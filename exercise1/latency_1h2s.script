@@ -11,7 +11,7 @@
 #$ -N latency
 
 # Redirect output stream to this file.
-#$ -o ./result/latency_1h2s.dat
+#$ -o /results /latency_1h2s.dat
 
 # Join the error stream to the output stream.
 #$ -j yes
