@@ -1,0 +1,4 @@
+
+
+status: Eqw
+qstat -j jobid | grep error 
