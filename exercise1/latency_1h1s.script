@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Execute job in the queue "std.q" unless you have special requirements.
+#$ -q std.q
+
+# The batch system should use the current directory as working directory.
+#$ -cwd
+
+# Name your job. Unless you use the -o and -e options, output will
+# go to a unique file name.ojob_id for each job.
+#$ -N latency
+
+# Redirect output stream to this file.
+#$ -o latency_1h1s.dat
+
+# Join the error stream to the output stream.
+#$ -j yes
+
+# check whether syntax of job is correct
+##$ -w v
+
+#$ -pe openmpi-fillup 2
+
+module load openmpi/4.0.1
+
+mpiexec -n 2 ./pt2pt/osu_latency
