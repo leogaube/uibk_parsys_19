@@ -11,7 +11,7 @@
 #$ -N hostname
 
 # Redirect output stream to this file.
-#$ -o hostname.dat
+#$ -o ./results/hostname.dat
 
 # Join the error stream to the output stream.
 #$ -j yes
@@ -19,7 +19,7 @@
 # check whether syntax of job is correct
 ##$ -w v
 
-#$ -pe openmpi-fillup 8
+#$ -pe openmpi-2perhost 8
 
 module load openmpi/4.0.1
 
