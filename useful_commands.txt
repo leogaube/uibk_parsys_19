@@ -1,4 +1,4 @@
-
+lscpu --> sockets, cores per node!
 
 status: Eqw
 qstat -j jobid | grep error 
