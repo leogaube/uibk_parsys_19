@@ -167,6 +167,8 @@ int main(int argc, char **argv) {
     printf("\n");
   }
 
+  MPI_Barrier(MPI_COMM_WORLD);
+
   int success = 1;
   for (long long i = 0; i < M; i++) {
     value_t temp = A[i];
