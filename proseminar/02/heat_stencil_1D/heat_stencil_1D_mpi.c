@@ -99,13 +99,17 @@ int main(int argc, char **argv) {
   int leftCell = -1;
   int rightCell = -1;
 
-  MPI_Bsend(&(A[0]), 1, MPI_DOUBLE, MAX(rank-1, 0), rank, MPI_COMM_WORLD);
-  MPI_Bsend(&(A[M - 1]), 1, MPI_DOUBLE, MIN(rank+1, numProcs-1), rank, MPI_COMM_WORLD);
+  printf("0 %d\n", rank);
 
-  MPI_Recv(&leftCell, 1, MPI_DOUBLE, MAX(rank - 1, 0), rank, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  MPI_Recv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs-1), rank, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  MPI_Bsend(&(A[0]), 1, MPI_DOUBLE, MAX(rank-1, 0), 0, MPI_COMM_WORLD);
+  MPI_Bsend(&(A[M - 1]), 1, MPI_DOUBLE, MIN(rank+1, numProcs-1), 0, MPI_COMM_WORLD);
 
-  printf("%d\n", rank);
+  printf("1 %d\n", rank);
+
+  MPI_Recv(&leftCell, 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  MPI_Recv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs-1), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+  printf("2 %d\n", rank);
 
   // for each time step ..
   for (int t = 0; t < T; t++) {
@@ -142,12 +146,12 @@ int main(int argc, char **argv) {
 
       // send/receive "data corners" to/from the prev/next rank
       if (i == 0){
-        MPI_Bsend(&(B[i]), 1, MPI_DOUBLE, MAX(rank - 1, 0), rank, MPI_COMM_WORLD);
-        MPI_Recv(&leftCell, 1, MPI_DOUBLE, MAX(rank - 1, 0), rank, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Bsend(&(B[i]), 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD);
+        MPI_Recv(&leftCell, 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
       }
       else if (i == M-1){
-        MPI_Bsend(&(B[i]), 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), rank, MPI_COMM_WORLD);
-        MPI_Recv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), rank, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Bsend(&(B[i]), 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD);
+        MPI_Recv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
       }
     }
 
