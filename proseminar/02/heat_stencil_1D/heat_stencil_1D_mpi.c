@@ -96,7 +96,7 @@ int main(int argc, char **argv) {
   MPI_Bsend(&(A[M - 1]), 1, MPI_DOUBLE, MIN(rank+1, numProcs-1), 0, MPI_COMM_WORLD);
 
   MPI_Irecv(&leftCell, 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, &LRrequest);
-  MPI_Irecv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, &LRrequest);
+  MPI_Irecv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, &RRrequest);
 
   // for each time step ..
   for (int t = 0; t < T; t++) {
@@ -136,7 +136,7 @@ int main(int argc, char **argv) {
         MPI_Bsend(&(B[i]), 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD);
         MPI_Irecv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, &RRrequest);
       }
-      printf("timestep: %d, %lld, %d\n", t, i, rank);
+      //printf("timestep: %d, %lld, %d\n", t, i, rank);
     }
 
     printf("timestep: %d, %d\n", t, rank);
