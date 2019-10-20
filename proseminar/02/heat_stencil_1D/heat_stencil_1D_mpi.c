@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
 
   Vector AA;
   Vector A = createVector(M);
-  int source_x = -1;
+  int source_x;
   if (rank == 0)
   {
     AA = createVector(N);
@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
     }
 
     // and there is a heat source in one corner
-    source_x = 510;
+    source_x = N/4;
     AA[source_x] = 273 + 60;
 
     printf("Initial:\t");
@@ -89,8 +89,8 @@ int main(int argc, char **argv) {
   MPI_Request LRrequest;
   MPI_Request RRrequest;
 
-  double leftCell = 0.;
-  double rightCell = 0.;
+  double leftCell;
+  double rightCell;
 
   MPI_Bsend(&(A[0]), 1, MPI_DOUBLE, MAX(rank-1, 0), 0, MPI_COMM_WORLD);
   MPI_Bsend(&(A[M - 1]), 1, MPI_DOUBLE, MIN(rank+1, numProcs-1), 0, MPI_COMM_WORLD);
@@ -107,25 +107,24 @@ int main(int argc, char **argv) {
       if (i + (rank * M) == source_x)
       {
         B[i] = A[i];
-        //TODO send receive
-        continue;
       }
+      else{
+        //sync data
+        if (i == 0)
+          MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
+        else if (i == M - 1)
+          MPI_Wait(&RRrequest, MPI_STATUS_IGNORE);
 
-      if (i == 0){
-        MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
+        // get temperature at current position
+        value_t tc = A[i];
+
+        // get temperatures of adjacent cells
+        value_t tl = (i != 0) ? A[i - 1] : leftCell;
+        value_t tr = (i != M - 1) ? A[i + 1] : rightCell;
+
+        // compute new temperature at current position
+        B[i] = tc + 0.2 * (tl + tr + (-2 * tc));
       }
-      else if (i == M - 1)
-        MPI_Wait(&RRrequest, MPI_STATUS_IGNORE);
-
-      // get temperature at current position
-      value_t tc = A[i];
-
-      // get temperatures of adjacent cells
-      value_t tl = (i != 0) ? A[i - 1] : leftCell;
-      value_t tr = (i != M - 1) ? A[i + 1] : rightCell;
-
-      // compute new temperature at current position
-      B[i] = tc + 0.2 * (tl + tr + (-2 * tc));
 
       // send/receive "data corners" to/from the prev/next rank
       if (i == 0){
@@ -138,21 +137,6 @@ int main(int argc, char **argv) {
       }
       //printf("timestep: %d, %lld, %d\n", t, i, rank);
     }
-
-    //printf("timestep: %d, %d\n", t, rank);
-    //MPI_Barrier(MPI_COMM_WORLD);
-    /*
-    if (rank != 0)
-    {
-      MPI_Wait(&LSrequest, MPI_STATUS_IGNORE);
-      MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
-    }
-    if (rank != numProcs - 1)
-    {
-      MPI_Wait(&RSrequest, MPI_STATUS_IGNORE);
-      MPI_Wait(&RRrequest, MPI_STATUS_IGNORE);
-    }
-    */
 
     // swap matrices (just pointers, not content)
     Vector H = A;
