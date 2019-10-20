@@ -115,13 +115,7 @@ int main(int argc, char **argv) {
       }
 
       if (i == 0){
-        if (rank == 0){
-          printf("hoolooo\n");
-        }
         MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
-        if (rank == 0){
-          printf("hoolooo\n");
-        }
       }
       else if (i == M - 1)
         MPI_Wait(&RRrequest, MPI_STATUS_IGNORE);
@@ -169,9 +163,9 @@ int main(int argc, char **argv) {
     B = H;
 
     // show intermediate step
-    if (rank == 0 && !(t % 1000))
+    if (rank == 0 && !(t % 1))
     {
-      printf("HALLOO");
+      printf("HALLOO\n");
       MPI_Gather(A, M, MPI_DOUBLE, AA, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
       printf("Step t=%d:\t", t);
       printTemperature(AA, N);
