@@ -53,7 +53,7 @@ int main(int argc, char **argv) {
   // create a buffer for storing temperature fields
 
   Vector AA;
-  Vector A = createVector(M);
+  Vector A;
   int source_x = -1;
   if (rank == 0)
   {
@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
     printTemperature(AA, N);
     printf("\n");
   }
-  MPI_Scatter(AA, M, MPI_DOUBLE, A, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Scatter(AA, M, MPI_DOUBLE, &A, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast(&source_x, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
   if (rank == 2){
@@ -98,8 +98,8 @@ int main(int argc, char **argv) {
   MPI_Request LRrequest;
   MPI_Request RRrequest;
 
-  int leftCell = -1;
-  int rightCell = -1;
+  double leftCell;
+  double rightCell;
 
   MPI_Bsend(&(A[0]), 1, MPI_DOUBLE, MAX(rank-1, 0), 0, MPI_COMM_WORLD);
   MPI_Bsend(&(A[M - 1]), 1, MPI_DOUBLE, MIN(rank+1, numProcs-1), 0, MPI_COMM_WORLD);
