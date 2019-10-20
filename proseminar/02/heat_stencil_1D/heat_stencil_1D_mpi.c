@@ -71,17 +71,12 @@ int main(int argc, char **argv) {
   MPI_Scatter(AA, M, MPI_INT, A, M, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&source_x, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-  if (rank == 1){
+  if (rank == 2){
     printf("source_x: %d\n", source_x);
     printf("SubRoom:\t");
     printTemperature(A, M);
     printf("\n");
   }
-
-  MPI_Finalize();
-
-  // done
-  return EXIT_SUCCESS;
 
   // ---------- compute ----------
 
@@ -124,8 +119,15 @@ int main(int argc, char **argv) {
       // get temperature at current position
       value_t tc = A[i];
 
-      MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
-      MPI_Wait(&RRrequest, MPI_STATUS_IGNORE);
+      if (rank != 0)
+        MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
+      if (rank != numProcs - 1)
+        MPI_Wait(&RRrequest, MPI_STATUS_IGNORE);
+
+      MPI_Finalize();
+
+      // done
+      return EXIT_SUCCESS;
 
       // get temperatures of adjacent cells
       value_t tl = (i != 0) ? A[i - 1] : ((rank != 0) ? leftCell : tc);
