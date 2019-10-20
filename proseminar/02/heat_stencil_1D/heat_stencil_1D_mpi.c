@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
         continue;
       }
 
-      printf("timestep: %d, %d, %d\n", t, i, rank);
+      printf("timestep: %d, %lld, %d\n", t, i, rank);
 
       if (i == 0)
         MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
