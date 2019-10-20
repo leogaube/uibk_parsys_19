@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
   {
     N = atoi(argv[1]);
   }
-  int T = 10000;
+  int T = N * 500;
 
   // MPI setup
   int rank, numProcs;
@@ -144,13 +144,13 @@ int main(int argc, char **argv) {
     B = H;
 
     // show intermediate step
-    if (!(t % 1))
+    if (!(t % 1000))
     {
       MPI_Gather(A, M, MPI_DOUBLE, AA, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
       if (rank == 0)
       {
         printf("Step t=%d:\t", t);
-        printTemperature(A, M);
+        printTemperature(AA, N);
         printf("\n");
       }
     }
