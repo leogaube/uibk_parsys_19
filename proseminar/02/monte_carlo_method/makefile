@@ -1,7 +1,6 @@
 CC=gcc
 CC_FLAGS=-O2 -std=c99 -Wall
 MPI=mpicc
-MPI_Include=-I"C:\cygwin64\usr\include" -I"C:\cygwin64\lib\openmpi"
 
 # sequential
 .PHONEY: seq
@@ -22,7 +21,7 @@ run_seq: seq
 mpi: pi_mpi
 
 pi_mpi: pi_mpi.c
-	@$(MPI) $(CC_FLAGS) $(MPI_Include) $< -o pi_mpi
+	@$(MPI) $(CC_FLAGS) $< -o pi_mpi
 
 .PHONEY: run_mpi
 run_mpi: mpi
@@ -44,3 +43,4 @@ run: run_seq run_mpi
 clean:
 	@rm pi_seq
 	@rm pi_mpi
+	@rm *.o
