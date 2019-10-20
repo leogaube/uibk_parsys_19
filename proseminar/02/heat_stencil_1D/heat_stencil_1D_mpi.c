@@ -43,7 +43,7 @@ int main(int argc, char **argv) {
   int M = N / numProcs;
 
   if (rank == 0)
-    printf("Computing heat-distribution for room size N=%d for T=%d timesteps\nusing %d processes with subroom size M=%d\n", N, T, numProcs, M);
+    printf("Computing heat-distribution for room size N=%d for T=%d timesteps using %d processes with subroom size M=%d\n", N, T, numProcs, M);
 
   // ---------- setup ----------
 
@@ -71,7 +71,8 @@ int main(int argc, char **argv) {
   MPI_Scatter(AA, M, MPI_INT, A, M, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&source_x, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-  if (rank == 2){
+  if (rank == 1){
+    printf("source_x: %d\n", source_x)
     printf("SubRoom:\t");
     printTemperature(A, M);
     printf("\n");
