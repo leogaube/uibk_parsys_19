@@ -119,13 +119,12 @@ int main(int argc, char **argv) {
     // swap matrices (just pointers, not content)
     MPI_Barrier(MPI_COMM_WORLD);
 
-
     Vector H = A;
     A = B;
     B = H;
 
     // show intermediate step
-    if (!(t % 1000)) {
+    if (rank == 0 && !(t % 1000)) {
       printf("Step t=%d:\t", t);
       printTemperature(A, N);
       printf("\n");
