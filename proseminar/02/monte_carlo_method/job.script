@@ -19,9 +19,10 @@
 # check whether syntax of job is correct
 ##$ -w v
 
-#$ -pe openmpi-8perhost 32
+#$ -pe openmpi-4perhost 16
+
 module load openmpi/4.0.1
 
 mpicc -Wall -Werror pi_mpi.c -o pi_mpi.o
 
-mpiexec -n 32 ./pi_mpi.o 320000000
+mpiexec -n 16 ./pi_mpi.o 3200000000
