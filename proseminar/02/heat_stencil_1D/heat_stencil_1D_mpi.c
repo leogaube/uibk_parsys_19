@@ -95,21 +95,17 @@ int main(int argc, char **argv) {
   MPI_Request RSrequest;
   MPI_Request RRrequest;
   */
+  MPI_Request LRrequest;
+  MPI_Request RRrequest;
 
   int leftCell = -1;
   int rightCell = -1;
 
-  printf("0 %d\n", rank);
-
   MPI_Bsend(&(A[0]), 1, MPI_DOUBLE, MAX(rank-1, 0), 0, MPI_COMM_WORLD);
   MPI_Bsend(&(A[M - 1]), 1, MPI_DOUBLE, MIN(rank+1, numProcs-1), 0, MPI_COMM_WORLD);
 
-  printf("1 %d\n", rank);
-
-  MPI_Recv(&leftCell, 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  MPI_Recv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs-1), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-  printf("2 %d\n", rank);
+  MPI_Irecv(&leftCell, 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, &LRrequest);
+  MPI_Irecv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, &LRrequest);
 
   // for each time step ..
   for (int t = 0; t < T; t++) {
@@ -127,15 +123,13 @@ int main(int argc, char **argv) {
         continue;
       }
 
+      if (i == 0)
+        MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
+      else if (i == M - 1)
+        MPI_Wait(&RRrequest, MPI_STATUS_IGNORE);
+
       // get temperature at current position
       value_t tc = A[i];
-
-      /*
-      if (rank != 0)
-        MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
-      if (rank != numProcs - 1)
-        MPI_Wait(&RRrequest, MPI_STATUS_IGNORE);
-      */
 
       // get temperatures of adjacent cells
       value_t tl = (i != 0) ? A[i - 1] : leftCell;
@@ -147,11 +141,11 @@ int main(int argc, char **argv) {
       // send/receive "data corners" to/from the prev/next rank
       if (i == 0){
         MPI_Bsend(&(B[i]), 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD);
-        MPI_Recv(&leftCell, 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Irecv(&leftCell, 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, &LRrequest);
       }
       else if (i == M-1){
         MPI_Bsend(&(B[i]), 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD);
-        MPI_Recv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+        MPI_Irecv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, &RRrequest);
       }
     }
 
