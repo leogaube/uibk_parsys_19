@@ -71,8 +71,8 @@ int main(int argc, char **argv) {
     printTemperature(AA, N);
     printf("\n");
   }
-  MPI_Scatter(AA, M, MPI_INT, A, M, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&source_x, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Scatter(AA, M, MPI_DOUBLE, A, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&source_x, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
   if (rank == 2){
     printf("source_x: %d\n", A[M-1]);
@@ -98,11 +98,11 @@ int main(int argc, char **argv) {
   if (rank == 0)
     printf("Hooloooo\n");
 
-  MPI_Send(&(A[0]), 1, MPI_INT, MAX(rank-1, 0), 0, MPI_COMM_WORLD);
-  MPI_Send(&(A[M - 1]), 1, MPI_INT, MIN(rank+1, numProcs-1), 0, MPI_COMM_WORLD);
+  MPI_Send(&(A[0]), 1, MPI_DOUBLE, MAX(rank-1, 0), 0, MPI_COMM_WORLD);
+  MPI_Send(&(A[M - 1]), 1, MPI_DOUBLE, MIN(rank+1, numProcs-1), 0, MPI_COMM_WORLD);
 
-  MPI_Recv(&leftCell, 1, MPI_INT, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  MPI_Recv(&rightCell, 1, MPI_INT, MIN(rank + 1, numProcs-1), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  MPI_Recv(&leftCell, 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  MPI_Recv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs-1), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
   if (rank == 0)
     printf("Hallooo");
@@ -139,12 +139,12 @@ int main(int argc, char **argv) {
 
       // send/receive "data corners" to/from the prev/next rank
       if (i == 0 && rank != 0){
-        MPI_Isend(&B[i], 1, MPI_INT, rank - 1, 41, MPI_COMM_WORLD, &LSrequest);
-        MPI_Irecv(&leftCell, 1, MPI_INT, rank - 1, 42, MPI_COMM_WORLD, &LRrequest);
+        MPI_Isend(&B[i], 1, MPI_DOUBLE, rank - 1, 41, MPI_COMM_WORLD, &LSrequest);
+        MPI_Irecv(&leftCell, 1, MPI_DOUBLE, rank - 1, 42, MPI_COMM_WORLD, &LRrequest);
       }
       else if (i == M-1 && rank != numProcs-1){
-        MPI_Isend(&B[i], 1, MPI_INT, rank + 1, 42, MPI_COMM_WORLD, &RSrequest);
-        MPI_Irecv(&rightCell, 1, MPI_INT, rank + 1, 41, MPI_COMM_WORLD, &RRrequest);
+        MPI_Isend(&B[i], 1, MPI_DOUBLE, rank + 1, 42, MPI_COMM_WORLD, &RSrequest);
+        MPI_Irecv(&rightCell, 1, MPI_DOUBLE, rank + 1, 41, MPI_COMM_WORLD, &RRrequest);
       }
     }
 
@@ -168,7 +168,7 @@ int main(int argc, char **argv) {
     // show intermediate step
     if (rank == 0 && !(t % 1000))
     {
-      MPI_Gather(AA, M, MPI_INT, A, M, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Gather(AA, M, MPI_DOUBLE, A, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
       printf("Step t=%d:\t", t);
       printTemperature(AA, N);
       printf("\n");
@@ -180,7 +180,7 @@ int main(int argc, char **argv) {
   // ---------- check ----------
 
   if (rank == 0){
-    MPI_Gather(AA, M, MPI_INT, A, M, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Gather(AA, M, MPI_DOUBLE, A, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     printf("Final:\t\t");
     printTemperature(AA, N);
     printf("\n");
