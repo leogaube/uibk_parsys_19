@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
     }
 
     // and there is a heat source in one corner
-    source_x = 10;
+    source_x = 510;
     AA[source_x] = 273 + 60;
 
     printf("Initial:\t");
@@ -75,7 +75,9 @@ int main(int argc, char **argv) {
   MPI_Bcast(&source_x, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
   if (rank == 2){
-    printf("source_x: %d\n", A[M-1]);
+    printf("0: %d\n", A[0]);
+    printf("source_x: %d\n", A[10]);
+    printf("anything else: %d\n", A[M-1]);
     printf("SubRoom:\t");
     printTemperature(A, M);
     printf("\n");
@@ -95,11 +97,10 @@ int main(int argc, char **argv) {
   int leftCell = -1;
   int rightCell = -1;
 
-  if (rank == 0)
-    printf("Hooloooo\n");
-
   MPI_Bsend(&(A[0]), 1, MPI_DOUBLE, MAX(rank-1, 0), 0, MPI_COMM_WORLD);
   MPI_Bsend(&(A[M - 1]), 1, MPI_DOUBLE, MIN(rank+1, numProcs-1), 0, MPI_COMM_WORLD);
+
+  printf("Hooloooo\n");
 
   MPI_Recv(&leftCell, 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
   MPI_Recv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs-1), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -145,7 +146,6 @@ int main(int argc, char **argv) {
       }
     }
 
-    // swap matrices (just pointers, not content)
     /*
     MPI_Barrier(MPI_COMM_WORLD);
     if (rank != 0)
@@ -160,6 +160,7 @@ int main(int argc, char **argv) {
     }
     */
 
+    // swap matrices (just pointers, not content)
     Vector H = A;
     A = B;
     B = H;
