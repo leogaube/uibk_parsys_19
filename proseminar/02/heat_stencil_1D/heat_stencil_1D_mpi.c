@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
     }
 
     // and there is a heat source in one corner
-    source_x = N / 4;
+    source_x = 10;
     AA[source_x] = 273 + 60;
 
     printf("Initial:\t");
@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
   MPI_Scatter(AA, M, MPI_INT, A, M, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&source_x, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-  if (rank == 2){
+  if (rank == 0){
     printf("source_x: %d\n", source_x);
     printf("SubRoom:\t");
     printTemperature(A, M);
