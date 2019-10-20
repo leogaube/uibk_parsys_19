@@ -120,7 +120,7 @@ int main(int argc, char **argv) {
         continue;
       }
 
-      printf("timestep: %d, %lld, %d\n", t, i, rank);
+      //printf("timestep: %d, %lld, %d\n", t, i, rank);
 
       if (i == 0)
         MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
@@ -148,8 +148,9 @@ int main(int argc, char **argv) {
       }
     }
 
-    /*
+    printf("timestep: %d, %lld, %d\n", t, i, rank);
     MPI_Barrier(MPI_COMM_WORLD);
+    /*
     if (rank != 0)
     {
       MPI_Wait(&LSrequest, MPI_STATUS_IGNORE);
@@ -167,9 +168,12 @@ int main(int argc, char **argv) {
     A = B;
     B = H;
 
+    printf("Hoolooo");
+
     // show intermediate step
     if (rank == 0 && !(t % 1000))
     {
+      printf("HALLOO");
       MPI_Gather(A, M, MPI_DOUBLE, AA, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
       printf("Step t=%d:\t", t);
       printTemperature(AA, N);
