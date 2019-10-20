@@ -98,8 +98,8 @@ int main(int argc, char **argv) {
   MPI_Request LRrequest;
   MPI_Request RRrequest;
 
-  double leftCell;
-  double rightCell;
+  double leftCell = 0.;
+  double rightCell = 0.;
 
   MPI_Bsend(&(A[0]), 1, MPI_DOUBLE, MAX(rank-1, 0), 0, MPI_COMM_WORLD);
   MPI_Bsend(&(A[M - 1]), 1, MPI_DOUBLE, MIN(rank+1, numProcs-1), 0, MPI_COMM_WORLD);
