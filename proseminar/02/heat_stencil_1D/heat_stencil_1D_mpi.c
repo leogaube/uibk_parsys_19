@@ -107,20 +107,20 @@ int main(int argc, char **argv) {
     for (long long i = 0; i < M; i++)
     {
       // center stays constant (the heat is still on)
-      /*if (i + (rank * M) == source_x)
+      if (i + (rank * M) == source_x)
       {
         B[i] = A[i];
         //TODO send receive
         continue;
-      }*/
+      }
 
       if (i == 0){
         if (rank == 0){
-          printf("hoolooo");
+          printf("hoolooo\n");
         }
         MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
         if (rank == 0){
-          printf("hoolooo");
+          printf("hoolooo\n");
         }
       }
       else if (i == M - 1)
