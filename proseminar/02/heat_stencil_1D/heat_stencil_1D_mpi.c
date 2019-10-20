@@ -116,6 +116,8 @@ int main(int argc, char **argv) {
         if (rank == 0)
           printf("hoolooo");
         MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
+        if (rank == 0)
+          printf("hoolooo");
         }
       else if (i == M - 1)
         MPI_Wait(&RRrequest, MPI_STATUS_IGNORE);
