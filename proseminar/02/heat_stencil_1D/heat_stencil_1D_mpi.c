@@ -109,10 +109,6 @@ int main(int argc, char **argv) {
 
   // for each time step ..
   for (int t = 0; t < T; t++) {
-    if (rank == 0)
-    {
-      printf("timestep: %d\n", t);
-    }
     // .. we propagate the temperature
     for (long long i = 0; i < M; i++)
     {
@@ -128,6 +124,11 @@ int main(int argc, char **argv) {
         MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
       else if (i == M - 1)
         MPI_Wait(&RRrequest, MPI_STATUS_IGNORE);
+
+      if (rank == 1)
+      {
+        printf("timestep: %d, %d\n", t, i);
+      }
 
       // get temperature at current position
       value_t tc = A[i];
