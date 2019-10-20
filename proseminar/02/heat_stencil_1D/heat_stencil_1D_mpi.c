@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
   {
     N = atoi(argv[1]);
   }
-  int T = N * 500;
+  int T = 10000;
 
   // MPI setup
   int rank, numProcs;
@@ -72,15 +72,6 @@ int main(int argc, char **argv) {
     printf("\n");
   }
   MPI_Scatter(AA, M, MPI_DOUBLE, A, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Gather(A, M, MPI_DOUBLE, AA, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  if (rank == 0){
-    printf("Initial:\t");
-    printTemperature(AA, N);
-    printf("\n");
-  }
-
-  return EXIT_SUCCESS;
-
   MPI_Bcast(&source_x, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
   // ---------- compute ----------
@@ -153,7 +144,7 @@ int main(int argc, char **argv) {
     B = H;
 
     // show intermediate step
-    if (!(t % 1000))
+    if (!(t % 1))
     {
       MPI_Gather(A, M, MPI_DOUBLE, AA, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
       if (rank == 0)
