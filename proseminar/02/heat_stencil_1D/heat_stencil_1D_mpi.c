@@ -98,11 +98,11 @@ int main(int argc, char **argv) {
   if (rank != 0)
   {
     MPI_Recv(&leftCell, 1, MPI_INT, rank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    MPI_Send(&A[0], 1, MPI_INT, rank - 1, 0, MPI_COMM_WORLD);
+    MPI_Send(&(A[0]), 1, MPI_INT, rank - 1, 0, MPI_COMM_WORLD);
   }
   if (rank != numProcs - 1)
   {
-    MPI_Send(&A[M - 1], 1, MPI_INT, rank + 1, 0, MPI_COMM_WORLD);
+    MPI_Send(&(A[M - 1]), 1, MPI_INT, rank + 1, 0, MPI_COMM_WORLD);
     MPI_Recv(&rightCell, 1, MPI_INT, rank + 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
   }
 
