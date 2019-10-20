@@ -72,6 +72,15 @@ int main(int argc, char **argv) {
     printf("\n");
   }
   MPI_Scatter(AA, M, MPI_DOUBLE, A, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Gather(A, M, MPI_DOUBLE, AA, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  if (rank == 0){
+    printf("Initial:\t");
+    printTemperature(AA, N);
+    printf("\n");
+  }
+
+  return EXIT_SUCCESS;
+
   MPI_Bcast(&source_x, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
   // ---------- compute ----------
@@ -160,8 +169,8 @@ int main(int argc, char **argv) {
 
   // ---------- check ----------
 
+  MPI_Gather(A, M, MPI_DOUBLE, AA, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   if (rank == 0){
-    MPI_Gather(A, M, MPI_DOUBLE, AA, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     printf("Final:\t\t");
     printTemperature(AA, N);
     printf("\n");
