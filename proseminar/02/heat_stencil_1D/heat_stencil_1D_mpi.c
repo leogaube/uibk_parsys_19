@@ -92,6 +92,9 @@ int main(int argc, char **argv) {
   int leftCell;
   int rightCell;
 
+  if (rank == 0)
+    printf("Hooloooo");
+
   if (rank != 0)
   {
     MPI_Irecv(&leftCell, 1, MPI_INT, rank - 1, 42, MPI_COMM_WORLD, &LRrequest);
@@ -102,6 +105,9 @@ int main(int argc, char **argv) {
     MPI_Isend(&A[M - 1], 1, MPI_INT, rank + 1, 42, MPI_COMM_WORLD, &RSrequest);
     MPI_Irecv(&rightCell, 1, MPI_INT, rank + 1, 41, MPI_COMM_WORLD, &RRrequest);
   }
+
+  if (rank == 0)
+    printf("Hallooo");
 
   // for each time step ..
   for (int t = 0; t < T; t++) {
