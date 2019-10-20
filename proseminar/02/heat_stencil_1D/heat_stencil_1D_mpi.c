@@ -92,16 +92,10 @@ int main(int argc, char **argv) {
   int leftCell;
   int rightCell;
 
-  if (rank == 0){
+  if (rank == 0)
     printf("Hooloooo\n");
-    MPI_Send(&A[M-1], 1, MPI_INT, rank + 1, 0, MPI_COMM_WORLD);
-  }
-  if (rank == 1){
-    MPI_Recv(&leftCell, 1, MPI_INT, rank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    printf("%d\n", leftCell);
-  }
 
-/*
+
   if (rank != 0)
   {
     MPI_Recv(&leftCell, 1, MPI_INT, rank - 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -112,7 +106,6 @@ int main(int argc, char **argv) {
     MPI_Send(&(A[M - 1]), 1, MPI_INT, rank + 1, 0, MPI_COMM_WORLD);
     MPI_Recv(&rightCell, 1, MPI_INT, rank + 1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
   }
-  */
 
   if (rank == 0)
     printf("Hallooo");
