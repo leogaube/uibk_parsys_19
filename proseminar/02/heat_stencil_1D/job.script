@@ -11,10 +11,10 @@
 #$ -N heat_stencil
 
 # Redirect output stream to this file.
-#$ -o output
+#$ -o out
 
-# Join the error stream to the output stream.
-#$ -j yes
+# Redirect error stream to this file.
+#$ -e err
 
 #$ -pe openmpi-fillup 8
 
