@@ -176,7 +176,7 @@ int main(int argc, char **argv) {
     break;
   }
 
-  printf("Verification: %s\n", (success) ? "OK" : "FAILED");
+  printf("Verification for rank %d: %s\n", rank, (success) ? "OK" : "FAILED");
 
   // ---------- cleanup ----------
 
