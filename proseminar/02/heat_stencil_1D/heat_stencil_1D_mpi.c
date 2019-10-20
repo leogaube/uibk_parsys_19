@@ -77,7 +77,7 @@ int main(int argc, char **argv) {
   MPI_Finalize();
 
   // done
-  return (success) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return EXIT_SUCCESS;
 
   // ---------- compute ----------
 
