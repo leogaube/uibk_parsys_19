@@ -165,7 +165,7 @@ int main(int argc, char **argv) {
     // show intermediate step
     if (rank == 0 && !(t % 1))
     {
-      MPI_Gather(A, M, MPI_DOUBLE, AA, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      //MPI_Gather(A, M, MPI_DOUBLE, AA, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
       printf("Step t=%d:\t", t);
       printTemperature(A, M);
       printf("\n");
