@@ -148,7 +148,7 @@ int main(int argc, char **argv) {
       }
     }
 
-    printf("timestep: %d, %lld, %d\n", t, i, rank);
+    printf("timestep: %d, %d\n", t, rank);
     MPI_Barrier(MPI_COMM_WORLD);
     /*
     if (rank != 0)
