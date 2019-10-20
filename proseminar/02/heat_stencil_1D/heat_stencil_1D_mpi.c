@@ -124,11 +124,6 @@ int main(int argc, char **argv) {
       if (rank != numProcs - 1)
         MPI_Wait(&RRrequest, MPI_STATUS_IGNORE);
 
-      MPI_Finalize();
-
-      // done
-      return EXIT_SUCCESS;
-
       // get temperatures of adjacent cells
       value_t tl = (i != 0) ? A[i - 1] : ((rank != 0) ? leftCell : tc);
       value_t tr = (i != M - 1) ? A[i + 1] : ((rank != numProcs-1) ? rightCell : tc);
@@ -167,7 +162,7 @@ int main(int argc, char **argv) {
     // show intermediate step
     if (rank == 0 && !(t % 1000))
     {
-      MPI_Gather(&AA, M, MPI_INT, A, M, MPI_INT, 0, MPI_COMM_WORLD);
+      MPI_Gather(AA, M, MPI_INT, A, M, MPI_INT, 0, MPI_COMM_WORLD);
       printf("Step t=%d:\t", t);
       printTemperature(AA, N);
       printf("\n");
@@ -179,9 +174,9 @@ int main(int argc, char **argv) {
   // ---------- check ----------
 
   if (rank == 0){
-    MPI_Gather(&A, M, MPI_INT, AA, M, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Gather(AA, M, MPI_INT, A, M, MPI_INT, 0, MPI_COMM_WORLD);
     printf("Final:\t\t");
-    printTemperature(A, N);
+    printTemperature(AA, N);
     printf("\n");
   }
 
