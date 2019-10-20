@@ -120,15 +120,12 @@ int main(int argc, char **argv) {
         continue;
       }
 
+      printf("timestep: %d, %d, %d\n", t, i, rank);
+
       if (i == 0)
         MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
       else if (i == M - 1)
         MPI_Wait(&RRrequest, MPI_STATUS_IGNORE);
-
-      if (rank == 1)
-      {
-        printf("timestep: %d, %d\n", t, i);
-      }
 
       // get temperature at current position
       value_t tc = A[i];
