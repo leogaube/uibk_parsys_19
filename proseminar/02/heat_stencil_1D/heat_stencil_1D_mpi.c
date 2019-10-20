@@ -75,9 +75,9 @@ int main(int argc, char **argv) {
   MPI_Bcast(&source_x, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
   if (rank == 2){
-    printf("0: %d\n", A[0]);
-    printf("source_x: %d\n", A[10]);
-    printf("anything else: %d\n", A[M-1]);
+    printf("0: %f\n", A[0]);
+    printf("source_x: %f\n", A[10]);
+    printf("anything else: %f\n", A[M-1]);
     printf("SubRoom:\t");
     printTemperature(A, M);
     printf("\n");
@@ -89,11 +89,13 @@ int main(int argc, char **argv) {
   Vector B = createVector(M);
 
   // send/receive requests for left/right rank
+  /*
   MPI_Request LSrequest;
   MPI_Request LRrequest;
   MPI_Request RSrequest;
   MPI_Request RRrequest;
-
+  */
+ 
   int leftCell = -1;
   int rightCell = -1;
 
