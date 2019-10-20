@@ -75,6 +75,7 @@ int main(int argc, char **argv) {
   // create a second buffer for the computation
   Vector B = createVector(N);
 
+  // send/receive requests for left/right rank
   MPI_Request LSrequest;
   MPI_Request LRrequest;
   MPI_Request RSrequest;
@@ -111,12 +112,13 @@ int main(int argc, char **argv) {
       }
       else if (j == elemsPerRank-1 && myrank != numProcs-1){
         MPI_Isend(&B[i], 1, MPI_INT, myrank + 1, 42, MPI_COMM_WORLD, &RSrequest);
-        MPI_Irecv(&B[i+1], 1, MPI_INT, myrank + 1, 41, MPI_COMM_WORLD, &RSrequest);
+        MPI_Irecv(&B[i+1], 1, MPI_INT, myrank + 1, 41, MPI_COMM_WORLD, &RRrequest);
       }
     }
 
     // swap matrices (just pointers, not content)
-    MPI_Barrier(MPI_WORLD_COMM);
+    MPI_Barrier(MPI_COMM_WORLD);
+
 
     Vector H = A;
     A = B;
