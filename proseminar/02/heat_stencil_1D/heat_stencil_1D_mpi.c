@@ -100,6 +100,7 @@ int main(int argc, char **argv) {
 
   // for each time step ..
   for (int t = 0; t < T; t++) {
+    printf("timestep: %d, %d\n", t, rank);
     // .. we propagate the temperature
     for (long long i = 0; i < M; i++)
     {
@@ -110,7 +111,6 @@ int main(int argc, char **argv) {
         //TODO send receive
         continue;
       }
-
 
       if (i == 0)
         MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
@@ -139,8 +139,8 @@ int main(int argc, char **argv) {
       //printf("timestep: %d, %lld, %d\n", t, i, rank);
     }
 
-    printf("timestep: %d, %d\n", t, rank);
-    MPI_Barrier(MPI_COMM_WORLD);
+    //printf("timestep: %d, %d\n", t, rank);
+    //MPI_Barrier(MPI_COMM_WORLD);
     /*
     if (rank != 0)
     {
@@ -158,8 +158,6 @@ int main(int argc, char **argv) {
     Vector H = A;
     A = B;
     B = H;
-
-    printf("Hoolooo");
 
     // show intermediate step
     if (rank == 0 && !(t % 1000))
