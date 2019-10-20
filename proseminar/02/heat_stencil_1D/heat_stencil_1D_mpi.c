@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
   // for each time step ..
   for (int t = 0; t < T; t++) {
     // .. we propagate the temperature
-    for (long long i = 0; i < M; j++)
+    for (long long i = 0; i < M; i++)
     {
       // center stays constant (the heat is still on)
       if (i + (rank * M) == source_x)
@@ -110,8 +110,8 @@ int main(int argc, char **argv) {
       // get temperature at current position
       value_t tc = A[i];
 
-      MPI_Wait(&LRrequest);
-      MPI_Wait(&RRrequest);
+      MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
+      MPI_Wait(&RRrequest, MPI_STATUS_IGNORE);
 
       // get temperatures of adjacent cells
       value_t tl = (i != 0) ? A[i - 1] : ((rank != 0) ? leftCell : tc);
@@ -122,12 +122,12 @@ int main(int argc, char **argv) {
 
       // send/receive "data corners" to/from the prev/next rank
       if (i == 0 && rank != 0){
-        MPI_Send(&B[i], 1, MPI_INT, rank - 1, 41, MPI_COMM_WORLD, &LSrequest);
-        MPI_Recv(&leftCell, 1, MPI_INT, rank - 1, 42, MPI_COMM_WORLD, &LRrequest);
+        MPI_Isend(&B[i], 1, MPI_INT, rank - 1, 41, MPI_COMM_WORLD, &LSrequest);
+        MPI_Irecv(&leftCell, 1, MPI_INT, rank - 1, 42, MPI_COMM_WORLD, &LRrequest);
       }
       else if (i == M-1 && rank != numProcs-1){
-        MPI_Send(&B[i], 1, MPI_INT, rank + 1, 42, MPI_COMM_WORLD, &RSrequest);
-        MPI_Recv(&rightCell, 1, MPI_INT, rank + 1, 41, MPI_COMM_WORLD, &RRrequest);
+        MPI_Isend(&B[i], 1, MPI_INT, rank + 1, 42, MPI_COMM_WORLD, &RSrequest);
+        MPI_Irecv(&rightCell, 1, MPI_INT, rank + 1, 41, MPI_COMM_WORLD, &RRrequest);
       }
     }
 
