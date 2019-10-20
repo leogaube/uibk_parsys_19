@@ -21,6 +21,6 @@
 module load gcc
 module load openmpi/4.0.1
 
-mpicc -Wall -Werror heat_stencil_1D_par.c -o heat_stencil_1D_par.o
+mpicc -Wall -Werror heat_stencil_1D_mpi.c -o heat_stencil_1D_mpi.o
 
-mpiexec -n 8 ./heat_stencil_1D_par.o
+mpiexec -n 8 ./heat_stencil_1D_mpi.o
