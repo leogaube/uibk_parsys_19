@@ -24,7 +24,7 @@ void printTemperature(Vector m, int N);
 
 int main(int argc, char **argv) {
 // 'parsing' optional input parameter = problem size
-  int N = 2000;
+  int N = 8;
   if (argc > 1)
   {
     N = atoi(argv[1]);
@@ -71,7 +71,7 @@ int main(int argc, char **argv) {
     printTemperature(AA, N);
     printf("\n");
   }
-  MPI_Scatter(AA, M, MPI_DOUBLE, &A, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Scatter(AA, M, MPI_DOUBLE, A, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast(&source_x, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
   if (rank == 2){
