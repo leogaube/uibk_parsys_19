@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
   MPI_Bcast(&source_x, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
   if (rank == 1){
-    printf("source_x: %d\n", source_x)
+    printf("source_x: %d\n", source_x);
     printf("SubRoom:\t");
     printTemperature(A, M);
     printf("\n");
