@@ -95,22 +95,20 @@ int main(int argc, char **argv) {
   MPI_Request RSrequest;
   MPI_Request RRrequest;
   */
- 
+
   int leftCell = -1;
   int rightCell = -1;
 
   MPI_Bsend(&(A[0]), 1, MPI_DOUBLE, MAX(rank-1, 0), 0, MPI_COMM_WORLD);
   MPI_Bsend(&(A[M - 1]), 1, MPI_DOUBLE, MIN(rank+1, numProcs-1), 0, MPI_COMM_WORLD);
 
-  printf("Hooloooo\n");
-
   MPI_Recv(&leftCell, 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
   MPI_Recv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs-1), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
-  printf("Haloooo\n");
-
   // for each time step ..
   for (int t = 0; t < T; t++) {
+    if (rank == 0)
+      printf("%d", f);
     // .. we propagate the temperature
     for (long long i = 0; i < M; i++)
     {
@@ -172,7 +170,7 @@ int main(int argc, char **argv) {
     // show intermediate step
     if (rank == 0 && !(t % 1000))
     {
-      MPI_Gather(AA, M, MPI_DOUBLE, A, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Gather(A, M, MPI_DOUBLE, AA, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
       printf("Step t=%d:\t", t);
       printTemperature(AA, N);
       printf("\n");
@@ -184,7 +182,7 @@ int main(int argc, char **argv) {
   // ---------- check ----------
 
   if (rank == 0){
-    MPI_Gather(AA, M, MPI_DOUBLE, A, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Gather(A, M, MPI_DOUBLE, AA, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
     printf("Final:\t\t");
     printTemperature(AA, N);
     printf("\n");
