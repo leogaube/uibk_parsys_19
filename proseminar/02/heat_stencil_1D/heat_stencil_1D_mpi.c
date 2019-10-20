@@ -99,10 +99,10 @@ int main(int argc, char **argv) {
     printf("Hooloooo\n");
 
   MPI_Send(&(A[0]), 1, MPI_INT, MAX(rank-1, 0), 0, MPI_COMM_WORLD);
-  MPI_Send(&(A[M - 1]), 1, MPI_INT, MIN(rank+1, M-1), 0, MPI_COMM_WORLD);
+  MPI_Send(&(A[M - 1]), 1, MPI_INT, MIN(rank+1, numProcs-1), 0, MPI_COMM_WORLD);
 
   MPI_Recv(&leftCell, 1, MPI_INT, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-  MPI_Recv(&rightCell, 1, MPI_INT, MIN(rank + 1, M - 1), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  MPI_Recv(&rightCell, 1, MPI_INT, MIN(rank + 1, numProcs-1), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
   if (rank == 0)
     printf("Hallooo");
