@@ -100,9 +100,6 @@ int main(int argc, char **argv) {
 
   // for each time step ..
   for (int t = 0; t < T; t++) {
-    if (rank == 0){
-      printf("timestep: %d, %d\n", t, rank);
-    }
     // .. we propagate the temperature
     for (long long i = 0; i < M; i++)
     {
