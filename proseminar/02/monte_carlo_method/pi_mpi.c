@@ -12,7 +12,7 @@ int main (int argc, char** argv) {
 	int size, rank;
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	// If N is not a multiple of N than we just dont care because this is negliable in this scenario.
+	// If N is not a multiple of size than we just dont care because this is negliable in this scenario.
 	unsigned long N = 100000000;
 	if (argc > 1) {
 		sscanf(argv[1], "%lu", &N);
