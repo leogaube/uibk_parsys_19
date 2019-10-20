@@ -97,13 +97,13 @@ int main(int argc, char **argv) {
 
   if (rank != 0)
   {
-    MPI_Irecv(&leftCell, 1, MPI_INT, rank - 1, 42, MPI_COMM_WORLD, &LRrequest);
-    MPI_Isend(&A[0], 1, MPI_INT, rank - 1, 41, MPI_COMM_WORLD, &LSrequest);
+    MPI_Recv(&leftCell, 1, MPI_INT, rank - 1, 42, MPI_COMM_WORLD, &LRrequest);
+    MPI_Send(&A[0], 1, MPI_INT, rank - 1, 41, MPI_COMM_WORLD);
   }
   if (rank != numProcs - 1)
   {
-    MPI_Isend(&A[M - 1], 1, MPI_INT, rank + 1, 42, MPI_COMM_WORLD, &RSrequest);
-    MPI_Irecv(&rightCell, 1, MPI_INT, rank + 1, 41, MPI_COMM_WORLD, &RRrequest);
+    MPI_Send(&A[M - 1], 1, MPI_INT, rank + 1, 42, MPI_COMM_WORLD);
+    MPI_Recv(&rightCell, 1, MPI_INT, rank + 1, 41, MPI_COMM_WORLD, &RRrequest);
   }
 
   if (rank == 0)
