@@ -74,15 +74,6 @@ int main(int argc, char **argv) {
   MPI_Scatter(AA, M, MPI_DOUBLE, A, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast(&source_x, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-  if (rank == 2){
-    printf("0: %f\n", A[0]);
-    printf("source_x: %f\n", A[10]);
-    printf("anything else: %f\n", A[M-1]);
-    printf("SubRoom:\t");
-    printTemperature(A, M);
-    printf("\n");
-  }
-
   // ---------- compute ----------
 
   // create a second buffer for the computation
@@ -120,7 +111,6 @@ int main(int argc, char **argv) {
         continue;
       }
 
-      //printf("timestep: %d, %lld, %d\n", t, i, rank);
 
       if (i == 0)
         MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
@@ -146,6 +136,7 @@ int main(int argc, char **argv) {
         MPI_Bsend(&(B[i]), 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD);
         MPI_Irecv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, &RRrequest);
       }
+      printf("timestep: %d, %lld, %d\n", t, i, rank);
     }
 
     printf("timestep: %d, %d\n", t, rank);
