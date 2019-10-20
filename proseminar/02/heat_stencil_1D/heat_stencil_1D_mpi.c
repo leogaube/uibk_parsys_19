@@ -69,11 +69,13 @@ int main(int argc, char **argv) {
     printf("\n");
   }
   MPI_Scatter(AA, M, MPI_INT, A, M, MPI_INT, 0, MPI_COMM_WORLD);
-  //MPI_Bcast(&source_x, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&source_x, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-  printf("SubRoom:\t");
-  printTemperature(A, M);
-  printf("\n");
+  if (rank == 2){
+    printf("SubRoom:\t");
+    printTemperature(A, M);
+    printf("\n");
+  }
 
   MPI_Finalize();
 
