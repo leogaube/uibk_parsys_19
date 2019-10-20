@@ -7,6 +7,9 @@ typedef double value_t;
 
 #define RESOLUTION 120
 
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
 // -- vector utilities --
 
 typedef value_t *Vector;
@@ -95,17 +98,11 @@ int main(int argc, char **argv) {
   if (rank == 0)
     printf("Hooloooo\n");
 
+  MPI_Bsend(&(A[0]), 1, MPI_INT, MAX(rank-1, 0), 0, MPI_COMM_WORLD);
+  MPI_Bsend(&(A[M - 1]), 1, MPI_INT, MIN(rank+1, M-1), 0, MPI_COMM_WORLD);
 
-  if (rank != 0)
-  {
-    MPI_Isend(&(A[0]), 1, MPI_INT, rank - 1, 0, MPI_COMM_WORLD, &LSrequest);
-    MPI_Irecv(&leftCell, 1, MPI_INT, rank - 1, 0, MPI_COMM_WORLD, &LRrequest);
-  }
-  if (rank != numProcs - 1)
-  {
-    MPI_Isend(&(A[M - 1]), 1, MPI_INT, rank + 1, 0, MPI_COMM_WORLD, &RSrequest);
-    MPI_Irecv(&rightCell, 1, MPI_INT, rank + 1, 0, MPI_COMM_WORLD, &RRrequest);
-  }
+  MPI_Recv(&leftCell, 1, MPI_INT, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  MPI_Recv(&rightCell, 1, MPI_INT, MIN(rank + 1, M - 1), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
   if (rank == 0)
     printf("Hallooo");
