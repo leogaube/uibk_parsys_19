@@ -125,30 +125,33 @@ int main(int argc, char **argv) {
       // get temperature at current position
       value_t tc = A[i];
 
+      /*
       if (rank != 0)
         MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
       if (rank != numProcs - 1)
         MPI_Wait(&RRrequest, MPI_STATUS_IGNORE);
+      */
 
       // get temperatures of adjacent cells
-      value_t tl = (i != 0) ? A[i - 1] : ((rank != 0) ? leftCell : tc);
-      value_t tr = (i != M - 1) ? A[i + 1] : ((rank != numProcs-1) ? rightCell : tc);
+      value_t tl = (i != 0) ? A[i - 1] : leftCell;
+      value_t tr = (i != M - 1) ? A[i + 1] : rightCell;
 
       // compute new temperature at current position
       B[i] = tc + 0.2 * (tl + tr + (-2 * tc));
 
       // send/receive "data corners" to/from the prev/next rank
-      if (i == 0 && rank != 0){
-        MPI_Isend(&B[i], 1, MPI_DOUBLE, rank - 1, 41, MPI_COMM_WORLD, &LSrequest);
-        MPI_Irecv(&leftCell, 1, MPI_DOUBLE, rank - 1, 42, MPI_COMM_WORLD, &LRrequest);
+      if (i == 0){
+        MPI_Send(&(B[i]), 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD);
+        MPI_Recv(&leftCell, 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
       }
-      else if (i == M-1 && rank != numProcs-1){
-        MPI_Isend(&B[i], 1, MPI_DOUBLE, rank + 1, 42, MPI_COMM_WORLD, &RSrequest);
-        MPI_Irecv(&rightCell, 1, MPI_DOUBLE, rank + 1, 41, MPI_COMM_WORLD, &RRrequest);
+      else if (i == M-1){
+        MPI_Send(&(B[i]), 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD);
+        MPI_Recv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
       }
     }
 
     // swap matrices (just pointers, not content)
+    /*
     MPI_Barrier(MPI_COMM_WORLD);
     if (rank != 0)
     {
@@ -160,6 +163,7 @@ int main(int argc, char **argv) {
       MPI_Wait(&RSrequest, MPI_STATUS_IGNORE);
       MPI_Wait(&RRrequest, MPI_STATUS_IGNORE);
     }
+    */
 
     Vector H = A;
     A = B;
