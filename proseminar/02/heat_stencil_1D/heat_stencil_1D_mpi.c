@@ -92,8 +92,8 @@ int main(int argc, char **argv) {
   MPI_Request RSrequest;
   MPI_Request RRrequest;
 
-  int leftCell;
-  int rightCell;
+  int leftCell = -1;
+  int rightCell = -1;
 
   if (rank == 0)
     printf("Hooloooo\n");
