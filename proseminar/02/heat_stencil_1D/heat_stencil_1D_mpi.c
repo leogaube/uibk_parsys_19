@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
 
   Vector AA;
   Vector A = createVector(M);
-  int source_x;
+  int source_x = -1;
   if (rank == 0)
   {
     AA = createVector(N);
@@ -64,7 +64,7 @@ int main(int argc, char **argv) {
     }
 
     // and there is a heat source in one corner
-    source_x = 510;
+    source_x = 2;
     AA[source_x] = 273 + 60;
 
     printf("Initial:\t");
@@ -104,6 +104,8 @@ int main(int argc, char **argv) {
 
   MPI_Recv(&leftCell, 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
   MPI_Recv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs-1), 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+  printf("Haloooo\n");
 
   // for each time step ..
   for (int t = 0; t < T; t++) {
