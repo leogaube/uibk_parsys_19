@@ -7,6 +7,9 @@ typedef double value_t;
 
 #define RESOLUTION 120
 
+#define MAX(x, y) (((x) > (y)) ? (x) : (y))
+#define MIN(x, y) (((x) < (y)) ? (x) : (y))
+
 // -- vector utilities --
 
 typedef value_t *Vector;
@@ -27,7 +30,6 @@ int main(int argc, char **argv) {
     N = atoi(argv[1]);
   }
   int T = N * 500;
-  printf("Computing heat-distribution for room size N=%d for T=%d timesteps\n", N, T);
 
   // MPI setup
   int rank, numProcs;
@@ -42,6 +44,9 @@ int main(int argc, char **argv) {
     return EXIT_FAILURE;
   }
   int M = N / numProcs;
+
+  if (rank == 0)
+    printf("Computing heat-distribution for room size N=%d for T=%d timesteps using %d processes with subroom size M=%d\n", N, T, numProcs, M);
 
   // ---------- setup ----------
 
@@ -59,14 +64,14 @@ int main(int argc, char **argv) {
     }
 
     // and there is a heat source in one corner
-    source_x = N / 4;
+    source_x = N/4;
     AA[source_x] = 273 + 60;
 
     printf("Initial:\t");
     printTemperature(AA, N);
     printf("\n");
   }
-  MPI_Scatter(AA, M, MPI_INT, &A, M, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Scatter(AA, M, MPI_DOUBLE, A, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Bcast(&source_x, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
   // ---------- compute ----------
@@ -75,83 +80,79 @@ int main(int argc, char **argv) {
   Vector B = createVector(M);
 
   // send/receive requests for left/right rank
+  /*
   MPI_Request LSrequest;
   MPI_Request LRrequest;
   MPI_Request RSrequest;
   MPI_Request RRrequest;
+  */
+  MPI_Request LRrequest;
+  MPI_Request RRrequest;
 
-  int leftCell;
-  int rightCell;
+  double leftCell;
+  double rightCell;
 
-  if (rank != 0)
-  {
-    MPI_Recv(&leftCell, 1, MPI_INT, rank - 1, 42, MPI_COMM_WORLD, &LRrequest);
-    MPI_Send(&A[0], 1, MPI_INT, rank - 1, 41, MPI_COMM_WORLD, &LSrequest);
-  }
-  if (rank != numProcs - 1)
-  {
-    MPI_Send(&A[M-1], 1, MPI_INT, rank + 1, 42, MPI_COMM_WORLD, &RSrequest);
-    MPI_Recv(&rightCell, 1, MPI_INT, rank + 1, 41, MPI_COMM_WORLD, &RRrequest);
-  }
+  MPI_Bsend(&(A[0]), 1, MPI_DOUBLE, MAX(rank-1, 0), 0, MPI_COMM_WORLD);
+  MPI_Bsend(&(A[M - 1]), 1, MPI_DOUBLE, MIN(rank+1, numProcs-1), 0, MPI_COMM_WORLD);
+
+  MPI_Irecv(&leftCell, 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, &LRrequest);
+  MPI_Irecv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, &RRrequest);
 
   // for each time step ..
   for (int t = 0; t < T; t++) {
     // .. we propagate the temperature
-    for (long long i = 0; i < M; j++)
+    for (long long i = 0; i < M; i++)
     {
       // center stays constant (the heat is still on)
       if (i + (rank * M) == source_x)
       {
         B[i] = A[i];
-        //TODO send receive
-        continue;
       }
+      else{
+        //sync data
+        if (i == 0)
+          MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
+        else if (i == M - 1)
+          MPI_Wait(&RRrequest, MPI_STATUS_IGNORE);
 
-      // get temperature at current position
-      value_t tc = A[i];
+        // get temperature at current position
+        value_t tc = A[i];
 
-      // get temperatures of adjacent cells
-      value_t tl = (i != 0) ? A[i - 1] : ((rank != 0) ? leftCell : tc);
-      value_t tr = (i != M - 1) ? A[i + 1] : ((rank != numProcs-1) ? rightCell : tc);
+        // get temperatures of adjacent cells
+        value_t tl = (i != 0) ? A[i - 1] : leftCell;
+        value_t tr = (i != M - 1) ? A[i + 1] : rightCell;
 
-      // compute new temperature at current position
-      B[i] = tc + 0.2 * (tl + tr + (-2 * tc));
+        // compute new temperature at current position
+        B[i] = tc + 0.2 * (tl + tr + (-2 * tc));
+      }
 
       // send/receive "data corners" to/from the prev/next rank
-      if (i == 0 && rank != 0){
-        MPI_Isend(&B[i], 1, MPI_INT, rank - 1, 41, MPI_COMM_WORLD, &LSrequest);
-        MPI_Irecv(&leftCell, 1, MPI_INT, rank - 1, 42, MPI_COMM_WORLD, &LRrequest);
+      if (i == 0){
+        MPI_Bsend(&(B[i]), 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD);
+        MPI_Irecv(&leftCell, 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, &LRrequest);
       }
-      else if (i == M-1 && rank != numProcs-1){
-        MPI_Isend(&B[i], 1, MPI_INT, rank + 1, 42, MPI_COMM_WORLD, &RSrequest);
-        MPI_Irecv(&rightCell, 1, MPI_INT, rank + 1, 41, MPI_COMM_WORLD, &RRrequest);
+      else if (i == M-1){
+        MPI_Bsend(&(B[i]), 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD);
+        MPI_Irecv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, &RRrequest);
       }
+      //printf("timestep: %d, %lld, %d\n", t, i, rank);
     }
 
     // swap matrices (just pointers, not content)
-    MPI_Barrier(MPI_COMM_WORLD);
-    if (rank != 0)
-    {
-      MPI_Wait(&LSrequest, MPI_STATUS_IGNORE);
-      MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
-    }
-    if (rank != numProcs - 1)
-    {
-      MPI_Wait(&RSrequest, MPI_STATUS_IGNORE);
-      MPI_Wait(&RRrequest, MPI_STATUS_IGNORE);
-    }
-
     Vector H = A;
     A = B;
     B = H;
 
     // show intermediate step
-    if (rank == 0 && !(t % 1000))
+    if (!(t % 1000))
     {
-      MPI_Gather(&AA, M, MPI_INT, A, M, MPI_INT, 0, MPI_COMM_WORLD);
-      printf("Step t=%d:\t", t);
-      printTemperature(AA, N);
-      printf("\n");
+      MPI_Gather(A, M, MPI_DOUBLE, AA, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      if (rank == 0)
+      {
+        printf("Step t=%d:\t", t);
+        printTemperature(AA, N);
+        printf("\n");
+      }
     }
   }
 
@@ -159,12 +160,14 @@ int main(int argc, char **argv) {
 
   // ---------- check ----------
 
+  MPI_Gather(A, M, MPI_DOUBLE, AA, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   if (rank == 0){
-    MPI_Gather(&A, M, MPI_INT, AA, M, MPI_INT, 0, MPI_COMM_WORLD);
     printf("Final:\t\t");
-    printTemperature(A, N);
+    printTemperature(AA, N);
     printf("\n");
   }
+
+  MPI_Barrier(MPI_COMM_WORLD);
 
   int success = 1;
   for (long long i = 0; i < M; i++) {
@@ -175,7 +178,7 @@ int main(int argc, char **argv) {
     break;
   }
 
-  printf("Verification: %s\n", (success) ? "OK" : "FAILED");
+  printf("Verification for rank %d: %s\n", rank, (success) ? "OK" : "FAILED");
 
   // ---------- cleanup ----------
 
