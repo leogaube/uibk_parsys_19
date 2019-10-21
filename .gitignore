@@ -1,1 +1,4 @@
+*.exe
+.vscode/
+
 lcc2.cmd
