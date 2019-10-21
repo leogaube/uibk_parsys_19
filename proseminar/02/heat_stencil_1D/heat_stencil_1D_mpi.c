@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
 
   // create a buffer for storing temperature fields
 
-  Vector AA;
+  Vector AA = NULL;
   Vector A = createVector(M);
   int source_x;
   if (rank == 0)
