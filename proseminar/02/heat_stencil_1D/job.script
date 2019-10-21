@@ -18,9 +18,6 @@
 
 #$ -pe openmpi-fillup 8
 
-module load gcc
-module load openmpi/4.0.1
+mpicc -Wall heat_stencil_1D_mpi.c -o heat_stencil_1D_mpi
 
-mpicc -Wall heat_stencil_1D_mpi.c -o heat_stencil_1D_mpi.o
-
-mpiexec -n 8 ./heat_stencil_1D_mpi.o
+mpiexec -n 8 ./heat_stencil_1D_mpi

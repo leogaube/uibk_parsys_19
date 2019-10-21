@@ -39,7 +39,8 @@ int main(int argc, char **argv) {
   MPI_Comm_size(MPI_COMM_WORLD, &numProcs);
 
   if (N % numProcs != 0){
-    printf("This Problem cannot be split up evenly among MPI ranks! (N mod numProcs != 0)");
+    if (rank == 0)
+      printf("This Problem cannot be split up evenly among MPI ranks! (N mod numProcs != 0)\n");
     MPI_Finalize();
     return EXIT_FAILURE;
   }
@@ -52,7 +53,7 @@ int main(int argc, char **argv) {
 
   // create a buffer for storing temperature fields
 
-  Vector AA;
+  Vector AA = NULL;
   Vector A = createVector(M);
   int source_x;
   if (rank == 0)
@@ -167,6 +168,7 @@ int main(int argc, char **argv) {
     printf("\n");
   }
 
+  // For some reason "Verification" is printed from all ranks (except rank 0), before "Final Temperatures" 
   MPI_Barrier(MPI_COMM_WORLD);
 
   int success = 1;
