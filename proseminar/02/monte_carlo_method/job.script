@@ -11,7 +11,7 @@
 #$ -N pi_mpi
 
 # Redirect output stream to this file.
-#$ -o output
+#$ -o output_mpi
 
 # Join the error stream to the output stream.
 #$ -j yes
@@ -23,6 +23,22 @@
 
 module load openmpi/4.0.1
 
-mpicc -Wall -Werror pi_mpi.c -o pi_mpi.o
+make all
 
-mpiexec -n 16 ./pi_mpi.o 3200000000
+repetitions=1
+
+while [ $repetitions -le 10 ]
+do
+  echo $repetitions >> output_mpi
+  echo $repetitions >> output_seq
+  counter=100
+  while [ $counter -le 10000000000 ]
+  do
+    echo $counter >> output_seq
+    ./pi_seq $counter >> output_seq
+    echo $counter >> output_mpi
+    mpiexec -n 16 ./pi_mpi $counter
+    counter=$((10*counter))
+  done
+  repetitions=$((1+repetitions))
+done
