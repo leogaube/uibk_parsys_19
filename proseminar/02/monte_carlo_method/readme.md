@@ -18,15 +18,17 @@ Implement your chosen parallelization strategy as a second application `pi_mpi`.
 
 Implemented in pi_mpi.c
 Verification (Data points are mean & std. dev. of 10 runs. Sample size corresponds to trials.):
-<img src="./pi.png" width="100%">
+
+<img src="./pi.png" width="60%">
 
 ## Task 4
 Discuss the effects and implications of your parallelization.
 
-- Overhead for small sample sizes.
+- Overhead for small sample sizes. (Lower overhead for less ranks.)
 - Similar behavior to sequential code for large sizes.
 - No measured speed-up. Larger samples might show speed-up. Tests with larger samples required for definitive answer.
 - If no speed-up can be measured, another parallelization strategy must be chosen.
 
 Time consumption (Data points are mean & std. dev. of 10 runs. Sample size corresponds to trials. Missing data points are below milliseconds.):
-<img src="./pi_sec.png" width="100%">
+
+<img src="./pi_sec.png" width="60%">
