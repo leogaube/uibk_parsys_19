@@ -1,4 +1,4 @@
-# Solution
+# Solution: Assignment 1
 
 ## Tasks 1
 Write a sequential application `pi_seq` in C or C++ that computes π for a given number of samples (command line argument). Test your application for various, large sample sizes to verify the correctness of your implementation.
@@ -24,6 +24,7 @@ Verification (Data points are mean & std. dev. of 10 runs. Sample size correspon
 ## Task 4
 Discuss the effects and implications of your parallelization.
 
+- Rounding number of desired samples to be divisible by number of ranks.
 - Overhead for small sample sizes. (Lower overhead for less ranks.)
 - Similar behavior to sequential code for large sizes.
 - No measured speed-up. Larger samples might show speed-up. Tests with larger samples required for definitive answer.
