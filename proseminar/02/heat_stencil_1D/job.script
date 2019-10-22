@@ -23,7 +23,7 @@ module load openmpi/4.0.1
 make all
 
 problem_size=160
-while [ problem_size -le 2000 ]
+while [ $problem_size -le 2000 ]
 do
   echo $problem_size >> output_seq
   ./heat_stencil_1D_seq $problem_size >> output_seq

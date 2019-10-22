@@ -23,9 +23,9 @@ module load openmpi/4.0.1
 make all
 
 problem_size=160
-while [ problem_size -le 2000 ]
+while [ $problem_size -le 2000 ]
 do
   echo $problem_size >> output_mpi_4
-  mpiexec -n 16 ./heat_stencil_1D_mpi $problem_size
+  mpiexec -n 4 ./heat_stencil_1D_mpi $problem_size
   problem_size=$((problem_size*2))
 done
