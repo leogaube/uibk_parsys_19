@@ -55,7 +55,7 @@ run_cygwin: run_seq run_mpi_cygwin
 .PHONEY: clean
 clean:
 	@rm -f heat_stencil_1D_seq
-	@rm -f heat_stencil_1D_par
+	@rm -f heat_stencil_1D_mpi
 	@rm -f *.o
 	
 	
