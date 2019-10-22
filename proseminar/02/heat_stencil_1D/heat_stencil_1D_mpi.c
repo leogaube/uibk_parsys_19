@@ -3,6 +3,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <time.h>
+
 typedef double value_t;
 
 #define RESOLUTION 120
@@ -23,7 +25,9 @@ void printTemperature(Vector m, int N);
 // -- simulation code ---
 
 int main(int argc, char **argv) {
-// 'parsing' optional input parameter = problem size
+  double start = MPI_Wtime();
+
+  // 'parsing' optional input parameter = problem size
   int N = 2000;
   if (argc > 1)
   {
@@ -80,20 +84,16 @@ int main(int argc, char **argv) {
   Vector B = createVector(M);
 
   // send/receive requests for left/right rank
-  /*
+  MPI_Request LRrequest;
   MPI_Request LSrequest;
-  MPI_Request LRrequest;
+  MPI_Request RRrequest;
   MPI_Request RSrequest;
-  MPI_Request RRrequest;
-  */
-  MPI_Request LRrequest;
-  MPI_Request RRrequest;
 
   double leftCell;
   double rightCell;
 
-  MPI_Bsend(&(A[0]), 1, MPI_DOUBLE, MAX(rank-1, 0), 0, MPI_COMM_WORLD);
-  MPI_Bsend(&(A[M - 1]), 1, MPI_DOUBLE, MIN(rank+1, numProcs-1), 0, MPI_COMM_WORLD);
+  MPI_Isend(&(A[0]), 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, &LSrequest);
+  MPI_Isend(&(A[M - 1]), 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, &RSrequest);
 
   MPI_Irecv(&leftCell, 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, &LRrequest);
   MPI_Irecv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, &RRrequest);
@@ -110,11 +110,13 @@ int main(int argc, char **argv) {
       }
       else{
         //sync data
-        if (i == 0)
-          MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
-        else if (i == M - 1)
+        if (i == 0){
+          MPI_Wait(&LSrequest, MPI_STATUS_IGNORE);
+          MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);}
+        else if (i == M - 1){
+          MPI_Wait(&RSrequest, MPI_STATUS_IGNORE);
           MPI_Wait(&RRrequest, MPI_STATUS_IGNORE);
-
+        }
         // get temperature at current position
         value_t tc = A[i];
 
@@ -128,11 +130,11 @@ int main(int argc, char **argv) {
 
       // send/receive "data corners" to/from the prev/next rank
       if (i == 0){
-        MPI_Bsend(&(B[i]), 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD);
+        MPI_Isend(&(B[i]), 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, &LSrequest);
         MPI_Irecv(&leftCell, 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, &LRrequest);
       }
       else if (i == M-1){
-        MPI_Bsend(&(B[i]), 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD);
+        MPI_Isend(&(B[i]), 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, &RSrequest);
         MPI_Irecv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, &RRrequest);
       }
       //printf("timestep: %d, %lld, %d\n", t, i, rank);
@@ -187,6 +189,12 @@ int main(int argc, char **argv) {
     releaseVector(AA);
   }
   releaseVector(A);
+
+  if (rank == 0)
+  {
+    double end = MPI_Wtime();
+    printf("The process took %g seconds to finish. \n", end - start);
+  }
 
   MPI_Finalize();
 

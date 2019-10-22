@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include <time.h>
+
 typedef double value_t;
 
 #define RESOLUTION 120
@@ -18,6 +20,8 @@ void printTemperature(Vector m, int N);
 // -- simulation code ---
 
 int main(int argc, char **argv) {
+  clock_t start = clock();
+
   // 'parsing' optional input parameter = problem size
   int N = 2000;
   if (argc > 1) {
@@ -105,6 +109,9 @@ int main(int argc, char **argv) {
   // ---------- cleanup ----------
 
   releaseVector(A);
+
+  clock_t end = clock();
+  printf("The process took %g seconds to finish. \n", ((double)(end - start)) / CLOCKS_PER_SEC);
 
   // done
   return (success) ? EXIT_SUCCESS : EXIT_FAILURE;
