@@ -1,7 +1,15 @@
 CC=gcc
-CC_FLAGS=-O2 -std=c99 -Wall -Wextra -pedantic
+CC_FLAGS=-O2 -std=c99 -Wall
 MPI=mpicc
-Cygwin_Include=-I"C:\cygwin64\usr\include" -I"C:\cygwin64\lib\openmpi"
+MPI_FLAGS=-O2 -std=c99 -Wall
+
+#on windows add include directories 
+ifeq ($(OS), Windows_NT)
+	NUM_RANKS=4
+	MPI_FLAGS+=-I"C:\cygwin64\usr\include" -I"C:\cygwin64\lib\openmpi"
+else
+	module load openmpi/4.0.1
+endif
 
 # sequential
 .PHONEY: heat_stencil_1D_seq
@@ -15,25 +23,18 @@ run_seq: heat_stencil_1D_seq
 	@echo
 
 # parallel
-.PHONEY: heat_stencil_1D_mpi
+.PHONEY: heat_stencil_1D_mpi Makefile
 heat_stencil_1D_mpi: heat_stencil_1D_mpi.c
-	@$(MPI) $(CC_FLAGS) $< -o heat_stencil_1D_mpi
+	@$(MPI) $(MPI_FLAGS) $< -o heat_stencil_1D_mpi
 
 .PHONEY: run_mpi
 run_mpi: heat_stencil_1D_mpi
 	@echo "MPI:"
-	@./heat_stencil_1D_mpi
-	@echo
-
-# parallel with cygwin
-.PHONEY: heat_stencil_1D_mpi_cygwin
-heat_stencil_1D_mpi_cygwin: heat_stencil_1D_mpi.c
-	@$(MPI) $(CC_FLAGS) $(Cygwin_Include) $< -o heat_stencil_1D_mpi
-
-.PHONEY: run_mpi_cygwin
-run_mpi_cygwin: heat_stencil_1D_mpi
-	@echo "MPI:"
-	@./heat_stencil_1D_mpi
+ifeq ($(OS), Windows_NT)
+	@mpiexec -n $(NUM_RANKS) heat_stencil_1D_mpi
+else
+	@qsub job.script
+endif
 	@echo
 
 # all
@@ -43,21 +44,9 @@ all: heat_stencil_1D_seq heat_stencil_1D_mpi
 .PHONEY: run
 run: run_seq run_mpi
 
-# all with cygwin
-.PHONEY: all_cygwin
-all_cygwin: heat_stencil_1D_seq heat_stencil_1D_mpi_cygwin
-
-.PHONEY: run_cygwin
-run_cygwin: run_seq run_mpi_cygwin
-
-
 # clean
 .PHONEY: clean
 clean:
-	@rm -f heat_stencil_1D_seq
-	@rm -f heat_stencil_1D_mpi
-	@rm -f *.o
-	
-	
-	
-	
+	@rm heat_stencil_1D_seq 2> /dev/null || true
+	@rm heat_stencil_1D_mpi 2> /dev/null || true
+	@rm output* 2> /dev/null || true
