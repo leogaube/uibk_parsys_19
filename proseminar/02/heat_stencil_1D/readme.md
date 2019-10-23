@@ -22,11 +22,14 @@ Making a calculation with neighboring cells in every time step.
 *Implement your chosen parallelization strategy as a second application heat_stencil_1D_mpi. Run it with varying numbers of ranks and problem sizes and verify its correctness by comparing the output to heat_stencil_1D_seq.*
 
 See programs and outputs. Equality of outputs verified by comparison with sequential program.
+If you are insterested in runtime for different values of N=2000-16000, use:
+`grep seconds [output_file]`
 
 ## Task 4
 *Discuss the effects and implications of your parallelization.*
 
 - The `MPI_Gather` to plot the temperature values after 1000 time step takes time. Optimization might be possible if only the final result matters.
-- But it seems like for this task parallelization does not make sense (in terms of runtime) for small problem sizes like N = 2000, because there is too much communication overhead.
-- We have done some experiments and our MPI-algorithm gains an runtime advantage with approximately N >= 10000 and at least 4 ranks running on the same CPU.
-- Unfortunately we don't have any fancy graphics to go along with our findings to determine speedup and efficiency for various problem sizes.
+- For small problem sizes like N = 2000, parallelization does not make much sense, because there is too much MPI initialization and communication overhead.
+- However we have done some experiments for bigger N until N=16000 and yielded a speedup of 2.24 (compared to 1.27 for N=2000) for 4 ranks running on the same cpu.
+- Unfortunately the lcc2 cluster was always fully utilized in the last two days; thus we were unable to get reliable results for different number of ranks or even node to node communication!
+- Tables & Figures for our results (seq + 4_ranks_same_cpu) can be found in *results.xlsx*
