@@ -1,38 +1,41 @@
 
-SEQUENTIAL=heat_stencil_1D_seq
-PARALLEL=heat_stencil_1D_mpi
-LANGUAGE=c									#cpp
+SEQUENTIAL = heat_stencil_1D_seq
+PARALLEL = heat_stencil_1D_mpi
+LANGUAGE = c
+#LANGUAGE = cpp
 
 
 #multiple mpi runs with different configurations
-NUM_RUNS=1									#TODO repeat experiment multiple times
-PROBLEM_SIZE_START=2000
-PROBLEM_SIZE_END=16000
+NUM_RUNS = 1
+PROBLEM_SIZE_START = 2000
+PROBLEM_SIZE_END = 16000
 
-NUM_RANKS_ARRAY=4 2							#1 2 4 8 16
-RANK_CONFIG_ARRAY=fillup					#fillup 1perhost 2perhost
+NUM_RANKS_ARRAY = 4 2
+#NUM_RANKS_ARRAY = 1 2 4 8 16
+RANK_CONFIG_ARRAY = fillup
+#RANK_CONFIG_ARRAY = fillup 1perhost 2perhost
 
 #default values for single mpi run
-PROBLEM_SIZE=$(PROBLEM_SIZE_START)
-NUM_RANKS:=$(word 1, $(NUM_RANKS_ARRAY))
-RANK_CONFIG:=$(word 1, $(RANK_CONFIG_ARRAY))
+PROBLEM_SIZE = $(PROBLEM_SIZE_START)
+NUM_RANKS := $(word 1, $(NUM_RANKS_ARRAY))
+RANK_CONFIG := $(word 1, $(RANK_CONFIG_ARRAY))
 
 ### SETUP ###
 
-CYGWIN_PATH=C:\cygwin						#@Marc --> C:\cygwin64
+CYGWIN_PATH = C:\cygwin						#@Marc --> C:\cygwin64
 
-CC=gcc
-CC_FLAGS=-O2 -std=c99 -Wall
+CC = gcc
+CC_FLAGS = -O2 -std=c99 -Wall
 
-MPI=mpicc									#mpi++ for c++!
-MPI_FLAGS=-O2 -std=c99 -Wall
+MPI = mpicc									#mpi++ for c++!
+MPI_FLAGS = -O2 -std=c99 -Wall
 
 #PYTHON=python
 
 
-OUTPUTS_DIR=./outputs
-#RESULTS_DIR=./results
-SEQ_NAME = seq  
+OUTPUTS_DIR = ./outputs
+#RESULTS_DIR = ./results
+SEQ_NAME = seq
 MPI_NAME = $(NUM_RANKS)_$(RANK_CONFIG)
 
 SEQ_OUTPUT_FILENAME = $(OUTPUTS_DIR)/$(SEQ_NAME).dat
@@ -46,27 +49,27 @@ ifeq ($(OS), Windows_NT)
 	MPI_VERSION=3.1.3
 
 	# additional linking required on Windows
-	MPI_FLAGS+=-I "$(CYGWIN_PATH)\usr\include" 
-	MPI_FLAGS+=-I "$(CYGWIN_PATH)\lib\openmpi"
+	MPI_FLAGS += -I "$(CYGWIN_PATH)\usr\include" 
+	MPI_FLAGS += -I "$(CYGWIN_PATH)\lib\openmpi"
 
-	EXTENSION=.exe
+	EXTENSION = .exe
 else
-	MPI_VERSION=4.0.1
+	MPI_VERSION = 4.0.1
 
-	SGE_SEQ_FLAGS=-q std.q
-	SGE_SEQ_FLAGS+=-cwd
-	SGE_SEQ_FLAGS+=-N $(SEQ_NAME)
-	SGE_SEQ_FLAGS+=-o $(SEQ_OUTPUT_FILENAME)
-	SGE_SEQ_FLAGS+=-e $(SEQ_ERROR_FILENAME)
-	SGE_SEQ_FLAGS+=-b
+	SGE_SEQ_FLAGS = -q std.q
+	SGE_SEQ_FLAGS += -cwd
+	SGE_SEQ_FLAGS += -N $(SEQ_NAME)
+	SGE_SEQ_FLAGS += -o $(SEQ_OUTPUT_FILENAME)
+	SGE_SEQ_FLAGS += -e $(SEQ_ERROR_FILENAME)
+	SGE_SEQ_FLAGS += -b
 
-	SGE_MPI_FLAGS=-q std.q
-	SGE_MPI_FLAGS+=-cwd
-	SGE_MPI_FLAGS+=-N $(MPI_NAME)
-	SGE_MPI_FLAGS+=-o $(MPI_OUTPUT_FILENAME)
-	SGE_MPI_FLAGS+=-e $(MPI_ERROR_FILENAME)
-	SGE_MPI_FLAGS+=-pe openmpi-$(MPI_SETUP_TYPE)
-	SGE_MPI_FLAGS+=-b
+	SGE_MPI_FLAGS = -q std.q
+	SGE_MPI_FLAGS += -cwd
+	SGE_MPI_FLAGS += -N $(MPI_NAME)
+	SGE_MPI_FLAGS += -o $(MPI_OUTPUT_FILENAME)
+	SGE_MPI_FLAGS += -e $(MPI_ERROR_FILENAME)
+	SGE_MPI_FLAGS += -pe openmpi-$(MPI_SETUP_TYPE)
+	SGE_MPI_FLAGS += -b
 
 	EXTENSION=.o
 endif
