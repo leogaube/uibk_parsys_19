@@ -61,8 +61,6 @@ ifeq ($(OS), Windows_NT)
 	#@Marc: add Windows environmental variable 'CYGWIN_PATH --> C:\cygwin64'
 	MPI_FLAGS += -I "$(CYGWIN_PATH)\usr\include" 
 	MPI_FLAGS += -I "$(CYGWIN_PATH)\lib\openmpi"
-
-	EXTENSION = .exe
 else
 	MPI_VERSION = 4.0.1
 
@@ -80,8 +78,6 @@ else
 	SGE_MPI_FLAGS += -e $(MPI_ERROR_FILENAME)
 	SGE_MPI_FLAGS += -pe openmpi-$(SLOT_DISTRIBUTE) $(NUM_RANKS)
 	SGE_MPI_FLAGS += -b yes
-
-	EXTENSION = .o
 endif
 
 ### CREATE NON-EXISTING DIRECTORIES ###
@@ -121,7 +117,7 @@ run_mpi: compile_mpi $(OUTPUTS_DIR)
 ifeq ($(OS), Windows_NT)
 	mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE) 1>> $(MPI_OUTPUT_FILENAME) 2>> $(MPI_ERROR_FILENAME)
 else
-	qsub $(SGE_MPI_FLAGS) mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE)
+	qsub $(SGE_MPI_FLAGS) module load openmpi/4.0.1 && mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE)
 endif
 
 #TODO run mutiple times with multiple rank setups: (for \ ...)
@@ -140,7 +136,13 @@ graphs: $(GRAPH) $(RESULTS_DIR)
 
 
 ### CLEANUP ###
+# ignore errors if files don't exist: use '|| true' 
 .PHONEY: clean
 clean:
-	@rm *$(EXTENSION) || true			#hide output with: 2> /dev/null
 	@rm -r $(OUTPUTS_DIR) || true
+ifeq ($(OS), Windows_NT)
+	@rm *.exe || true
+else
+	# all executable files!
+	@ls | grep -v "\." | xargs rm || true
+endif
