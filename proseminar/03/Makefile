@@ -140,9 +140,9 @@ graphs: $(GRAPH) $(OUTPUTS_DIR) $(RESULTS_DIR)
 	@$(PYTHON) ./$(GRAPH) $(OUTPUTS_DIR) $(RESULTS_DIR)
 
 ### CHECK FOR ERRORS ###
-.PHONEY: print_errors
-print_errors: $(ERRORS_DIR)
-	@check_for_errors.sh ./$(ERRORS_DIR)
+.PHONEY: check_for_errors
+check_for_errors: $(ERRORS_DIR)
+	$(PYTHON) check_for_errors.py $(ERRORS_DIR)
 
 ### CLEANUP ###
 # '|| true' --> ignore errors if files don't exist
