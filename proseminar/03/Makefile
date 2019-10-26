@@ -89,8 +89,8 @@ else
 	SEQ_EXEC_COMMAND = qsub $(SGE_SEQ_FLAGS) ./$(SEQUENTIAL) $${problem_size}
 
 	MPI_EXEC_COMMAND = echo -e "module load openmpi/$(MPI_VERSION) 2>/dev/null\nmpiexec -n $${num_ranks} ./$(PARALLEL) $${problem_size}" > job.tmp;
-	MPI_EXEC_COMMAND += qsub $(SGE_MPI_FLAGS) job.tmp;
-	MPI_EXEC_COMMAND += rm job.tmp
+	MPI_EXEC_COMMAND += chmod +x job.tmp;
+	MPI_EXEC_COMMAND += qsub $(SGE_MPI_FLAGS) job.tmp
 endif
 
 ### CREATE NON-EXISTING DIRECTORIES ###
