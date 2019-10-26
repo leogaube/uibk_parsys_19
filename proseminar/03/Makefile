@@ -120,7 +120,7 @@ run_mpi: compile_mpi $(OUTPUTS_DIR) $(ERRORS_DIR)
 ifeq ($(OS), Windows_NT)
 	mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE) 1>> $(MPI_OUTPUT_FILENAME) 2>> $(MPI_ERROR_FILENAME)
 else
-	@echo -e "#!/bin/bash\nmodule load openmpi/$(MPI_VERSION) 2>/dev/null\nmpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE)" > job.tmp
+	@echo -e "#!/bin/bash\n\nmodule load openmpi/$(MPI_VERSION) 2>/dev/null\nmpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE)" > job.tmp
 	@qsub $(SGE_MPI_FLAGS) job.tmp
 	@rm job.tmp
 endif
@@ -139,6 +139,10 @@ run_all: run_seq run_all_mpi
 graphs: $(GRAPH) $(OUTPUTS_DIR) $(RESULTS_DIR)
 	@$(PYTHON) ./$(GRAPH) $(OUTPUTS_DIR) $(RESULTS_DIR)
 
+### CHECK FOR ERRORS ###
+.PHONEY: print_errors
+print_errors: $(ERRORS_DIR)
+	@check_for_errors.sh ./$(ERRORS_DIR)
 
 ### CLEANUP ###
 # '|| true' --> ignore errors if files don't exist
