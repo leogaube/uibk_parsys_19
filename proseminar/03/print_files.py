@@ -9,7 +9,7 @@ if not os.path.isdir(directory):
 	print("'%s' does not exist!"%directory)
 	sys.exit(0)
 
-files = os.listdir(directory)
+files = sorted(os.listdir(directory))
 if not files:
 	print("'%s' is empty!" % directory)
 	sys.exit(0)
