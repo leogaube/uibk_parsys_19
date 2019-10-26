@@ -1,42 +1,39 @@
-
+### C/C++ SEQ/MPI PROGRAMS ###
 SEQUENTIAL = heat_stencil_1D_seq
 PARALLEL = heat_stencil_1D_mpi
-LANGUAGE = c
 #LANGUAGE = cpp
+LANGUAGE = c
 
 
-#multiple mpi runs with different configurations
+### PARAMETERS for multiple mpi runs ###
+# --> 'make run_all' for submitting multiple jobs with different configurations
 NUM_RUNS = 1
+
+#problem size will be doubled for each consecutive run --> 2000 4000 8000
 PROBLEM_SIZE_START = 2000
-PROBLEM_SIZE_END = 16000
+NEXT_PROBLEM_SIZE = 2*$(PROBLEM_SIZE_START)
+NUM_PROBLEM_SIZES = 3
 
-NUM_RANKS_ARRAY = 4 2
+#program will be run with various mpi configurations each specified by #ranks and slot distribution across nodes/cpus
+NUM_RANKS_ARRAY = 4
 #NUM_RANKS_ARRAY = 1 2 4 8 16
-RANK_CONFIG_ARRAY = fillup
-#RANK_CONFIG_ARRAY = fillup 1perhost 2perhost
+SLOT_DISTRIBUTE_ARRAY = fillup
+#SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
 
-#default values for single mpi run
-PROBLEM_SIZE = $(PROBLEM_SIZE_START)
+
+### PARAMETERS for single mpi run ###
+# --> 'make run_mpi' for debugging with these default values
+PROBLEM_SIZE := $(PROBLEM_SIZE_START)
 NUM_RANKS := $(word 1, $(NUM_RANKS_ARRAY))
-RANK_CONFIG := $(word 1, $(RANK_CONFIG_ARRAY))
-
-### SETUP ###
-
-CYGWIN_PATH = C:\cygwin						#@Marc --> C:\cygwin64
-
-CC = gcc
-CC_FLAGS = -O2 -std=c99 -Wall
-
-MPI = mpicc									#mpi++ for c++!
-MPI_FLAGS = -O2 -std=c99 -Wall
-
-#PYTHON=python
+SLOT_DISTRIBUTE := $(word 1, $(SLOT_DISTRIBUTE_ARRAY))
 
 
+### OUTPUT + ERRORS ###
 OUTPUTS_DIR = ./outputs
-#RESULTS_DIR = ./results
+RESULTS_DIR = ./results
+
 SEQ_NAME = seq
-MPI_NAME = $(NUM_RANKS)_$(RANK_CONFIG)
+MPI_NAME = $(NUM_RANKS)_$(SLOT_DISTRIBUTE)
 
 SEQ_OUTPUT_FILENAME = $(OUTPUTS_DIR)/$(SEQ_NAME).dat
 MPI_OUTPUT_FILENAME = $(OUTPUTS_DIR)/$(MPI_NAME).dat
@@ -44,11 +41,24 @@ MPI_OUTPUT_FILENAME = $(OUTPUTS_DIR)/$(MPI_NAME).dat
 SEQ_ERROR_FILENAME = $(OUTPUTS_DIR)/$(SEQ_NAME).err
 MPI_ERROR_FILENAME = $(OUTPUTS_DIR)/$(MPI_NAME).err
 
-# Windows/LCC2 specific setup
+PYTHON = python
+GRAPH = graph.py
+
+
+### COMPILERS + FLAGS ###
+CC = gcc
+CC_FLAGS = -O2 -std=c99 -Wall
+
+MPI = mpicc									#mpi++ for c++!
+MPI_FLAGS = -O2 -std=c99 -Wall
+
+
+### Windows/LCC2 SPECIFIC SETUP ###
 ifeq ($(OS), Windows_NT)
 	MPI_VERSION=3.1.3
 
 	# additional linking required on Windows
+	#@Marc: add Windows environmental variable 'CYGWIN_PATH --> C:\cygwin64'
 	MPI_FLAGS += -I "$(CYGWIN_PATH)\usr\include" 
 	MPI_FLAGS += -I "$(CYGWIN_PATH)\lib\openmpi"
 
@@ -68,18 +78,23 @@ else
 	SGE_MPI_FLAGS += -N $(MPI_NAME)
 	SGE_MPI_FLAGS += -o $(MPI_OUTPUT_FILENAME)
 	SGE_MPI_FLAGS += -e $(MPI_ERROR_FILENAME)
-	SGE_MPI_FLAGS += -pe openmpi-$(MPI_SETUP_TYPE)
+	SGE_MPI_FLAGS += -pe openmpi-$(SLOT_DISTRIBUTE)
 	SGE_MPI_FLAGS += -b
 
-	EXTENSION=.o
+	EXTENSION = .o
 endif
 
-# create non-existing directories
+### CREATE NON-EXISTING DIRECTORIES ###
+.PHONEY: $(OUTPUTS_DIR)
 $(OUTPUTS_DIR):
 	@mkdir -p $@
 
-### COMPILE ###
+.PHONEY: $(RESULTS_DIR)
+$(RESULTS_DIR):
+	@mkdir -p $@
 
+
+### COMPILE ###
 .PHONEY: compile_seq
 compile_seq: $(SEQUENTIAL).$(LANGUAGE)
 	@$(CC) $(CC_FLAGS) $< -o $(SEQUENTIAL)
@@ -91,8 +106,8 @@ compile_mpi: $(PARALLEL).$(LANGUAGE)
 .PHONEY: all
 all: compile_seq compile_mpi
 
-### RUN ###
 
+### RUN ###
 .PHONEY: run_seq
 run_seq: compile_seq $(OUTPUTS_DIR)
 ifeq ($(OS), Windows_NT)
@@ -118,10 +133,11 @@ run_all: run_seq run_all_mpi
 
 
 ### VISUALIZE ###
+# TODO --> runtime, speedup, efficiency, ...
+.PHONEY: graphs
+graphs: $(GRAPH) $(RESULTS_DIR)
+	@$(PYTHON) ./$(GRAPH) $(OUTPUTS_DIR) $(RESULTS_DIR)
 
-#.PHONEY graphs
-#graphs: graph.py
-#	@python  $(OUTPUTS_DIR) $(OUTPUTS_DIR)
 
 ### CLEANUP ###
 .PHONEY: clean
