@@ -83,11 +83,12 @@ else
 endif
 
 ### CREATE NON-EXISTING DIRECTORIES ###
-.PHONEY: $(OUTPUTS_DIR)
 $(OUTPUTS_DIR):
 	@mkdir -p $@
 
-.PHONEY: $(RESULTS_DIR)
+$(ERRORS_DIR):
+	@mkdir -p $@
+
 $(RESULTS_DIR):
 	@mkdir -p $@
 
@@ -107,7 +108,7 @@ all: compile_seq compile_mpi
 
 ### RUN ###
 .PHONEY: run_seq
-run_seq: compile_seq $(OUTPUTS_DIR)
+run_seq: compile_seq $(OUTPUTS_DIR) $(ERRORS_DIR)
 ifeq ($(OS), Windows_NT)
 	@./$(SEQUENTIAL) $(PROBLEM_SIZE) 1>> $(SEQ_OUTPUT_FILENAME) 2>> $(SEQ_ERROR_FILENAME)
 else
@@ -115,7 +116,7 @@ else
 endif
 
 .PHONEY: run_mpi
-run_mpi: compile_mpi $(OUTPUTS_DIR)
+run_mpi: compile_mpi $(OUTPUTS_DIR) $(ERRORS_DIR)
 ifeq ($(OS), Windows_NT)
 	mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE) 1>> $(MPI_OUTPUT_FILENAME) 2>> $(MPI_ERROR_FILENAME)
 else
@@ -135,7 +136,7 @@ run_all: run_seq run_all_mpi
 ### VISUALIZE ###
 # TODO --> runtime, speedup, efficiency, ...
 .PHONEY: graphs
-graphs: $(GRAPH) $(RESULTS_DIR)
+graphs: $(GRAPH) $(OUTPUTS_DIR) $(RESULTS_DIR)
 	@$(PYTHON) ./$(GRAPH) $(OUTPUTS_DIR) $(RESULTS_DIR)
 
 
