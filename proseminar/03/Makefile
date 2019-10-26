@@ -35,11 +35,11 @@ OUTPUTS_DIR=./outputs
 SEQ_NAME = seq  
 MPI_NAME = $(NUM_RANKS)_$(RANK_CONFIG)
 
-SEQ_OUTPUT_FILENAME = "$(OUTPUTS_DIR)/$(SEQ_NAME).dat"
-MPI_OUTPUT_FILENAME = "$(OUTPUTS_DIR)/$(MPI_NAME).dat"
+SEQ_OUTPUT_FILENAME = $(OUTPUTS_DIR)/$(SEQ_NAME).dat
+MPI_OUTPUT_FILENAME = $(OUTPUTS_DIR)/$(MPI_NAME).dat
 
-SEQ_ERROR_FILENAME = "$(OUTPUTS_DIR)/$(SEQ_NAME).err"
-MPI_ERROR_FILENAME = "$(OUTPUTS_DIR)/$(MPI_NAME).err"
+SEQ_ERROR_FILENAME = $(OUTPUTS_DIR)/$(SEQ_NAME).err
+MPI_ERROR_FILENAME = $(OUTPUTS_DIR)/$(MPI_NAME).err
 
 # Windows/LCC2 specific setup
 ifeq ($(OS), Windows_NT)
@@ -103,8 +103,7 @@ run_mpi: compile_mpi $(OUTPUTS_DIR)
 ifeq ($(OS), Windows_NT)
 	mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE) 1>> $(MPI_OUTPUT_FILENAME) 2>> $(MPI_ERROR_FILENAME)
 else
-	module load openmpi/$(MPI_VERSION)
-	qsub $(SGE_MPI_FLAGS) mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE)
+	qsub $(SGE_MPI_FLAGS) module load openmpi/$(MPI_VERSION) && mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE)
 endif
 
 #TODO run mutiple times with multiple rank setups: (for \ ...)
