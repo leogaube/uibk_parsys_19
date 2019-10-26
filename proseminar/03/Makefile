@@ -118,7 +118,8 @@ run_mpi: compile_mpi $(OUTPUTS_DIR)
 ifeq ($(OS), Windows_NT)
 	mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE) 1>> $(MPI_OUTPUT_FILENAME) 2>> $(MPI_ERROR_FILENAME)
 else
-	qsub $(SGE_MPI_FLAGS) module load openmpi/$(MPI_VERSION) && mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE)
+	@echo -e "#!/bin/bash\nmodule load openmpi/$(MPI_VERSION) && mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE)" > job.script
+	qsub $(SGE_MPI_FLAGS) job.script
 endif
 
 #TODO run mutiple times with multiple rank setups: (for \ ...)
