@@ -1,107 +1,132 @@
-
-SEQUENTIAL=heat_stencil_1D_seq
-PARALLEL=heat_stencil_1D_mpi
-LANGUAGE=c									#cpp
-
-
-#multiple mpi runs with different configurations
-NUM_RUNS=1									#TODO repeat experiment multiple times
-PROBLEM_SIZE_START=2000
-PROBLEM_SIZE_END=16000
-
-NUM_RANKS_ARRAY=4 2							#1 2 4 8 16
-RANK_CONFIG_ARRAY=fillup					#fillup 1perhost 2perhost
-
-#default values for single mpi run
-PROBLEM_SIZE=$(PROBLEM_SIZE_START)
-NUM_RANKS:=$(word 1, $(NUM_RANKS_ARRAY))
-RANK_CONFIG:=$(word 1, $(RANK_CONFIG_ARRAY))
-
-### SETUP ###
-
-CYGWIN_PATH=C:\cygwin						#@Marc --> C:\cygwin64
-
-CC=gcc
-CC_FLAGS=-O2 -std=c99 -Wall
-
-MPI=mpicc									#mpi++ for c++!
-MPI_FLAGS=-O2 -std=c99 -Wall
+### C/C++ SEQ/MPI PROGRAMS ###
+SEQUENTIAL = seq_1D
+PARALLEL = mpi_1D
+#LANGUAGE = cpp
+LANGUAGE = c
 
 
-OUTPUTS_DIR=./outputs
-#RESULTS_DIR=./results
-SEQ_NAME = seq
-MPI_NAME = $(NUM_RANKS)_$(RANK_CONFIG)
+### PARAMETERS for multiple mpi runs ###
+# --> 'make run_all' for submitting multiple jobs with different configurations
+NUM_RUNS = 1
+
+#problem size will be doubled for each consecutive run --> 2000 4000 8000
+PROBLEM_SIZE_START = 2000
+NEXT_PROBLEM_SIZE = 2*$(PROBLEM_SIZE_START)
+NUM_PROBLEM_SIZES = 3
+
+#program will be run with various mpi configurations each specified by #ranks and slot distribution across nodes/cpus
+NUM_RANKS_ARRAY = 4
+#NUM_RANKS_ARRAY = 1 2 4 8 16
+SLOT_DISTRIBUTE_ARRAY = fillup
+#SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
+
+
+### PARAMETERS for single mpi run ###
+# --> 'make run_mpi' for debugging with these default values
+PROBLEM_SIZE := $(PROBLEM_SIZE_START)
+NUM_RANKS := $(word 1, $(NUM_RANKS_ARRAY))
+SLOT_DISTRIBUTE := $(word 1, $(SLOT_DISTRIBUTE_ARRAY))
+
+
+### OUTPUT + ERRORS ###
+OUTPUTS_DIR = ./outputs
+ERRORS_DIR = ./errors
+RESULTS_DIR = ./results
+
+SEQ_NAME = $(SEQUENTIAL)
+MPI_NAME = $(PARALLEL)_$(SLOT_DISTRIBUTE)_$(NUM_RANKS)
 
 SEQ_OUTPUT_FILENAME = $(OUTPUTS_DIR)/$(SEQ_NAME).dat
 MPI_OUTPUT_FILENAME = $(OUTPUTS_DIR)/$(MPI_NAME).dat
 
-SEQ_ERROR_FILENAME = $(OUTPUTS_DIR)/$(SEQ_NAME).err
-MPI_ERROR_FILENAME = $(OUTPUTS_DIR)/$(MPI_NAME).err
+#create errors in cwd to easily spot them!
+SEQ_ERROR_FILENAME = $(ERRORS_DIR)/$(SEQ_NAME).err
+MPI_ERROR_FILENAME = $(ERRORS_DIR)/$(MPI_NAME).err
 
-# Windows/LCC2 specific setup
+PYTHON = python
+GRAPH = graph.py
+
+
+### COMPILERS + FLAGS ###
+CC = gcc
+CC_FLAGS = -O2 -std=c99 -Wall
+
+MPI = mpicc									#mpi++ for c++!
+MPI_FLAGS = -O2 -std=c99 -Wall
+
+
+### Windows/LCC2 SPECIFIC SETUP ###
 ifeq ($(OS), Windows_NT)
-	MPI_VERSION=3.1.3
+	MPI_VERSION = 3.1.3
 
 	# additional linking required on Windows
-	MPI_FLAGS+=-I "$(CYGWIN_PATH)\usr\include" 
-	MPI_FLAGS+=-I "$(CYGWIN_PATH)\lib\openmpi"
-
-	EXTENSION=.exe
+	#@Marc: add Windows environmental variable 'CYGWIN_PATH --> C:\cygwin64'
+	MPI_FLAGS += -I "$(CYGWIN_PATH)\usr\include" 
+	MPI_FLAGS += -I "$(CYGWIN_PATH)\lib\openmpi"
 else
-	MPI_VERSION=4.0.1
-	@module load openmpi/$(MPI_VERSION)
+	MPI_VERSION = 4.0.1
 
-	SGE_SEQ_FLAGS=-q std.q
-	SGE_SEQ_FLAGS+=-cwd
-	SGE_SEQ_FLAGS+=-N $(SEQ_NAME)
-	SGE_SEQ_FLAGS+=-o $(SEQ_OUTPUT_FILENAME)
-	SGE_SEQ_FLAGS+=-e $(SEQ_ERROR_FILENAME)
-	SGE_SEQ_FLAGS+=-b
+	SGE_SEQ_FLAGS = -q std.q
+	SGE_SEQ_FLAGS += -cwd
+	SGE_SEQ_FLAGS += -N $(SEQ_NAME)
+	SGE_SEQ_FLAGS += -o $(SEQ_OUTPUT_FILENAME)
+	SGE_SEQ_FLAGS += -e $(SEQ_ERROR_FILENAME)
+	SGE_SEQ_FLAGS += -b yes
 
-	SGE_MPI_FLAGS=-q std.q
-	SGE_MPI_FLAGS+=-cwd
-	SGE_MPI_FLAGS+=-N $(MPI_NAME)
-	SGE_MPI_FLAGS+=-o $(MPI_OUTPUT_FILENAME)
-	SGE_MPI_FLAGS+=-e $(MPI_ERROR_FILENAME)
-	SGE_MPI_FLAGS+=-pe openmpi-$(MPI_SETUP_TYPE)
-	SGE_MPI_FLAGS+=-b
-
-	EXTENSION=.o
+	SGE_MPI_FLAGS = -q std.q
+	SGE_MPI_FLAGS += -cwd
+	SGE_MPI_FLAGS += -N $(MPI_NAME)
+	SGE_MPI_FLAGS += -o $(MPI_OUTPUT_FILENAME)
+	SGE_MPI_FLAGS += -e $(MPI_ERROR_FILENAME)
+	SGE_MPI_FLAGS += -pe openmpi-$(SLOT_DISTRIBUTE) $(NUM_RANKS)
+	#cannot use '-b yes' because openmpi module needs to be loaded on lcc2 cluster
 endif
 
-# create non-existing directories
+### CREATE NON-EXISTING DIRECTORIES ###
 $(OUTPUTS_DIR):
 	@mkdir -p $@
 
-### COMPILE ###
+$(ERRORS_DIR):
+	@mkdir -p $@
 
+$(RESULTS_DIR):
+	@mkdir -p $@
+
+
+### COMPILE ###
 .PHONEY: compile_seq
 compile_seq: $(SEQUENTIAL).$(LANGUAGE)
 	@$(CC) $(CC_FLAGS) $< -o $(SEQUENTIAL)
 
 .PHONEY: compile_mpi
 compile_mpi: $(PARALLEL).$(LANGUAGE)
+ifeq ($(OS), Windows_NT)
 	@$(MPI) $(MPI_FLAGS) $< -o $(PARALLEL)
+else
+	@module load openmpi/$(MPI_VERSION) 2>/dev/null && $(MPI) $(MPI_FLAGS) $< -o $(PARALLEL)
+endif
 
 .PHONEY: all
 all: compile_seq compile_mpi
 
+
 ### RUN ###
 .PHONEY: run_seq
-run_seq: compile_seq $(OUTPUTS_DIR)
+run_seq: compile_seq $(OUTPUTS_DIR) $(ERRORS_DIR)
 ifeq ($(OS), Windows_NT)
-	./$(SEQUENTIAL) $(PROBLEM_SIZE) 1>> $(SEQ_OUTPUT_FILENAME) 2>> $(SEQ_ERROR_FILENAME)
+	@./$(SEQUENTIAL) $(PROBLEM_SIZE) 1>> $(SEQ_OUTPUT_FILENAME) 2>> $(SEQ_ERROR_FILENAME)
 else
-	qsub $(SGE_SEQ_FLAGS) ./$(SEQUENTIAL) $(PROBLEM_SIZE)
+	@qsub $(SGE_SEQ_FLAGS) ./$(SEQUENTIAL) $(PROBLEM_SIZE)
 endif
 
 .PHONEY: run_mpi
-run_mpi: compile_mpi $(OUTPUTS_DIR)
+run_mpi: compile_mpi $(OUTPUTS_DIR) $(ERRORS_DIR)
 ifeq ($(OS), Windows_NT)
 	mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE) 1>> $(MPI_OUTPUT_FILENAME) 2>> $(MPI_ERROR_FILENAME)
 else
-	qsub $(SGE_MPI_FLAGS) mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE)
+	@echo -e "#!/bin/bash\n\nmodule load openmpi/$(MPI_VERSION) 2>/dev/null\nmpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE)" > job.tmp
+	@qsub $(SGE_MPI_FLAGS) job.tmp
+	@rm job.tmp
 endif
 
 #TODO run mutiple times with multiple rank setups: (for \ ...)
@@ -111,8 +136,36 @@ run_all_mpi: run_mpi
 .PHONEY: run_all
 run_all: run_seq run_all_mpi
 
+
+### VISUALIZE ###
+# TODO --> runtime, speedup, efficiency, ...
+.PHONEY: graphs
+graphs: $(GRAPH) $(OUTPUTS_DIR) $(RESULTS_DIR)
+	@$(PYTHON) ./$(GRAPH) $(OUTPUTS_DIR) $(RESULTS_DIR)
+
+### CHECK OUTPUTS & ERRORS ###
+.PHONEY: check_outputs
+check_outputs: $(ERRORS_DIR)
+	@$(PYTHON) print_files.py $(OUTPUTS_DIR)
+
+.PHONEY: check_errors
+check_errors: $(ERRORS_DIR)
+	@$(PYTHON) print_files.py $(ERRORS_DIR)
+
 ### CLEANUP ###
+# '|| true' --> ignore errors if files don't exist
 .PHONEY: clean
 clean:
-	@rm *$(EXTENSION) || true			#hide output with: 2> /dev/null
-	@rm -r $(OUTPUTS_DIR) || true
+	@rm -r $(ERRORS_DIR) 2>/dev/null  || true
+ifeq ($(OS), Windows_NT)
+	@rm $(SEQUENTIAL).exe $(PARALLEL).exe 2>/dev/null || true
+else
+	@rm $(SEQUENTIAL) $(PARALLEL) 2>/dev/null  || true
+endif
+	@echo "your directory has been cleaned of executables and errors!"
+
+
+.PHONEY: super_clean
+super_clean: clean
+	@rm -r $(OUTPUTS_DIR) 2>/dev/null  || true
+	@echo "... and also outputs!"
