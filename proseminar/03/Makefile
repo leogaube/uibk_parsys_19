@@ -65,7 +65,7 @@ ifeq ($(OS), Windows_NT)
 	MPI_FLAGS += -I "$(CYGWIN_PATH)\lib\openmpi"
 else
 	MPI_VERSION = 4.0.1
-	LOAD_OPEN_MPI = module load openmpi/$(MPI_VERSION)
+	LOAD_OPEN_MPI = $(module load openmpi/$(MPI_VERSION))
 
 	SGE_SEQ_FLAGS = -q std.q
 	SGE_SEQ_FLAGS += -cwd
