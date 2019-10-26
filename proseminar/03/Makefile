@@ -78,7 +78,7 @@ else
 	SGE_MPI_FLAGS += -o $(MPI_OUTPUT_FILENAME)
 	SGE_MPI_FLAGS += -e $(MPI_ERROR_FILENAME)
 	SGE_MPI_FLAGS += -pe openmpi-$(SLOT_DISTRIBUTE) $(NUM_RANKS)
-	SGE_MPI_FLAGS += -b yes
+	#cannot use '-b yes' because openmpi module needs to be loaded on lcc2 cluster
 endif
 
 ### CREATE NON-EXISTING DIRECTORIES ###
@@ -118,7 +118,7 @@ run_mpi: compile_mpi $(OUTPUTS_DIR)
 ifeq ($(OS), Windows_NT)
 	mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE) 1>> $(MPI_OUTPUT_FILENAME) 2>> $(MPI_ERROR_FILENAME)
 else
-	module load openmpi/$(MPI_VERSION) && qsub $(SGE_MPI_FLAGS) mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE)
+	qsub $(SGE_MPI_FLAGS) module load openmpi/$(MPI_VERSION) && mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE)
 endif
 
 #TODO run mutiple times with multiple rank setups: (for \ ...)
