@@ -63,10 +63,10 @@ ifeq ($(OS), Windows_NT)
 	MPI_FLAGS += -I "$(CYGWIN_PATH)\lib\openmpi"
 
 	SEQ_EXEC_COMMAND = echo "running '$(SEQ_NAME)'";
-	SEQ_EXEC_COMMAND += ./$(SEQUENTIAL) $$problem_size 1>> $(SEQ_OUTPUT_FILENAME) 2>> $(SEQ_ERROR_FILENAME)
+	SEQ_EXEC_COMMAND += ./$(SEQUENTIAL) $${problem_size} 1>> $(SEQ_OUTPUT_FILENAME) 2>> $(SEQ_ERROR_FILENAME)
 
 	MPI_EXEC_COMMAND = echo "running '$(MPI_NAME)'";
-	MPI_EXEC_COMMAND += mpiexec -n $$num_ranks --oversubscribe ./$(PARALLEL) $$problem_size 1>> $(MPI_OUTPUT_FILENAME) 2>> $(MPI_ERROR_FILENAME)
+	MPI_EXEC_COMMAND += mpiexec -n $${num_ranks} --oversubscribe ./$(PARALLEL) $${problem_size} 1>> $(MPI_OUTPUT_FILENAME) 2>> $(MPI_ERROR_FILENAME)
 else
 	MPI_VERSION = 4.0.1
 
@@ -86,9 +86,9 @@ else
 	#cannot use '-b yes' because openmpi module needs to be loaded on lcc2 cluster
 
 
-	SEQ_EXEC_COMMAND = qsub $(SGE_SEQ_FLAGS) ./$(SEQUENTIAL) $$problem_size
+	SEQ_EXEC_COMMAND = qsub $(SGE_SEQ_FLAGS) ./$(SEQUENTIAL) $${problem_size}
 
-	MPI_EXEC_COMMAND = echo -e "#!/bin/bash\n\nmodule load openmpi/$(MPI_VERSION) 2>/dev/null\nmpiexec -n $$num_ranks ./$(PARALLEL) $$problem_size" > job.tmp;
+	MPI_EXEC_COMMAND = echo -e "#!/bin/bash\n\nmodule load openmpi/$(MPI_VERSION) 2>/dev/null\nmpiexec -n $${num_ranks} ./$(PARALLEL) $${problem_size}" > job.tmp;
 	MPI_EXEC_COMMAND += qsub $(SGE_MPI_FLAGS) job.tmp;
 	MPI_EXEC_COMMAND += rm job.tmp
 endif
