@@ -65,6 +65,7 @@ ifeq ($(OS), Windows_NT)
 	MPI_FLAGS += -I "$(CYGWIN_PATH)\lib\openmpi"
 else
 	MPI_VERSION = 4.0.1
+	LOAD_OPEN_MPI = module load openmpi/$(MPI_VERSION)
 
 	SGE_SEQ_FLAGS = -q std.q
 	SGE_SEQ_FLAGS += -cwd
@@ -100,6 +101,9 @@ compile_seq: $(SEQUENTIAL).$(LANGUAGE)
 
 .PHONEY: compile_mpi
 compile_mpi: $(PARALLEL).$(LANGUAGE)
+ifneq ($(OS), Windows_NT)
+	@$(LOAD_OPEN_MPI)
+endif
 	@$(MPI) $(MPI_FLAGS) $< -o $(PARALLEL)
 
 .PHONEY: all
