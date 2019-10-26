@@ -103,7 +103,7 @@ compile_mpi: $(PARALLEL).$(LANGUAGE)
 ifeq ($(OS), Windows_NT)
 	@$(MPI) $(MPI_FLAGS) $< -o $(PARALLEL)
 else
-	@module load openmpi/$(MPI_VERSION) && $(MPI) $(MPI_FLAGS) $< -o $(PARALLEL)
+	@module load openmpi/$(MPI_VERSION) 2>/dev/null && $(MPI) $(MPI_FLAGS) $< -o $(PARALLEL)
 endif
 
 .PHONEY: all
