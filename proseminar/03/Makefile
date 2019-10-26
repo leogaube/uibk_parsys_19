@@ -88,9 +88,7 @@ else
 
 	SEQ_EXEC_COMMAND = qsub $(SGE_SEQ_FLAGS) ./$(SEQUENTIAL) $${problem_size}
 
-	MPI_EXEC_COMMAND = echo -e "#!/bin/bash\n\nmodule load openmpi/$(MPI_VERSION) 2>/dev/null\nmpiexec -n $${num_ranks} ./$(PARALLEL) $${problem_size}" > job.tmp;
-	MPI_EXEC_COMMAND += qsub $(SGE_MPI_FLAGS) job.tmp;
-	MPI_EXEC_COMMAND += rm job.tmp
+	MPI_EXEC_COMMAND = echo -e "#!/bin/bash\nmodule load openmpi/$(MPI_VERSION) 2>/dev/null\nmpiexec -n $${num_ranks} ./$(PARALLEL) $${problem_size}" > job.tmp
 endif
 
 ### CREATE NON-EXISTING DIRECTORIES ###
@@ -138,7 +136,7 @@ run_mpi_single: NUM_RANKS_ARRAY := $(word 1, $(NUM_RANKS_ARRAY))
 run_mpi_single: SLOT_DIRSTRIBUTE_ARRAY := $(word 1, $(SLOT_DISTRIBUTE_ARRAY))
 
 run_mpi run_mpi_single: compile_mpi $(OUTPUTS_DIR) $(ERRORS_DIR)
-	@for problem_size in $(PROBLEM_SIZE_ARRAY); do \
+	for problem_size in $(PROBLEM_SIZE_ARRAY); do \
 		for num_ranks in $(NUM_RANKS_ARRAY); do \
 			for slot_distribute in $(SLOT_DISTRIBUTE_ARRAY); do \
 				$(MPI_EXEC_COMMAND); \
