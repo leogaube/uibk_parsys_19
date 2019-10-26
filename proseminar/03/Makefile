@@ -149,7 +149,13 @@ run_mpi run_mpi_single: compile_mpi $(OUTPUTS_DIR) $(ERRORS_DIR)
 
 
 .PHONEY: run
-run: super_clean run_seq run_mpi check
+run: super_clean run_seq run_mpi
+ifeq ($(OS), Windows_NT)
+run: check
+else
+	@qstat
+endif
+
 
 ### VISUALIZE ###
 # TODO --> runtime, speedup, efficiency, ...
