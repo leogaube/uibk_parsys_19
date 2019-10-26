@@ -30,6 +30,7 @@ SLOT_DISTRIBUTE := $(word 1, $(SLOT_DISTRIBUTE_ARRAY))
 
 ### OUTPUT + ERRORS ###
 OUTPUTS_DIR = ./outputs
+ERRORS_DIR = ./errors
 RESULTS_DIR = ./results
 
 SEQ_NAME = $(SEQUENTIAL)
@@ -39,8 +40,8 @@ SEQ_OUTPUT_FILENAME = $(OUTPUTS_DIR)/$(SEQ_NAME).dat
 MPI_OUTPUT_FILENAME = $(OUTPUTS_DIR)/$(MPI_NAME).dat
 
 #create errors in cwd to easily spot them!
-SEQ_ERROR_FILENAME = $(SEQ_NAME).err
-MPI_ERROR_FILENAME = $(MPI_NAME).err
+SEQ_ERROR_FILENAME = $(ERRORS_DIR)/$(SEQ_NAME).err
+MPI_ERROR_FILENAME = $(ERRORS_DIR)/$(MPI_NAME).err
 
 PYTHON = python
 GRAPH = graph.py
@@ -118,7 +119,7 @@ run_mpi: compile_mpi $(OUTPUTS_DIR)
 ifeq ($(OS), Windows_NT)
 	mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE) 1>> $(MPI_OUTPUT_FILENAME) 2>> $(MPI_ERROR_FILENAME)
 else
-	@echo -e "#!/bin/bash\nmodule load openmpi/$(MPI_VERSION) && mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE)" > job.tmp
+	@echo -e "#!/bin/bash\nmodule load openmpi/$(MPI_VERSION) 2>/dev/null\nmpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE)" > job.tmp
 	@qsub $(SGE_MPI_FLAGS) job.tmp
 	@rm job.tmp
 endif
@@ -142,11 +143,16 @@ graphs: $(GRAPH) $(RESULTS_DIR)
 # '|| true' --> ignore errors if files don't exist
 .PHONEY: clean
 clean:
-	@rm *.err 2>/dev/null  || true
-	@rm -r $(OUTPUTS_DIR) 2>/dev/null  || true
+	@rm -r $(ERRORS_DIR) 2>/dev/null  || true
 ifeq ($(OS), Windows_NT)
 	@rm $(SEQUENTIAL).exe $(PARALLEL).exe 2>/dev/null || true
 else
 	@rm $(SEQUENTIAL) $(PARALLEL) 2>/dev/null  || true
 endif
-	@echo your directory has been cleaned of executables, errors and outputs!
+	@echo "your directory has been cleaned of executables and errors!"
+
+
+.PHONEY: super_clean
+super_clean: clean
+	@rm -r $(OUTPUTS_DIR) 2>/dev/null  || true
+	@echo "... and also outputs!"
