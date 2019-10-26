@@ -27,10 +27,12 @@ CC_FLAGS=-O2 -std=c99 -Wall
 MPI=mpicc									#mpi++ for c++!
 MPI_FLAGS=-O2 -std=c99 -Wall
 
+#PYTHON=python
+
 
 OUTPUTS_DIR=./outputs
 #RESULTS_DIR=./results
-SEQ_NAME = seq
+SEQ_NAME = seq  
 MPI_NAME = $(NUM_RANKS)_$(RANK_CONFIG)
 
 SEQ_OUTPUT_FILENAME = $(OUTPUTS_DIR)/$(SEQ_NAME).dat
@@ -50,7 +52,6 @@ ifeq ($(OS), Windows_NT)
 	EXTENSION=.exe
 else
 	MPI_VERSION=4.0.1
-	@module load openmpi/$(MPI_VERSION)
 
 	SGE_SEQ_FLAGS=-q std.q
 	SGE_SEQ_FLAGS+=-cwd
@@ -88,6 +89,7 @@ compile_mpi: $(PARALLEL).$(LANGUAGE)
 all: compile_seq compile_mpi
 
 ### RUN ###
+
 .PHONEY: run_seq
 run_seq: compile_seq $(OUTPUTS_DIR)
 ifeq ($(OS), Windows_NT)
@@ -101,6 +103,7 @@ run_mpi: compile_mpi $(OUTPUTS_DIR)
 ifeq ($(OS), Windows_NT)
 	mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE) 1>> $(MPI_OUTPUT_FILENAME) 2>> $(MPI_ERROR_FILENAME)
 else
+	module load openmpi/$(MPI_VERSION)
 	qsub $(SGE_MPI_FLAGS) mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE)
 endif
 
@@ -110,6 +113,13 @@ run_all_mpi: run_mpi
 
 .PHONEY: run_all
 run_all: run_seq run_all_mpi
+
+
+### VISUALIZE ###
+
+#.PHONEY graphs
+#graphs: graph.py
+#	@python  $(OUTPUTS_DIR) $(OUTPUTS_DIR)
 
 ### CLEANUP ###
 .PHONEY: clean
