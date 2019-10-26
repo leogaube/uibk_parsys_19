@@ -1,6 +1,9 @@
 import os, sys
 
 directory = sys.argv[1]
+target_string = ""
+if len(sys.argv) > 2:
+	target_string = sys.argv[2]
 
 if not os.path.isdir(directory):
 	print("'%s' does not exist!"%directory)
@@ -19,5 +22,5 @@ for filename in files:
 		with open(full_filename, "r") as f:
 			print("'%s':"%full_filename)
 			for line in f.readlines():
-				print("\t"+line)
-	print("")
+				if target_string in line:
+					print("\t"+line)
