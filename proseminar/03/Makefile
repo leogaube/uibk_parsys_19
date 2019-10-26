@@ -108,9 +108,9 @@ all: compile_seq compile_mpi
 .PHONEY: run_seq
 run_seq: compile_seq $(OUTPUTS_DIR)
 ifeq ($(OS), Windows_NT)
-	./$(SEQUENTIAL) $(PROBLEM_SIZE) 1>> $(SEQ_OUTPUT_FILENAME) 2>> $(SEQ_ERROR_FILENAME)
+	@./$(SEQUENTIAL) $(PROBLEM_SIZE) 1>> $(SEQ_OUTPUT_FILENAME) 2>> $(SEQ_ERROR_FILENAME)
 else
-	qsub $(SGE_SEQ_FLAGS) ./$(SEQUENTIAL) $(PROBLEM_SIZE)
+	@qsub $(SGE_SEQ_FLAGS) ./$(SEQUENTIAL) $(PROBLEM_SIZE)
 endif
 
 .PHONEY: run_mpi
@@ -118,8 +118,9 @@ run_mpi: compile_mpi $(OUTPUTS_DIR)
 ifeq ($(OS), Windows_NT)
 	mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE) 1>> $(MPI_OUTPUT_FILENAME) 2>> $(MPI_ERROR_FILENAME)
 else
-	@echo -e "#!/bin/bash\nmodule load openmpi/$(MPI_VERSION) && mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE)" > job.script
-	qsub $(SGE_MPI_FLAGS) job.script
+	@echo -e "#!/bin/bash\nmodule load openmpi/$(MPI_VERSION) && mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE)" > job.tmp
+	@qsub $(SGE_MPI_FLAGS) job.tmp
+	@rm job.tmp
 endif
 
 #TODO run mutiple times with multiple rank setups: (for \ ...)
