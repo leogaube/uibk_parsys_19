@@ -140,11 +140,11 @@ graphs: $(GRAPH) $(RESULTS_DIR)
 # '|| true' --> ignore errors if files don't exist
 .PHONEY: clean
 clean:
-	@rm *.err &>/dev/null  || true
-	@rm -r $(OUTPUTS_DIR) &>/dev/null  || true
+	@rm *.err 2>/dev/null  || true
+	@rm -r $(OUTPUTS_DIR) 2>/dev/null  || true
 ifeq ($(OS), Windows_NT)
-	@rm $(SEQUENTIAL).exe $(PARALLEL).exe &>/dev/null || true
+	@rm $(SEQUENTIAL).exe $(PARALLEL).exe 2>/dev/null || true
 else
-	@ls | grep -E '$(SEQUENTIAL)|$(PARALLEL)' -v "\." | xargs rm &>/dev/null  || true
+	@rm $(SEQUENTIAL) $(PARALLEL) 2>/dev/null  || true
 endif
 	@echo your directory has been cleaned of executables, errors and outputs!
