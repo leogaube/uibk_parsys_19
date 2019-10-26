@@ -143,10 +143,14 @@ run_all: run_seq run_all_mpi
 graphs: $(GRAPH) $(OUTPUTS_DIR) $(RESULTS_DIR)
 	@$(PYTHON) ./$(GRAPH) $(OUTPUTS_DIR) $(RESULTS_DIR)
 
-### CHECK FOR ERRORS ###
-.PHONEY: check_for_errors
-check_for_errors: $(ERRORS_DIR)
-	@$(PYTHON) check_for_errors.py $(ERRORS_DIR)
+### CHECK OUTPUTS & ERRORS ###
+.PHONEY: check_outputs
+check_outputs: $(ERRORS_DIR)
+	@$(PYTHON) print_files.py $(OUTPUTS_DIR)
+
+.PHONEY: check_errors
+check_errors: $(ERRORS_DIR)
+	@$(PYTHON) print_files.py $(ERRORS_DIR)
 
 ### CLEANUP ###
 # '|| true' --> ignore errors if files don't exist
