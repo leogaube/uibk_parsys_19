@@ -149,7 +149,7 @@ run_mpi run_mpi_single: compile_mpi $(OUTPUTS_DIR) $(ERRORS_DIR)
 
 
 .PHONEY: run
-run: super_clean run_seq run_mpi check_errors check_outputs
+run: super_clean run_seq run_mpi check
 
 ### VISUALIZE ###
 # TODO --> runtime, speedup, efficiency, ...
@@ -169,6 +169,9 @@ check_outputs:
 check_errors:
 	@$(PYTHON) ./$(PRINT_FILES) $(ERRORS_DIR)
 	@echo 
+
+.PHONEY: check
+check: check_errors check_outputs
 
 ### CLEANUP ###
 # '|| true' --> ignore errors if files don't exist
