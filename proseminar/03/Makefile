@@ -55,7 +55,7 @@ MPI_FLAGS = -O2 -std=c99 -Wall
 
 ### Windows/LCC2 SPECIFIC SETUP ###
 ifeq ($(OS), Windows_NT)
-	MPI_VERSION=3.1.3
+	MPI_VERSION = 3.1.3
 
 	# additional linking required on Windows
 	#@Marc: add Windows environmental variable 'CYGWIN_PATH --> C:\cygwin64'
@@ -117,7 +117,7 @@ run_mpi: compile_mpi $(OUTPUTS_DIR)
 ifeq ($(OS), Windows_NT)
 	mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE) 1>> $(MPI_OUTPUT_FILENAME) 2>> $(MPI_ERROR_FILENAME)
 else
-	qsub $(SGE_MPI_FLAGS) module load openmpi/4.0.1 && mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE)
+	module load openmpi/$(MPI_VERSION) && qsub $(SGE_MPI_FLAGS) mpiexec -n $(NUM_RANKS) ./$(PARALLEL) $(PROBLEM_SIZE)
 endif
 
 #TODO run mutiple times with multiple rank setups: (for \ ...)
