@@ -38,8 +38,9 @@ MPI_NAME = $(PARALLEL)_$(SLOT_DISTRIBUTE)_$(NUM_RANKS)
 SEQ_OUTPUT_FILENAME = $(OUTPUTS_DIR)/$(SEQ_NAME).dat
 MPI_OUTPUT_FILENAME = $(OUTPUTS_DIR)/$(MPI_NAME).dat
 
-SEQ_ERROR_FILENAME = $(OUTPUTS_DIR)/$(SEQ_NAME).err
-MPI_ERROR_FILENAME = $(OUTPUTS_DIR)/$(MPI_NAME).err
+#create errors in cwd to easily spot them!
+SEQ_ERROR_FILENAME = $(SEQ_NAME).err
+MPI_ERROR_FILENAME = $(MPI_NAME).err
 
 PYTHON = python
 GRAPH = graph.py
@@ -136,13 +137,14 @@ graphs: $(GRAPH) $(RESULTS_DIR)
 
 
 ### CLEANUP ###
-# ignore errors if files don't exist: use '|| true' 
+# '|| true' --> ignore errors if files don't exist
 .PHONEY: clean
 clean:
+	@rm *.err || true
 	@rm -r $(OUTPUTS_DIR) || true
 ifeq ($(OS), Windows_NT)
-	@rm *.exe || true
+	@rm $(SEQUENTIAL).exe $(PARALLEL).exe || true
 else
-	# all executable files!
-	@ls | grep -v "\." | xargs rm || true
+	@ls | grep -E '$(SEQUENTIAL)|$(PARALLEL)' -v "\." | xargs rm || true
 endif
+	@echo your directory has been cleaned of executables, errors and outputs!
