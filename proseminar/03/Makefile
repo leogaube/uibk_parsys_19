@@ -4,29 +4,22 @@ PARALLEL = mpi_1D
 LANGUAGE = c
 #LANGUAGE = cpp
 
-GRAPH = graph.py
+PLOT = plot.py
 PRINT_FILES = print_files.py
 
-### PARAMETERS for multiple mpi runs ###
-# --> 'make run_all' for submitting multiple jobs with different configurations
-NUM_RUNS = 1
-
-### PARAMETERS for multiple mpi runs ###
+### CONFIGURATIONS ###
+# program will be run with various mpi configurations 
+# each specified by #ranks, slot distribution across nodes/cpus and problem sizes 
 # --> use 'make run' for submitting multiple jobs with different configurations
+# the default configuration consists of all first elements of the *_ARRAY variables
+# --> use 'make run_mpi_single' for submitting a single job. 
 NUM_RUNS = 1
 
-#program will be run with various mpi configurations each specified by #ranks, slot distribution across nodes/cpus and problem sizes
 NUM_RANKS_ARRAY = 4 8
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
 PROBLEM_SIZE_ARRAY = 2000 4000
-
-### PARAMETERS for single mpi run ###
-# --> use 'make run_mpi' for debugging with these default values
-#problem_size := $(word 1, $(PROBLEM_SIZE_ARRAY))
-#num_ranks := $(word 1, $(NUM_RANKS_ARRAY))
-#slot_distribute := $(word 1, $(SLOT_DISTRIBUTE_ARRAY))
 
 
 ### OUTPUT + ERRORS ###
@@ -40,14 +33,11 @@ MPI_NAME = $(PARALLEL)_$${problem_size}_$${slot_distribute}_$${num_ranks}_slots
 SEQ_OUTPUT_FILENAME = $(OUTPUTS_DIR)/$(SEQ_NAME).dat
 MPI_OUTPUT_FILENAME = $(OUTPUTS_DIR)/$(MPI_NAME).dat
 
-#create errors in cwd to easily spot them!
 SEQ_ERROR_FILENAME = $(ERRORS_DIR)/$(SEQ_NAME).err
 MPI_ERROR_FILENAME = $(ERRORS_DIR)/$(MPI_NAME).err
 
-PYTHON = python
-GRAPH = graph.py
 
-
+######## SETUP ##########
 ### COMPILERS + FLAGS ###
 CC = gcc
 CC_FLAGS = -O2 -std=c99 -Wall
@@ -55,10 +45,16 @@ CC_FLAGS = -O2 -std=c99 -Wall
 MPI = mpicc									#mpi++ for c++!
 MPI_FLAGS = -O2 -std=c99 -Wall
 
+PYTHON = python
 
-### Windows/LCC2 SPECIFIC SETUP ###
+### Windows/LCC2 specific setup ###
 ifeq ($(OS), Windows_NT)
 	MPI_VERSION = 3.1.3
+
+	LOAD_MPI = ""
+
+	SEQ_EXECUTABLE = $(SEQUENTIAL).exe
+	MPI_EXECUTABLE = $(PARALLEL).exe
 
 	# additional linking required on Windows
 	#@Marc: add Windows environmental variable 'CYGWIN_PATH --> C:\cygwin64'
@@ -73,6 +69,12 @@ ifeq ($(OS), Windows_NT)
 else
 	MPI_VERSION = 4.0.1
 
+	LOAD_MPI = module load openmpi/$(MPI_VERSION) 2>/dev/null && 
+
+	SEQ_EXECUTABLE = $(SEQUENTIAL)
+	MPI_EXECUTABLE = $(PARALLEL)
+
+	#TODO add and test with '-l h_rt= / h_vmem=' parameters
 	SGE_SEQ_FLAGS = -q std.q
 	SGE_SEQ_FLAGS += -cwd
 	SGE_SEQ_FLAGS += -N $(SEQ_NAME)
@@ -86,8 +88,7 @@ else
 	SGE_MPI_FLAGS += -o $(MPI_OUTPUT_FILENAME)
 	SGE_MPI_FLAGS += -e $(MPI_ERROR_FILENAME)
 	SGE_MPI_FLAGS += -pe openmpi-$$slot_distribute $$num_ranks
-	#cannot use '-b yes' because openmpi module needs to be loaded on lcc2 cluster
-
+	#cannot use '-b yes' because openmpi module needs to be loaded on lcc2 cluster TODO
 
 	SEQ_EXEC_COMMAND = qsub $(SGE_SEQ_FLAGS) ./$(SEQUENTIAL) $${problem_size}
 
@@ -95,6 +96,10 @@ else
 	MPI_EXEC_COMMAND += qsub $(SGE_MPI_FLAGS) job.tmp;
 	MPI_EXEC_COMMAND += rm job.tmp
 endif
+
+
+############## TARGETS ################
+.DEFAULT_GOAL := compile_all
 
 ### CREATE NON-EXISTING DIRECTORIES ###
 $(OUTPUTS_DIR):
@@ -108,27 +113,24 @@ $(RESULTS_DIR):
 
 
 ### COMPILE ###
-.PHONEY: compile_seq
-compile_seq: $(SEQUENTIAL).$(LANGUAGE)
+$(SEQ_EXECUTABLE): $(SEQUENTIAL).$(LANGUAGE)
+	@echo "compiling $(SEQUENTIAL)"
 	@$(CC) $(CC_FLAGS) $< -o $(SEQUENTIAL)
+	@echo
 
-.PHONEY: compile_mpi
-compile_mpi: $(PARALLEL).$(LANGUAGE)
-ifeq ($(OS), Windows_NT)
-	@$(MPI) $(MPI_FLAGS) $< -o $(PARALLEL)
-else
-	@module load openmpi/$(MPI_VERSION) 2>/dev/null && $(MPI) $(MPI_FLAGS) $< -o $(PARALLEL)
-endif
+$(MPI_EXECUTABLE): $(PARALLEL).$(LANGUAGE)
+	@echo "compiling $(PARALLEL)"
+	@$(LOAD_MPI)$(MPI) $(MPI_FLAGS) $< -o $(PARALLEL)
+	@echo
 
-.PHONEY: all
-all: compile_seq compile_mpi
+compile_all: $(SEQ_EXECUTABLE) $(MPI_EXECUTABLE)
 
 
 ### RUN ###
 .PHONEY: run_seq run_seq_single
 run_seq_single: PROBLEM_SIZE_ARRAY := $(word 1, $(PROBLEM_SIZE_ARRAY)) 
 
-run_seq run_seq_single: compile_seq $(OUTPUTS_DIR) $(ERRORS_DIR)
+run_seq run_seq_single: $(SEQ_EXECUTABLE) $(OUTPUTS_DIR) $(ERRORS_DIR)
 	@for problem_size in $(PROBLEM_SIZE_ARRAY); do \
 		$(SEQ_EXEC_COMMAND); \
 	done
@@ -140,11 +142,13 @@ run_mpi_single: PROBLEM_SIZE_ARRAY := $(word 1, $(PROBLEM_SIZE_ARRAY))
 run_mpi_single: NUM_RANKS_ARRAY := $(word 1, $(NUM_RANKS_ARRAY)) 
 run_mpi_single: SLOT_DIRSTRIBUTE_ARRAY := $(word 1, $(SLOT_DISTRIBUTE_ARRAY))
 
-run_mpi run_mpi_single: compile_mpi $(OUTPUTS_DIR) $(ERRORS_DIR)
-	@for problem_size in $(PROBLEM_SIZE_ARRAY); do \
-		for num_ranks in $(NUM_RANKS_ARRAY); do \
-			for slot_distribute in $(SLOT_DISTRIBUTE_ARRAY); do \
-				$(MPI_EXEC_COMMAND); \
+run_mpi run_mpi_single: $(MPI_EXECUTABLE) $(OUTPUTS_DIR) $(ERRORS_DIR)
+	@for run in in $(seq 1 $(NUM_RUNS)); do \
+		for problem_size in $(PROBLEM_SIZE_ARRAY); do \
+			for num_ranks in $(NUM_RANKS_ARRAY); do \
+				for slot_distribute in $(SLOT_DISTRIBUTE_ARRAY); do \
+					$(MPI_EXEC_COMMAND); \
+				done \
 			done \
 		done \
 	done
@@ -152,7 +156,9 @@ run_mpi run_mpi_single: compile_mpi $(OUTPUTS_DIR) $(ERRORS_DIR)
 
 
 .PHONEY: run
-run: super_clean run_seq run_mpi
+run: super_clean 
+run: run_seq 
+run: run_mpi
 ifeq ($(OS), Windows_NT)
 run: check
 else
@@ -162,10 +168,10 @@ endif
 
 ### VISUALIZE ###
 # TODO --> runtime, speedup, efficiency, ...
-.PHONEY: graphs
-graphs: $(GRAPH) $(OUTPUTS_DIR) $(RESULTS_DIR)
-	@echo creating some fancy plots...
-	@$(PYTHON) ./$(GRAPH) $(OUTPUTS_DIR) $(RESULTS_DIR)
+.PHONEY: plots
+plots: $(PLOT) $(OUTPUTS_DIR) $(RESULTS_DIR)
+	@echo "creating some fancy plots..."
+	#@$(PYTHON) ./$(PLOT) $(OUTPUTS_DIR) $(RESULTS_DIR)
 	@echo 
 
 ### CHECK OUTPUTS & ERRORS ###
@@ -187,16 +193,13 @@ check: check_errors check_outputs
 .PHONEY: clean
 clean:
 	@rm -r $(ERRORS_DIR) 2>/dev/null  || true
-ifeq ($(OS), Windows_NT)
-	@rm $(SEQUENTIAL).exe $(PARALLEL).exe 2>/dev/null || true
-else
-	@rm $(SEQUENTIAL) $(PARALLEL) 2>/dev/null  || true
-endif
+	@rm $(SEQ_EXECUTABLE) $(MPI_EXECUTABLE) 2>/dev/null || true
 	@echo "your directory has been cleaned of executables and errors!"
 
 
 .PHONEY: super_clean
 super_clean: clean
 	@rm -r $(OUTPUTS_DIR) 2>/dev/null  || true
-	@echo "... and also outputs!"
+	@rm -r $(RESULTSS_DIR) 2>/dev/null  || true
+	@echo "... and also outputs and results!"
 	@echo 
