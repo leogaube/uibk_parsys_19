@@ -20,8 +20,9 @@ int main(int argc, char **argv) {
     N = atoi(argv[1]);
   }
   int T = 1;//N * N * 500;
+#ifdef VERBOSE
   printf("Computing heat-distribution for room size N=%d for T=%d timesteps\n", N, T);
-
+#endif
   // ---------- setup ----------
 
   // create a buffer for storing temperature fields
@@ -37,8 +38,10 @@ int main(int argc, char **argv) {
   int source_y = source_x;
   A[IDX_2D(source_x,source_y,N)] = 273 + 60;
 
+#ifdef VERBOSE
   printf("Initial:\n");
   printTemperature(A, N, N);
+#endif
 
   // ---------- compute ----------
 
@@ -72,8 +75,10 @@ int main(int argc, char **argv) {
 			B[i] = tc + 0.2 * (tl + tr + tu + td + (-4 * tc));
 		}
 	}
+#ifdef VERBOSE
 	printf("time %i:\n",t);
 	printTemperature(B, N, N);
+#endif
 	// swap matrices (just pointers, not content)
 	Vector H = A;
 	A = B;
@@ -81,8 +86,10 @@ int main(int argc, char **argv) {
   }
 
   releaseVector(B);
+#ifdef VERBOSE
   printf("Final:\n");
   printTemperature(A, N, N);
+#endif
 
   // ---------- check ----------
   int success = (is_verified_2D(A, N, N, source_x, source_y, T)==0);

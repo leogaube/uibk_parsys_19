@@ -3,7 +3,7 @@
 
 typedef double value_t;
 
-#define IDX_3D(x,y,z,nx,ny) (x+y*nx+z*nx*ny)
+#define IDX_3D(x,y,z,nx,ny) ((x)+(y)*(nx)+(z)*(nx)*(ny))
 #define IDX_2D(x,y,nx) IDX_3D(x,y,0,nx,0)
 
 #define MAX(x, y) (((x) > (y)) ? (x) : (y))

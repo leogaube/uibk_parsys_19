@@ -1,9 +1,9 @@
 ### PROGRAMS ###
-DEPENDENCIES = verification.o heat_stencil.o 
+DEPENDENCIES = heat_stencil.c verification.c
 SEQUENTIAL = seq_2D
 PARALLEL = mpi_1D
-LANGUAGE = o
-#LANGUAGE = c
+DEFINES = -DVERBOSE
+LANGUAGE = c
 #LANGUAGE = cpp
 
 GRAPH = graph.py
@@ -111,8 +111,11 @@ $(RESULTS_DIR):
 
 ### COMPILE ###
 .PHONEY: compile_seq
-compile_seq: $(DEPENDENCIES) $(SEQUENTIAL).$(LANGUAGE)
-	@$(CC) $(CC_FLAGS) -o $(SEQUENTIAL) $^
+compile_seq: $(DEPENDENCIES:%.$(LANGUAGE)=%.o) $(SEQUENTIAL).o
+	$(CC) $(CC_FLAGS) -o $(SEQUENTIAL) $^
+	
+%.o: %.$(LANGUAGE)
+	$(CC) $(DEFINES) $(CC_FLAGS) -o $@ -c $<
 
 .PHONEY: compile_mpi
 compile_mpi: $(PARALLEL).$(LANGUAGE)
