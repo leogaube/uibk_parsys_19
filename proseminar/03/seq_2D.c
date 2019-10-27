@@ -78,8 +78,7 @@ int main(int argc, char **argv) {
   releaseVector(B);
 
   // ---------- check ----------
-  int success = 1;
-  // TODO
+  int success = (is_verified_2D(A, N, N, source_x, source_y, T)==0);
   printf("Verification: %s\n", (success) ? "OK" : "FAILED");
 
   // ---------- cleanup ----------
@@ -92,11 +91,4 @@ int main(int argc, char **argv) {
   // done
   return (success) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
-
-Vector createVector(int N) {
-  // create data and index vector
-  return malloc(sizeof(value_t) * N);
-}
-
-void releaseVector(Vector m) { free(m); }
 

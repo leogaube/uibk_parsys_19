@@ -18,7 +18,7 @@ Vector createVector(int N);
 void releaseVector(Vector m);
 
 // -- verification --
-int verify_2D(Vector m, int nx, int ny, int source_x, int source_y);
+int is_verified_2D(Vector result_2D, int nx, int ny, int source_x, int source_y, int T);
 
 
 

@@ -1,7 +1,9 @@
 ### PROGRAMS ###
+DEPENDENCIES = verification.o heat_stencil.o 
 SEQUENTIAL = seq_2D
 PARALLEL = mpi_1D
-LANGUAGE = c
+LANGUAGE = o
+#LANGUAGE = c
 #LANGUAGE = cpp
 
 GRAPH = graph.py
@@ -61,7 +63,7 @@ ifeq ($(OS), Windows_NT)
 	MPI_VERSION = 3.1.3
 
 	# additional linking required on Windows
-	#@Marc: add Windows environmental variable 'CYGWIN_PATH --> C:\cygwin64'
+	#add Windows environmental variable 'CYGWIN_PATH --> C:\cygwin64'
 	MPI_FLAGS += -I "$(CYGWIN_PATH)\usr\include" 
 	MPI_FLAGS += -I "$(CYGWIN_PATH)\lib\openmpi"
 
@@ -109,8 +111,8 @@ $(RESULTS_DIR):
 
 ### COMPILE ###
 .PHONEY: compile_seq
-compile_seq: $(SEQUENTIAL).$(LANGUAGE)
-	@$(CC) $(CC_FLAGS) $< -o $(SEQUENTIAL)
+compile_seq: $(DEPENDENCIES) $(SEQUENTIAL).$(LANGUAGE)
+	@$(CC) $(CC_FLAGS) -o $(SEQUENTIAL) $^
 
 .PHONEY: compile_mpi
 compile_mpi: $(PARALLEL).$(LANGUAGE)
@@ -192,6 +194,7 @@ ifeq ($(OS), Windows_NT)
 else
 	@rm $(SEQUENTIAL) $(PARALLEL) 2>/dev/null  || true
 endif
+	@rm -r -f *.o
 	@echo "your directory has been cleaned of executables and errors!"
 
 
