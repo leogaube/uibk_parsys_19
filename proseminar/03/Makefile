@@ -22,7 +22,7 @@ NUM_RANKS_ARRAY = 4 8
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
-PROBLEM_SIZE_ARRAY = 10 50
+PROBLEM_SIZE_ARRAY = 4 10
 
 ### PARAMETERS for single mpi run ###
 # --> use 'make run_mpi' for debugging with these default values

@@ -1,0 +1,51 @@
+Computing heat-distribution for room size N=4 for T=4 timesteps
+Initial:
+X        X
+X        X
+X        X
+X        X
+
+X        X
+X  @     X
+X        X
+X        X
+
+X        X
+X        X
+X        X
+X        X
+
+X        X
+X        X
+X        X
+X        X
+
+Final:
+X. : .   X
+X: * -   X
+X. -     X
+X        X
+
+X: * -   X
+X* @ = . X
+X- = -   X
+X  .     X
+
+X. -     X
+X- = -   X
+X  -     X
+X        X
+
+X        X
+X  .     X
+X        X
+X        X
+
+1D initial:
+X@        X
+1D final:
+X@%:      X
+The difference is too large (15.000000 K) for the cell with the indices (2,1,1).
+Expected: 300.456000 K, Real: 285.384000 K.
+Verification: FAILED
+The process took 0 seconds to finish. 

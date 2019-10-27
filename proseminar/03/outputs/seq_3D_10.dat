@@ -1,9 +1,0 @@
-Computing heat-distribution for room size N=10 for T=10 timesteps
-1D initial:
-X@                         X
-1D final:
-X@@^:.                     X
-The difference is too large (184.000000 K) for the cell with the indices (0,0,0).
-Expected: 275.980479 K, Real: 90.999998 K.
-Verification: FAILED
-The process took 0 seconds to finish. 

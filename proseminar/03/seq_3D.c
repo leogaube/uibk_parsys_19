@@ -15,7 +15,7 @@ int main(int argc, char **argv) {
   clock_t start = clock();
 
   // 'parsing' optional input parameter = problem size
-  int N = 50;
+  int N = 10;
   if (argc > 1) {
     N = atoi(argv[1]);
   }
@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
   // and there is a heat source in one corner
   int source_x = N / 4;
   int source_y = source_x;
-  int source_z = source_z;
+  int source_z = source_x;
   A[IDX_3D(source_x,source_y, source_z,N,N)] = 273 + 60;
 
 #ifdef VERBOSE
@@ -56,10 +56,10 @@ int main(int argc, char **argv) {
 		for (int y = 0; y < N; y++) {
 			for(int x = 0; x < N; x++){
 				// get the current idx
-				int i = IDX_2D(x,y,N);
+				int i = IDX_3D(x,y,z,N,N);
 
 				// center stays constant (the heat is still on)
-				if (x == source_x && y == source_y) {
+				if (i == IDX_3D(source_x,source_y,source_z,N,N)) {
 					B[i] = A[i];
 					continue;
 				}
@@ -80,15 +80,12 @@ int main(int argc, char **argv) {
 				B[i] = tc + 0.2 * (tl + tr + tu + td + tf + tb + (-6 * tc));
 			}
 		}
-		// swap matrices (just pointers, not content)
-		Vector H = A;
-		A = B;
-		B = H;
-	  }
-#ifdef VERBOSE
-	printf("time %i:\n",t);
-	printTemperature(B, N, N, N);
-#endif
+	}
+
+	// swap matrices (just pointers, not content)
+	Vector H = A;
+	A = B;
+	B = H;
   }
 
   releaseVector(B);
@@ -123,7 +120,8 @@ void printTemperature(Vector m, int nx, int ny, int nz) {
   // set the 'render' resolution
   int W = RESOLUTION;
   if(W>nx || W>ny || W>nz){
-	  W=MIN(MIN(nx,ny),nz);
+	  W=MIN(nx,ny);
+	  W=MIN(W,nz);
   }
 
   // step size in each dimension
@@ -140,7 +138,7 @@ void printTemperature(Vector m, int nx, int ny, int nz) {
 		  for (int i = 0; i < W; i++) {
 			// get max temperature in this tile
 			value_t max_t = 0;
-			for (int z = sWz * k; z < sWz * k + sWz; k++) {
+			for (int z = sWz * k; z < sWz * k + sWz; z++) {
 				for (int y = sWy * j; y < sWy * j + sWy; y++) {
 					for (int x = sWx * i; x < sWx * i + sWx; x++) {
 						max_t = (max_t < m[IDX_3D(x,y,z,nx,ny)]) ? m[IDX_3D(x,y,z,nx,ny)] : max_t;
@@ -154,7 +152,7 @@ void printTemperature(Vector m, int nx, int ny, int nz) {
 			c = (c >= numColors) ? numColors - 1 : ((c < 0) ? 0 : c);
 
 			// print the average temperature
-			printf("%c", colors[c]);
+			printf("%c ", colors[c]);
 		  }
 		  // right wall
 		  printf("X\n");
