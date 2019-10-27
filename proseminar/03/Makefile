@@ -1,6 +1,6 @@
 ### PROGRAMS ###
 DEPENDENCIES = heat_stencil.c verification.c
-SEQUENTIAL = seq_2D
+SEQUENTIAL = seq_3D
 PARALLEL = mpi_1D
 DEFINES = -DVERBOSE
 LANGUAGE = c

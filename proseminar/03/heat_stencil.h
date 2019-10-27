@@ -19,6 +19,7 @@ void releaseVector(Vector m);
 
 // -- verification --
 int is_verified_2D(Vector result_2D, int nx, int ny, int source_x, int source_y, int T);
+int is_verified_3D(Vector result_3D, int nx, int ny, int nz, int source_x, int source_y, int source_z, int T);
 
 
 

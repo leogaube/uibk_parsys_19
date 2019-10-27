@@ -7,10 +7,10 @@
 #define RESOLUTION 120
 
 Vector get_result_1D(int N, int T);
-double get_expected_T(Vector result_1D, int dx, int dy, int room_size_1D);
+double get_expected_T(Vector result_1D, int dx, int dy, int dz, int room_size_1D);
 void printTemperature_1D(Vector m, int N);
 
-int is_verified_2D(Vector result_2D, int nx, int ny, int source_x, int source_y, int T){
+int is_verified_3D(Vector result_3D, int nx, int ny, int nz, int source_x, int source_y, int source_z, int T){
 	double uncert_T = 15;
 
 	/**
@@ -25,31 +25,37 @@ int is_verified_2D(Vector result_2D, int nx, int ny, int source_x, int source_y,
 	 */
 	int max_distance_x = MAX(nx-source_x, source_x);
 	int max_distance_y = MAX(ny-source_y, source_y);
-	int room_size_1D = max_distance_x+max_distance_y;
-//	int room_size_1D = (int)ceil(
-//			 		sqrt( max_distance_x*max_distance_x +
-//			 			  max_distance_y*max_distance_y ) );
+	int max_distance_z = MAX(nz-source_z, source_z);
+	int room_size_1D = max_distance_x+max_distance_y + max_distance_z;
 	Vector result_1D = get_result_1D(room_size_1D, T);
 
 	// Go through the matrix and compare the cells to the result_1D.
-	for(int y=0; y<ny; y++){
-		for(int x=0; x<nx; x++){
-			double expected_T = get_expected_T(result_1D,
-					abs(x-source_x), abs(y-source_y), room_size_1D);
+	for(int z=0; z<nz; z++){
+		for(int y=0; y<ny; y++){
+			for(int x=0; x<nx; x++){
+				double expected_T = get_expected_T(result_1D,
+						abs(x-source_x), abs(y-source_y), abs(z-source_z), room_size_1D);
 
-			double residual = abs(result_2D[IDX_2D(x,y,nx)]-expected_T);
+				double residual = abs(result_3D[IDX_3D(x,y,z,nx,ny)]-expected_T);
 
-			if(residual>=uncert_T){
-				printf("The difference is too large (%f K) for the "
-						"cell with the indices (%i,%i).\n"
-						"Expected: %f K, Real: %f K.\n",
-						residual, x, y, expected_T, result_2D[IDX_2D(x,y,nx)]);
-				return -1;
+				if(residual>=uncert_T){
+					printf("The difference is too large (%f K) for the "
+							"cell with the indices (%i,%i,%i).\n"
+							"Expected: %f K, Real: %f K.\n",
+							residual, x, y, z, expected_T, result_3D[IDX_3D(x,y,z,nx,ny)]);
+					return -1;
+				}
 			}
 		}
 	}
 	return 0;
 }
+
+
+int is_verified_2D(Vector result_2D, int nx, int ny, int source_x, int source_y, int T){
+	return is_verified_3D(result_2D, nx, ny, 1, source_x, source_y, 0, T);
+}
+
 
 /**
  * This function gets a 1D result with the code from the prev. homework.
@@ -129,8 +135,8 @@ Vector get_result_1D(int N, int T){
  * 4. The difference between T and the N-dim cell's temperature has to
  *    be below the uncert_T.
  */
-double get_expected_T(Vector result_1D, int dx, int dy, int room_size_1D){
-	double d = dx+dy; // euclidian would be sqrt(dx*dx+dy*dy);
+double get_expected_T(Vector result_1D, int dx, int dy, int dz, int room_size_1D){
+	double d = dx+dy+dz; // euclidian would be sqrt(dx*dx+dy*dy+dz*dz);
 	double T_1 = result_1D[(int)floor(d)];
 	double T_2 = result_1D[(int)ceil(d)];
 	double T_expected = T_1 + (T_2 - T_1) * (ceil(d) - d);
