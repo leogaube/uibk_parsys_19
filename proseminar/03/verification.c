@@ -7,25 +7,32 @@
 #define RESOLUTION 120
 
 Vector get_result_1D(int N, int T);
-double get_expected_T(Vector result_1D, int x, int y, int room_size_1D);
+double get_expected_T(Vector result_1D, int dx, int dy, int room_size_1D);
 void printTemperature_1D(Vector m, int N);
 
 int is_verified_2D(Vector result_2D, int nx, int ny, int source_x, int source_y, int T){
 	double uncert_T = 1e-3;
 
-	// select longest possible distance to the source as 1D room size
+	/**
+	 * select longest possible distance to the source as 1D room size
+	 * as there are no diagonal paths, the norm that is used for this
+	 * has to be d((x1,y1),(x2,y2))=|x1-x2|+|y1-y2|
+	 * if the euclidian norm would be used to calculate the distance
+	 * use:
+	 * room_size_1D = (int)ceil(
+	 *		sqrt( max_distance_x*max_distance_x +
+	 *			  max_distance_y*max_distance_y ) );
+	 */
 	int max_distance_x = MAX(nx-source_x, source_x);
 	int max_distance_y = MAX(ny-source_y, source_y);
-	int room_size_1D = (int)ceil(
-			sqrt( max_distance_x*max_distance_x +
-				  max_distance_y*max_distance_y ) );
+	int room_size_1D = max_distance_x+max_distance_y;
 	Vector result_1D = get_result_1D(room_size_1D, T);
 
 	// Go through the matrix and compare the cells to the result_1D.
 	for(int y=0; y<ny; y++){
 		for(int x=0; x<nx; x++){
 			double expected_T = get_expected_T(result_1D,
-					x-source_x, y-source_y, room_size_1D);
+					abs(x-source_x), abs(y-source_y), room_size_1D);
 
 			double residual = abs(result_2D[IDX_2D(x,y,nx)]-expected_T);
 
@@ -107,7 +114,9 @@ Vector get_result_1D(int N, int T){
 
 /*
  * The compare goes as follows:
- * 1. calculate the euclidian distance d to the source from the indices
+ * 1. calculate the distance d to the source from the indices
+ *    (The norm to calculate this distance is not the euclidian norm as the
+ *    distance there is no diagonal path between cells.)
  * 2. round the distance up and down to get the closest cells d_1 and d_2
  *    from the result_1D vector
  * 3. the temperature expected from the result_1D is an interpolation
@@ -117,8 +126,8 @@ Vector get_result_1D(int N, int T){
  * 4. The difference between T and the N-dim cell's temperature has to
  *    be below the uncert_T.
  */
-double get_expected_T(Vector result_1D, int x, int y, int room_size_1D){
-	double d = sqrt(x*x+y*y);
+double get_expected_T(Vector result_1D, int dx, int dy, int room_size_1D){
+	double d = dx+dy; // euclidian would be sqrt(dx*dx+dy*dy);
 	double T_1 = result_1D[(int)floor(d)];
 	double T_2 = result_1D[(int)ceil(d)];
 	double T_expected = T_1 + (T_2 - T_1) * (ceil(d) - d);
@@ -160,8 +169,9 @@ void printTemperature_1D(Vector m, int N) {
     c = (c >= numColors) ? numColors - 1 : ((c < 0) ? 0 : c);
 
     // print the average temperature
-    printf("%c", colors[c]);
+    //printf("%c", colors[c]);
+    printf("%.0f ", m[i]-273);
   }
   // right wall
-  printf("X");
+  printf("X\n");
 }

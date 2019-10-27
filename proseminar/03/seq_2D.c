@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
   if (argc > 1) {
     N = atoi(argv[1]);
   }
-  int T = 1;//N * N * 500;
+  int T = 100;//N * N * 500;
 #ifdef VERBOSE
   printf("Computing heat-distribution for room size N=%d for T=%d timesteps\n", N, T);
 #endif
@@ -66,10 +66,15 @@ int main(int argc, char **argv) {
 			value_t tc = A[i];
 
 			// get temperatures of adjacent cells
-			value_t tl = (x != 0) ? A[IDX_2D(x-1,y,N)] : tc;
-			value_t tr = (x != N - 1) ? A[IDX_2D(x+1,y,N)] : tc;
-			value_t tu = (y != 0) ? A[IDX_2D(x,y-1,N)] : tc;
-			value_t td = (y != N - 1) ? A[IDX_2D(x,y+1,N)] : tc;
+//			value_t tl = A[IDX_2D((x-1+N)%N,y,N)];
+//			value_t tr = A[IDX_2D((x+1)%N,y,N)];
+//			value_t tu = A[IDX_2D(x,(y+1)%N,N)];
+//			value_t td = A[IDX_2D(x,(y-1+N)%N,N)];
+		      value_t tl = (x != 0) ? A[IDX_2D(x-1,y,N)] : tc;
+		      value_t tr = (x != N - 1) ? A[IDX_2D(x+1,y,N)] : tc;
+		      value_t tu = (y != 0) ? A[IDX_2D(x,y-1,N)] : tc;
+		      value_t td = (y != N - 1) ? A[IDX_2D(x,y+1,N)] : tc;
+
 
 			// compute new temperature at current position
 			B[i] = tc + 0.2 * (tl + tr + tu + td + (-4 * tc));
@@ -144,7 +149,8 @@ void printTemperature(Vector m, int nx, int ny) {
 		c = (c >= numColors) ? numColors - 1 : ((c < 0) ? 0 : c);
 
 		// print the average temperature
-		printf("%c", colors[c]);
+//		printf("%c", colors[c]);
+	    printf("%2.0f\t", m[i+W*j]-273);
 	  }
 	  // right wall
 	  printf("X\n");
