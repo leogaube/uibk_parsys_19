@@ -7,6 +7,7 @@
 
 #define RESOLUTION 120
 
+void printTemperature(Vector m, int nx, int ny);
 
 // -- simulation code ---
 
@@ -18,7 +19,7 @@ int main(int argc, char **argv) {
   if (argc > 1) {
     N = atoi(argv[1]);
   }
-  int T = N * 500;
+  int T = 1;//N * N * 500;
   printf("Computing heat-distribution for room size N=%d for T=%d timesteps\n", N, T);
 
   // ---------- setup ----------
@@ -35,6 +36,9 @@ int main(int argc, char **argv) {
   int source_x = N / 4;
   int source_y = source_x;
   A[IDX_2D(source_x,source_y,N)] = 273 + 60;
+
+  printf("Initial:\n");
+  printTemperature(A, N, N);
 
   // ---------- compute ----------
 
@@ -67,15 +71,18 @@ int main(int argc, char **argv) {
 			// compute new temperature at current position
 			B[i] = tc + 0.2 * (tl + tr + tu + td + (-4 * tc));
 		}
-
-		// swap matrices (just pointers, not content)
-		Vector H = A;
-		A = B;
-		B = H;
 	}
+	printf("time %i:\n",t);
+	printTemperature(B, N, N);
+	// swap matrices (just pointers, not content)
+	Vector H = A;
+	A = B;
+	B = H;
   }
 
   releaseVector(B);
+  printf("Final:\n");
+  printTemperature(A, N, N);
 
   // ---------- check ----------
   int success = (is_verified_2D(A, N, N, source_x, source_y, T)==0);
@@ -92,3 +99,47 @@ int main(int argc, char **argv) {
   return (success) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
+void printTemperature(Vector m, int nx, int ny) {
+  const char *colors = " .-:=+*^X#%@";
+  const int numColors = 12;
+
+  // boundaries for temperature (for simplicity hard-coded)
+  const value_t max = 273 + 30;
+  const value_t min = 273 + 0;
+
+  // set the 'render' resolution
+  int W = RESOLUTION;
+  if(W>nx || W>ny){
+	  W=MIN(nx,ny);
+  }
+
+  // step size in each dimension
+  int sWx = nx / W;
+  int sWy = ny / W;
+
+  // room
+  // actual room
+  for(int j=0; j<W; j++){
+	  // left wall
+	  printf("X");
+	  for (int i = 0; i < W; i++) {
+		// get max temperature in this tile
+		value_t max_t = 0;
+		for (int y = sWy * j; y < sWy * j + sWy; y++) {
+			for (int x = sWx * i; x < sWx * i + sWx; x++) {
+				max_t = (max_t < m[IDX_2D(x,y,nx)]) ? m[IDX_2D(x,y,nx)] : max_t;
+			}
+		}
+		value_t temp = max_t;
+
+		// pick the 'color'
+		int c = ((temp - min) / (max - min)) * numColors;
+		c = (c >= numColors) ? numColors - 1 : ((c < 0) ? 0 : c);
+
+		// print the average temperature
+		printf("%c", colors[c]);
+	  }
+	  // right wall
+	  printf("X\n");
+  }
+}
