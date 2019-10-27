@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
   if (argc > 1) {
     N = atoi(argv[1]);
   }
-  int T = 100;//N * N * 500;
+  int T = N * 10;
 #ifdef VERBOSE
   printf("Computing heat-distribution for room size N=%d for T=%d timesteps\n", N, T);
 #endif
@@ -149,8 +149,7 @@ void printTemperature(Vector m, int nx, int ny) {
 		c = (c >= numColors) ? numColors - 1 : ((c < 0) ? 0 : c);
 
 		// print the average temperature
-//		printf("%c", colors[c]);
-	    printf("%2.0f\t", m[i+W*j]-273);
+		printf("%c", colors[c]);
 	  }
 	  // right wall
 	  printf("X\n");

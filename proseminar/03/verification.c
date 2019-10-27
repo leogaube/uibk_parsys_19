@@ -11,7 +11,7 @@ double get_expected_T(Vector result_1D, int dx, int dy, int room_size_1D);
 void printTemperature_1D(Vector m, int N);
 
 int is_verified_2D(Vector result_2D, int nx, int ny, int source_x, int source_y, int T){
-	double uncert_T = 1e-3;
+	double uncert_T = 15;
 
 	/**
 	 * select longest possible distance to the source as 1D room size
@@ -26,6 +26,9 @@ int is_verified_2D(Vector result_2D, int nx, int ny, int source_x, int source_y,
 	int max_distance_x = MAX(nx-source_x, source_x);
 	int max_distance_y = MAX(ny-source_y, source_y);
 	int room_size_1D = max_distance_x+max_distance_y;
+//	int room_size_1D = (int)ceil(
+//			 		sqrt( max_distance_x*max_distance_x +
+//			 			  max_distance_y*max_distance_y ) );
 	Vector result_1D = get_result_1D(room_size_1D, T);
 
 	// Go through the matrix and compare the cells to the result_1D.
@@ -169,8 +172,7 @@ void printTemperature_1D(Vector m, int N) {
     c = (c >= numColors) ? numColors - 1 : ((c < 0) ? 0 : c);
 
     // print the average temperature
-    //printf("%c", colors[c]);
-    printf("%.0f ", m[i]-273);
+    printf("%c", colors[c]);
   }
   // right wall
   printf("X\n");
