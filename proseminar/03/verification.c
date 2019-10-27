@@ -2,58 +2,42 @@
 #include <stdio.h>
 #include <math.h>
 
-typedef double value_t;
-typedef value_t *Vector;
+#include "heat_stencil.h"
 
-Vector get_result_1D(int source_idx, int room_size);
-Vector createVector(int N);
-void releaseVector(Vector m);
-double get_expected_T(Vector result_1D, int x, int y, int z, int source_idx, int room_size_1D);
+Vector get_result_1D(int room_size);
+double get_expected_T(Vector result_1D, int x, int y, int room_size_1D);
 
-int main(int argc, char **argv) {
-	// TODO get the multidimensional data
-	double result_3D[10][10][1] = {};
-	// TODO get how many dims there are
-	int n_dim = 2;
-	// TODO get the indices of the source
-	int source_x = 1;
-	int source_y = 1;
-	int source_z = 0; // set zero if 2 dim
-	int source_idx = source_x;
-	// TODO get the room size
-	int room_size = 10;
-	// TODO get the uncertainty below which a deviation is still valid
+int verify_2D(Vector result_2D, int nx, int ny, int source_x, int source_y){
 	double uncert_T = 1e-3;
 
-	Vector result_1D = get_result_1D(source_idx, room_size*n_dim);
+	// select longest possible distance to source as room size
+	int room_size_1D = (int)ceil(
+			sqrt( (nx-source_x)*(nx-source_x) +
+				  (ny-source_y)*(ny-source_y) ) );
+	Vector result_1D = get_result_1D(room_size_1D);
 
 	// Go through the matrix and compare the cells to the result_1D.
-	for(int z=0; z<1+(n_dim-2)*(room_size-1); z++){
-		for(int y=0; y<room_size; y++){
-			for(int x=0; x<room_size; x++){
-				double expected_T = get_expected_T(result_1D,
-						x-source_x, y-source_y, z-source_z,
-						source_idx, room_size*n_dim);
+	for(int y=0; y<ny; y++){
+		for(int x=0; x<nx; x++){
+			double expected_T = get_expected_T(result_1D,
+					x-source_x, y-source_y, room_size_1D);
 
-				double residual = abs(result_3D[x][y][z]-expected_T);
+			double residual = abs(result_2D[IDX_2D(x,y,nx)]-expected_T);
 
-				if(residual>=uncert_T){
-					printf("The difference is too large (%f K) for the "
-							"cell with the indices (%i,%i,%i).\n"
-							"Expected: %f K, Real: %f K.\n",
-							residual, x, y, z, expected_T, result_3D[x][y][z]);
-					return EXIT_SUCCESS;
-				}
+			if(residual>=uncert_T){
+				printf("The difference is too large (%f K) for the "
+						"cell with the indices (%i,%i).\n"
+						"Expected: %f K, Real: %f K.\n",
+						residual, x, y, expected_T, result_2D[IDX_2D(x,y,nx)]);
+				return -1;
 			}
 		}
 	}
-
-	return EXIT_SUCCESS;
+	return 0;
 }
 
 
-
-Vector get_result_1D(int source_idx, int room_size){
+Vector get_result_1D(int room_size){
 	// TODO calculate from the code used in previous homework
 	Vector result_1D = createVector(room_size);
 	for(int i=0; i<room_size; i++){
@@ -62,12 +46,6 @@ Vector get_result_1D(int source_idx, int room_size){
 	return result_1D;
 }
 
-Vector createVector(int N) {
-  // create data and index vector
-  return malloc(sizeof(value_t) * N);
-}
-
-void releaseVector(Vector m) { free(m); }
 
 /*
  * The compare goes as follows:
@@ -81,10 +59,10 @@ void releaseVector(Vector m) { free(m); }
  * 4. The difference between T and the N-dim cell's temperature has to
  *    be below the uncert_T.
  */
-double get_expected_T(Vector result_1D, int x, int y, int z, int source_idx, int room_size_1D){
+double get_expected_T(Vector result_1D, int x, int y, int z, int room_size_1D){
 	double d = sqrt(x*x+y*y+z*z);
-	double T_1 = result_1D[((int)floor(d)+source_idx)%room_size_1D];
-	double T_2 = result_1D[((int)ceil(d)+source_idx)%room_size_1D];
+	double T_1 = result_1D[(int)floor(d)];
+	double T_2 = result_1D[(int)ceil(d)];
 	double T_expected = T_1 + (T_2 - T_1) * (ceil(d) - d);
 	return T_expected;
 }
