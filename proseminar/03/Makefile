@@ -156,9 +156,7 @@ run_mpi run_mpi_single: $(MPI_EXECUTABLE) $(OUTPUTS_DIR) $(ERRORS_DIR)
 
 
 .PHONEY: run
-run: super_clean 
-run: run_seq 
-run: run_mpi
+run: super_clean run_seq run_mpi
 ifeq ($(OS), Windows_NT)
 run: check
 else
@@ -195,7 +193,6 @@ clean:
 	@rm -r $(ERRORS_DIR) 2>/dev/null  || true
 	@rm $(SEQ_EXECUTABLE) $(MPI_EXECUTABLE) 2>/dev/null || true
 	@echo "your directory has been cleaned of executables and errors!"
-
 
 .PHONEY: super_clean
 super_clean: clean
