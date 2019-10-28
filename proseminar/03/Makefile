@@ -1,6 +1,7 @@
 ### PROGRAMS ###
-SEQUENTIAL_ARRAY = seq_1D
+SEQUENTIAL_ARRAY = seq_3D seq_2D seq_1D
 PARALLEL_ARRAY = mpi_1D
+DEPENDENCY_ARRAY = heat_stencil verification
 LANGUAGE = c
 #LANGUAGE = cpp
 
@@ -45,6 +46,8 @@ CC_FLAGS = -O2 -std=c99 -Wall
 MPI = mpicc									#mpi++ for c++!
 MPI_FLAGS = -O2 -std=c99 -Wall
 
+DEP_FLAGS = -DVERBOSE
+
 PYTHON = python
 
 ### Windows/LCC2 specific setup ###
@@ -53,12 +56,13 @@ ifeq ($(OS), Windows_NT)
 
 	LOAD_MPI = ""
 
+	DEP_OBJECTS = $(addsuffix .o, $(DEPENDENCY_ARRAY))
 	SEQ_EXECUTABLES = $(addsuffix .exe, $(SEQUENTIAL_ARRAY))
 	MPI_EXECUTABLES = $(addsuffix .exe, $(PARALLEL_ARRAY))
 	EXECUTABLE_PATTERN = %.exe
 
 	# additional linking required on Windows
-	#@Marc: add Windows environmental variable 'CYGWIN_PATH --> C:\cygwin64'
+	# Windows environmental variable 'CYGWIN_PATH --> C:\cygwin' required
 	MPI_FLAGS += -I "$(CYGWIN_PATH)\usr\include" 
 	MPI_FLAGS += -I "$(CYGWIN_PATH)\lib\openmpi"
 
@@ -72,6 +76,7 @@ else
 
 	LOAD_MPI = module load openmpi/$(MPI_VERSION) 2>/dev/null && 
 
+	DEP_OBJECTS = $(addsuffix .o, $(DEPENDENCY_ARRAY))
 	SEQ_EXECUTABLES = $(SEQUENTIAL_ARRAY)
 	MPI_EXECUTABLES = $(PARALLEL_ARRAY)
 	EXECUTABLE_PATTERN = %
@@ -115,12 +120,17 @@ $(RESULTS_DIR):
 
 
 ### COMPILE ###
-$(SEQ_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE)
+%.o: %.$(LANGUAGE)
+	@echo "compiling $@"
+	@$(CC) $(DEP_FLAGS) $(CC_FLAGS) -c $< -o $@
+	@echo
+
+$(SEQ_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
 	@echo "compiling $@"
 	@$(CC) $(CC_FLAGS) $< -o $@
 	@echo
 
-$(MPI_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE)
+$(MPI_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
 	@echo "compiling $@"
 	@$(LOAD_MPI)$(MPI) $(MPI_FLAGS) $< -o $@
 	@echo
@@ -199,7 +209,7 @@ check: check_errors check_outputs
 .PHONEY: clean
 clean:
 	@rm -r $(ERRORS_DIR) 2>/dev/null  || true
-	@rm $(SEQ_EXECUTABLES) $(MPI_EXECUTABLES) 2>/dev/null || true
+	@rm $(DEP_OBJECTS) $(SEQ_EXECUTABLES) $(MPI_EXECUTABLES) 2>/dev/null || true
 	@echo "your directory has been cleaned of executables and errors!"
 
 .PHONEY: super_clean
