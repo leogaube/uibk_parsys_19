@@ -1,7 +1,8 @@
 ### PROGRAMS ###
-SEQUENTIAL_ARRAY = seq_3D seq_2D seq_1D
+SEQUENTIAL_ARRAY = seq_3D seq_2D
 PARALLEL_ARRAY = mpi_1D
 DEPENDENCY_ARRAY = heat_stencil verification
+DEFINES = #-DVERBOSE
 LANGUAGE = c
 #LANGUAGE = cpp
 
@@ -20,7 +21,7 @@ NUM_RANKS_ARRAY = 4 8
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
-PROBLEM_SIZE_ARRAY = 2000 4000
+PROBLEM_SIZE_ARRAY = 100 200
 
 
 ### OUTPUT + ERRORS ###
@@ -41,10 +42,10 @@ MPI_ERROR_FILENAME = $(ERRORS_DIR)/$(MPI_NAME).err
 ######## SETUP ##########
 ### COMPILERS + FLAGS ###
 CC = gcc
-CC_FLAGS = -O2 -std=c99 -Wall
+CC_FLAGS = -O2 -std=c99 -Wall $(DEFINES)
 
 MPI = mpicc									#mpi++ for c++!
-MPI_FLAGS = -O2 -std=c99 -Wall
+MPI_FLAGS = -O2 -std=c99 -Wall $(DEFINES)
 
 DEP_FLAGS = -DVERBOSE
 
@@ -122,17 +123,17 @@ $(RESULTS_DIR):
 ### COMPILE ###
 %.o: %.$(LANGUAGE)
 	@echo "compiling $@"
-	@$(CC) $(DEP_FLAGS) $(CC_FLAGS) -c $< -o $@
+	@$(CC) $(DEP_FLAGS) $(CC_FLAGS) -c $^ -o $@
 	@echo
 
 $(SEQ_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
 	@echo "compiling $@"
-	@$(CC) $(CC_FLAGS) $< -o $@
+	@$(CC) $(CC_FLAGS) $^ -o $@
 	@echo
 
 $(MPI_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
 	@echo "compiling $@"
-	@$(LOAD_MPI)$(MPI) $(MPI_FLAGS) $< -o $@
+	@$(LOAD_MPI)$(MPI) $(MPI_FLAGS) $^ -o $@
 	@echo
 
 compile_all: $(SEQ_EXECUTABLES) $(MPI_EXECUTABLES)

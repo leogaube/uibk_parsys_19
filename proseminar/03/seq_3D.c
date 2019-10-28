@@ -30,7 +30,7 @@ int main(int argc, char **argv) {
   Vector A = createVector(N*N*N);
 
   // set up initial conditions in A
-  for (int i = 0; i < N*N*N; i++) {
+  for (long i = 0; i < N*N*N; i++) {
     A[i] = 273; // temperature is 0° C everywhere (273 K)
   }
 
@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
 		for (int y = 0; y < N; y++) {
 			for(int x = 0; x < N; x++){
 				// get the current idx
-				int i = IDX_3D(x,y,z,N,N);
+				long i = IDX_3D(x,y,z,N,N);
 
 				// center stays constant (the heat is still on)
 				if (i == IDX_3D(source_x,source_y,source_z,N,N)) {
@@ -81,7 +81,10 @@ int main(int argc, char **argv) {
 			}
 		}
 	}
-
+#ifdef VERBOSE
+  printf("t=%i:\n",t);
+  printTemperature(B, N, N, N);
+#endif
 	// swap matrices (just pointers, not content)
 	Vector H = A;
 	A = B;
@@ -95,8 +98,8 @@ int main(int argc, char **argv) {
 #endif
 
   // ---------- check ----------
-  int success = (is_verified_3D(A, N, N, N, source_x, source_y, source_z, T)==0);
-  printf("Verification: %s\n", (success) ? "OK" : "FAILED");
+  double residual = is_verified_2D(A, N, N, source_x, source_y, T);
+  printf("The maximal deviation from the 1D theory is %fK.", residual);
 
   // ---------- cleanup ----------
 
@@ -106,7 +109,7 @@ int main(int argc, char **argv) {
   printf("The process took %g seconds to finish. \n", ((double)(end - start)) / CLOCKS_PER_SEC);
 
   // done
-  return (success) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }
 
 void printTemperature(Vector m, int nx, int ny, int nz) {
