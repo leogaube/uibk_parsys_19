@@ -1,10 +1,11 @@
 ### PROGRAMS ###
-SEQUENTIAL_ARRAY = seq_3D seq_2D seq_1D
+SEQUENTIAL_ARRAY = seq_1D
 PARALLEL_ARRAY = mpi_1D
 DEPENDENCY_ARRAY = heat_stencil verification
 LANGUAGE = c
 #LANGUAGE = cpp
 
+PREPROCESS = preprocess.py
 PLOT = plot.py
 PRINT_FILES = print_files.py
 
@@ -14,7 +15,7 @@ PRINT_FILES = print_files.py
 # --> use 'make run' for submitting multiple jobs with different configurations
 # the default configuration consists of all first elements of the *_ARRAY variables
 # --> use 'make run_mpi_single' for submitting a single job. 
-NUM_RUNS = 1
+NUM_RUNS = 10
 
 NUM_RANKS_ARRAY = 4 8
 #NUM_RANKS_ARRAY = 1 2 4 8 16
@@ -26,6 +27,7 @@ PROBLEM_SIZE_ARRAY = 2000 4000
 ### OUTPUT + ERRORS ###
 OUTPUTS_DIR = ./outputs
 ERRORS_DIR = ./errors
+DATA_DIR = ./data
 RESULTS_DIR = ./results
 
 SEQ_NAME = $${sequential}_$${problem_size}
@@ -115,24 +117,27 @@ $(OUTPUTS_DIR):
 $(ERRORS_DIR):
 	@mkdir -p $@
 
+$(DATA_DIR):
+	@mkdir -p $@
+
 $(RESULTS_DIR):
 	@mkdir -p $@
 
 
 ### COMPILE ###
-%.o: %.$(LANGUAGE)
+%.o: %.$(LANGUAGE) %.h
 	@echo "compiling $@"
 	@$(CC) $(DEP_FLAGS) $(CC_FLAGS) -c $< -o $@
 	@echo
 
 $(SEQ_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
 	@echo "compiling $@"
-	@$(CC) $(CC_FLAGS) $< -o $@
+	@$(CC) $(CC_FLAGS) $^ -o $@
 	@echo
 
 $(MPI_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
 	@echo "compiling $@"
-	@$(LOAD_MPI)$(MPI) $(MPI_FLAGS) $< -o $@
+	@$(LOAD_MPI)$(MPI) $(MPI_FLAGS) $^ -o $@
 	@echo
 
 compile_all: $(SEQ_EXECUTABLES) $(MPI_EXECUTABLES)
@@ -176,7 +181,7 @@ run_mpi run_mpi_single: $(MPI_EXECUTABLES) $(OUTPUTS_DIR) $(ERRORS_DIR)
 .PHONEY: run
 run: super_clean run_seq run_mpi
 ifeq ($(OS), Windows_NT)
-run: check
+run: plots check
 else
 	@qstat
 endif
@@ -184,10 +189,16 @@ endif
 
 ### VISUALIZE ###
 # TODO --> runtime, speedup, efficiency, ...
+.PHONEY: preprocess
+preprocess: $(OUTPUTS_DIR) $(DATA_DIR)
+	@echo "preprocessing outputs"
+	@$(PYTHON) ./$(PREPROCESS) $(OUTPUTS_DIR) $(DATA_DIR)
+	@echo
+
 .PHONEY: plots
-plots: $(PLOT) $(OUTPUTS_DIR) $(RESULTS_DIR)
+plots: preprocess $(DATA_DIR) $(RESULTS_DIR)
 	@echo "creating some fancy plots..."
-	#@$(PYTHON) ./$(PLOT) $(OUTPUTS_DIR) $(RESULTS_DIR)
+	@$(PYTHON) ./$(PLOT) $(DATA_DIR) $(RESULTS_DIR)
 	@echo 
 
 ### CHECK OUTPUTS & ERRORS ###
