@@ -10,9 +10,7 @@ Vector get_result_1D(int N, int T);
 double get_expected_T(Vector result_1D, int dx, int dy, int dz, int room_size_1D);
 void printTemperature_1D(Vector m, int N);
 
-int is_verified_3D(Vector result_3D, int nx, int ny, int nz, int source_x, int source_y, int source_z, int T){
-	double uncert_T = 15;
-
+double is_verified_3D(Vector result_3D, int nx, int ny, int nz, int source_x, int source_y, int source_z, int T){
 	/**
 	 * select longest possible distance to the source as 1D room size
 	 * as there are no diagonal paths, the norm that is used for this
@@ -30,29 +28,28 @@ int is_verified_3D(Vector result_3D, int nx, int ny, int nz, int source_x, int s
 	Vector result_1D = get_result_1D(room_size_1D, T);
 
 	// Go through the matrix and compare the cells to the result_1D.
+	double max_residual = 0;
 	for(int z=0; z<nz; z++){
 		for(int y=0; y<ny; y++){
 			for(int x=0; x<nx; x++){
 				double expected_T = get_expected_T(result_1D,
 						abs(x-source_x), abs(y-source_y), abs(z-source_z), room_size_1D);
 
-				double residual = abs(result_3D[IDX_3D(x,y,z,nx,ny)]-expected_T);
-
-				if(residual>=uncert_T){
-					printf("The difference is too large (%f K) for the "
-							"cell with the indices (%i,%i,%i).\n"
-							"Expected: %f K, Real: %f K.\n",
-							residual, x, y, z, expected_T, result_3D[IDX_3D(x,y,z,nx,ny)]);
-					return -1;
+				double residual = result_3D[IDX_3D(x,y,z,nx,ny)]-expected_T;
+				// The residual can be compared to a maximally allowed value here.
+				// As this maximal value depends on the chosen geometry/norm, the
+				// maximal residual is found and returned instead.
+				if(abs(residual)>abs(max_residual)){
+					max_residual = residual;
 				}
 			}
 		}
 	}
-	return 0;
+	return max_residual;
 }
 
 
-int is_verified_2D(Vector result_2D, int nx, int ny, int source_x, int source_y, int T){
+double is_verified_2D(Vector result_2D, int nx, int ny, int source_x, int source_y, int T){
 	return is_verified_3D(result_2D, nx, ny, 1, source_x, source_y, 0, T);
 }
 

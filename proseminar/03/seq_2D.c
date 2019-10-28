@@ -29,7 +29,7 @@ int main(int argc, char **argv) {
   Vector A = createVector(N*N);
 
   // set up initial conditions in A
-  for (int i = 0; i < N*N; i++) {
+  for (long i = 0; i < N*N; i++) {
     A[i] = 273; // temperature is 0° C everywhere (273 K)
   }
 
@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
 	for (int y = 0; y < N; y++) {
 		for(int x = 0; x < N; x++){
 			// get the current idx
-			int i = IDX_2D(x,y,N);
+			long i = IDX_2D(x,y,N);
 
 			// center stays constant (the heat is still on)
 			if (x == source_x && y == source_y) {
@@ -66,14 +66,10 @@ int main(int argc, char **argv) {
 			value_t tc = A[i];
 
 			// get temperatures of adjacent cells
-//			value_t tl = A[IDX_2D((x-1+N)%N,y,N)];
-//			value_t tr = A[IDX_2D((x+1)%N,y,N)];
-//			value_t tu = A[IDX_2D(x,(y+1)%N,N)];
-//			value_t td = A[IDX_2D(x,(y-1+N)%N,N)];
-		      value_t tl = (x != 0) ? A[IDX_2D(x-1,y,N)] : tc;
-		      value_t tr = (x != N - 1) ? A[IDX_2D(x+1,y,N)] : tc;
-		      value_t tu = (y != 0) ? A[IDX_2D(x,y-1,N)] : tc;
-		      value_t td = (y != N - 1) ? A[IDX_2D(x,y+1,N)] : tc;
+		    value_t tl = (x != 0) ? A[IDX_2D(x-1,y,N)] : tc;
+		    value_t tr = (x != N - 1) ? A[IDX_2D(x+1,y,N)] : tc;
+		    value_t tu = (y != 0) ? A[IDX_2D(x,y-1,N)] : tc;
+		    value_t td = (y != N - 1) ? A[IDX_2D(x,y+1,N)] : tc;
 
 
 			// compute new temperature at current position
@@ -97,8 +93,8 @@ int main(int argc, char **argv) {
 #endif
 
   // ---------- check ----------
-  int success = (is_verified_2D(A, N, N, source_x, source_y, T)==0);
-  printf("Verification: %s\n", (success) ? "OK" : "FAILED");
+  double residual = is_verified_2D(A, N, N, source_x, source_y, T);
+  printf("The maximal deviation from the 1D theory is %fK.", residual);
 
   // ---------- cleanup ----------
 
@@ -108,7 +104,7 @@ int main(int argc, char **argv) {
   printf("The process took %g seconds to finish. \n", ((double)(end - start)) / CLOCKS_PER_SEC);
 
   // done
-  return (success) ? EXIT_SUCCESS : EXIT_FAILURE;
+  return EXIT_SUCCESS;
 }
 
 void printTemperature(Vector m, int nx, int ny) {
