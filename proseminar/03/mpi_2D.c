@@ -20,7 +20,7 @@ Vector createVector(int N);
 
 void releaseVector(Vector m);
 
-void printTemperature(Vector m, int N);
+void printTemperature(Vector m, int nx, int ny);
 
 void calculate_leftCellsToSend(double* src, double* dest, int M);
 
@@ -110,12 +110,12 @@ int main(int argc, char **argv) {
 
   if (rank % numberOfRanksPerRow != 0) {
     double leftCellsToSend[M];
-    calculate_leftCellsToSend(A, leftCellsToSend, M)
+    calculate_leftCellsToSend(A, leftCellsToSend, M);
     MPI_Isend(&(leftCellsToSend[0]), M, MPI_DOUBLE, rank - 1, 0, MPI_COMM_WORLD, &LSrequest);
   }
   if (rank % numberOfRanksPerRow != numberOfRanksPerRow - 1) {
     double rightCellsToSend[M];
-    calculate_rightCellsToSend(A, rightCellsToSend, M)
+    calculate_rightCellsToSend(A, rightCellsToSend, M);
     MPI_Isend(&(rightCellsToSend[0]), M, MPI_DOUBLE, rank + 1, 0, MPI_COMM_WORLD, &RSrequest);
   }
   if (rank - numberOfRanksPerRow > 0) {
@@ -168,7 +168,7 @@ int main(int argc, char **argv) {
 
           // get temperatures of adjacent cells
           value_t tl = rank % numberOfRanksPerRow != 0 ? (x != 0) ? A[IDX_2D(x-1,y,N)] : leftCells[y] : A[i];
-          value_t tr = rank % numberOfRanksPerRow != numberOfRanksPerRow - 1) ? (x != M - 1) ? A[IDX_2D(x+1,y,N)] : rightCells[y] : A[i];
+          value_t tr = rank % numberOfRanksPerRow != numberOfRanksPerRow - 1 ? (x != M - 1) ? A[IDX_2D(x+1,y,N)] : rightCells[y] : A[i];
           value_t tu = rank - numberOfRanksPerRow > 0 ? (y != 0) ? A[IDX_2D(x,y-1,N)] : topCells[x] : A[i];
           value_t tb = rank + numberOfRanksPerRow < numberOfRanksPerRow * numberOfRanksPerRow ? (y != M - 1) ? A[IDX_2D(x,y+1,N)] : bottomCells[x] : A[i];
 
@@ -185,12 +185,12 @@ int main(int argc, char **argv) {
 
     if (rank % numberOfRanksPerRow != 0) {
       double leftCellsToSend[M];
-      calculate_leftCellsToSend(A, leftCellsToSend, M)
+      calculate_leftCellsToSend(A, leftCellsToSend, M);
       MPI_Isend(&(leftCellsToSend[0]), M, MPI_DOUBLE, rank - 1, 0, MPI_COMM_WORLD, &LSrequest);
     }
     if (rank % numberOfRanksPerRow != numberOfRanksPerRow - 1) {
       double rightCellsToSend[M];
-      calculate_rightCellsToSend(A, rightCellsToSend, M)
+      calculate_rightCellsToSend(A, rightCellsToSend, M);
       MPI_Isend(&(rightCellsToSend[0]), M, MPI_DOUBLE, rank + 1, 0, MPI_COMM_WORLD, &RSrequest);
     }
     if (rank - numberOfRanksPerRow > 0) {
