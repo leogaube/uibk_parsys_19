@@ -1,6 +1,6 @@
 ### PROGRAMS ###
-SEQUENTIAL_ARRAY = seq_3D seq_2D seq_1D
-PARALLEL_ARRAY = mpi_1D
+SEQUENTIAL_ARRAY = seq_2D seq_1D
+PARALLEL_ARRAY = mpi_2D mpi_1D
 DEPENDENCY_ARRAY = heat_stencil verification
 LANGUAGE = c
 #LANGUAGE = cpp
@@ -44,7 +44,7 @@ CC = gcc
 CC_FLAGS = -O2 -std=c99 -Wall
 
 MPI = mpicc									#mpi++ for c++!
-MPI_FLAGS = -O2 -std=c99 -Wall
+MPI_FLAGS = -O2 -std=c99 -Wall -lm
 
 DEP_FLAGS = -DVERBOSE
 

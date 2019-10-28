@@ -2,29 +2,21 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 
 #include <time.h>
 
-typedef double value_t;
+#include "heat_stencil.h"
 
 #define RESOLUTION 120
-
-#define MAX(x, y) (((x) > (y)) ? (x) : (y))
-#define MIN(x, y) (((x) < (y)) ? (x) : (y))
-
-// -- vector utilities --
-
-typedef value_t *Vector;
-
-Vector createVector(int N);
-
-void releaseVector(Vector m);
 
 void printTemperature(Vector m, int nx, int ny);
 
 void calculate_leftCellsToSend(double* src, double* dest, int M);
 
 void calculate_rightCellsToSend(double* src, double* dest, int M);
+
+
 // -- simulation code ---
 
 int main(int argc, char **argv) {
@@ -220,7 +212,7 @@ int main(int argc, char **argv) {
       if (rank == 0)
       {
         printf("Step t=%d:\t", t);
-        printTemperature(AA, N);
+        printTemperature(AA, N, N);
         printf("\n");
       }
     }
@@ -233,7 +225,7 @@ int main(int argc, char **argv) {
   MPI_Gather(A, M, MPI_DOUBLE, AA, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   if (rank == 0){
     printf("Final:\t\t");
-    printTemperature(AA, N);
+    printTemperature(AA, N, N);
     printf("\n");
   }
 
