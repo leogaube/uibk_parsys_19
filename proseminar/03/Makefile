@@ -22,7 +22,7 @@ NUM_RANKS_ARRAY = 4 8
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
-PROBLEM_SIZE_ARRAY = 8 16 32
+PROBLEM_SIZE_ARRAY = 8 16 32 64
 
 
 ### OUTPUT + ERRORS ###
@@ -102,11 +102,12 @@ else
 	SGE_MPI_FLAGS += -pe openmpi-$$slot_distribute $$num_ranks
 	#cannot use '-b yes' because openmpi module needs to be loaded on lcc2 cluster TODO
 
-	SEQ_EXEC_COMMAND = [ $${parallel} = seq_1D ] && problem_size=eval "awk -v num=$${problem_size} 'BEGIN{print int(num^(3))}'";
-	SEQ_EXEC_COMMAND += [ $${parallel} = seq_2D ] && problem_size=eval "awk -v num=$${problem_size} 'BEGIN{print int(num^(3/2))}'";
-	SEQ_EXEC_COMMAND += echo $${problem_size};
+	SEQ_EXEC_COMMAND = [ $${sequential} = seq_1D ] && problem_size=eval awk -v num=$${problem_size} 'BEGIN{print int(num^(3))}';
+	SEQ_EXEC_COMMAND += [ $${sequential} = seq_2D ] && problem_size=eval awk -v num=$${problem_size} 'BEGIN{print int(num^(3/2))}';
 	SEQ_EXEC_COMMAND += qsub $(SGE_SEQ_FLAGS) ./$${sequential} $${problem_size}
 
+	MPI_EXEC_COMMAND = [ $${parallel} = seq_1D ] && problem_size=eval awk -v num=$${problem_size} 'BEGIN{print int(num^(3))}';
+	MPI_EXEC_COMMAND += [ $${parallel} = seq_2D ] && problem_size=eval awk -v num=$${problem_size} 'BEGIN{print int(num^(3/2))}';
 	MPI_EXEC_COMMAND = echo -e "module load openmpi/$(MPI_VERSION) 2>/dev/null\nmpiexec -n $${num_ranks} ./$${parallel} $${problem_size}" > job.tmp;
 	MPI_EXEC_COMMAND += qsub $(SGE_MPI_FLAGS) job.tmp;
 	MPI_EXEC_COMMAND += rm job.tmp
