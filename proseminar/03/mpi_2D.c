@@ -12,9 +12,9 @@
 
 void printTemperature(Vector m, int nx, int ny);
 
-void calculate_leftCellsToSend(double* src, double* dest, int M);
+void calculate_leftCellsToSend(value_t* src, value_t* dest, int M);
 
-void calculate_rightCellsToSend(double* src, double* dest, int M);
+void calculate_rightCellsToSend(value_t* src, value_t* dest, int M);
 
 
 // -- simulation code ---
@@ -46,7 +46,7 @@ int main(int argc, char **argv) {
   int M = sqrt(N*N / numProcs);
 
   if (rank == 0)
-    printf("Computing heat-distribution for room size N=%d for T=%d timesteps using %d processes with subroom size M=%d\n", N, T, numProcs, M);
+    printf("Computing heat-distribution for room size N=%d for T=%d timesteps using %d processes with subroom size M=%d\n", N*N, T, numProcs, M*M);
 
   // ---------- setup ----------
 
@@ -65,16 +65,16 @@ int main(int argc, char **argv) {
     }
 
     // and there is a heat source in one corner
-    source_x = N*N / 4;
+    source_x = N / 4;
     source_y = source_x;
-    AA[IDX_2D(source_x,source_y,N*N)] = 273 + 60;
+    AA[IDX_2D(source_x,source_y,N)] = 273 + 60;
 
-#ifdef VERBOSE
-  	printf("time %i:\n",t);
-	  printTemperature(B, N, N);
-#endif
+    printf("index source; x and y = %d and i = %d", source_x, IDX_2D(source_x,source_y,N));
+
+    printTemperature(AA, N, N);
   }
-  MPI_Scatter(AA, M*M, MPI_DOUBLE, A, M*M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+  MPI_Scatter(AA, M*M, MPI_FLOAT, A, M*M, MPI_FLOAT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&source_x, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&source_y, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
@@ -93,65 +93,69 @@ int main(int argc, char **argv) {
   MPI_Request DRrequest;
   MPI_Request DSrequest;
 
-  double leftCells[M];
-  double rightCells[M];
-  double topCells[M];
-  double bottomCells[M];
+  value_t leftCells[M];
+  value_t rightCells[M];
+  value_t topCells[M];
+  value_t bottomCells[M];
 
   int numberOfRanksPerRow = sqrt(numProcs);
 
   if (rank % numberOfRanksPerRow != 0) {
-    double leftCellsToSend[M];
-    calculate_leftCellsToSend(A, leftCellsToSend, M);
-    MPI_Isend(&(leftCellsToSend[0]), M, MPI_DOUBLE, rank - 1, 0, MPI_COMM_WORLD, &LSrequest);
+    value_t leftCellsToSend[M];
+    calculate_leftCellsToSend(&(A[0]), &(leftCellsToSend[0]), M);
+    MPI_Isend(&(leftCellsToSend[0]), M, MPI_FLOAT, rank - 1, 0, MPI_COMM_WORLD, &LSrequest);
   }
   if (rank % numberOfRanksPerRow != numberOfRanksPerRow - 1) {
-    double rightCellsToSend[M];
-    calculate_rightCellsToSend(A, rightCellsToSend, M);
-    MPI_Isend(&(rightCellsToSend[0]), M, MPI_DOUBLE, rank + 1, 0, MPI_COMM_WORLD, &RSrequest);
+    value_t rightCellsToSend[M];
+    calculate_rightCellsToSend(&(A[0]), &(rightCellsToSend[0]), M);
+    MPI_Isend(&(rightCellsToSend[0]), M, MPI_FLOAT, rank + 1, 0, MPI_COMM_WORLD, &RSrequest);
   }
-  if (rank - numberOfRanksPerRow > 0) {
-    MPI_Isend(&(A[0]), M, MPI_DOUBLE, rank - numberOfRanksPerRow, 0, MPI_COMM_WORLD, &TSrequest);
+  if (rank - numberOfRanksPerRow >= 0) {
+    MPI_Isend(&(A[0]), M, MPI_FLOAT, rank - numberOfRanksPerRow, 0, MPI_COMM_WORLD, &TSrequest);
   }
   if (rank + numberOfRanksPerRow < numberOfRanksPerRow * numberOfRanksPerRow) {
-    MPI_Isend(&(A[M*M-M-1]), M, MPI_DOUBLE, rank + numberOfRanksPerRow, 0, MPI_COMM_WORLD, &DSrequest);
+    MPI_Isend(&(A[M*M-M-1]), M, MPI_FLOAT, rank + numberOfRanksPerRow, 0, MPI_COMM_WORLD, &DSrequest);
   }
   
   if (rank % numberOfRanksPerRow != 0) {
-    MPI_Irecv(&leftCells, M, MPI_DOUBLE, rank -1, 0, MPI_COMM_WORLD, &LRrequest);
+    MPI_Irecv(&leftCells, M, MPI_FLOAT, rank -1, 0, MPI_COMM_WORLD, &LRrequest);
   }
   if (rank % numberOfRanksPerRow != numberOfRanksPerRow - 1) {
-    MPI_Irecv(&rightCells, M, MPI_DOUBLE, rank + 1, 0, MPI_COMM_WORLD, &RRrequest);
+    MPI_Irecv(&rightCells, M, MPI_FLOAT, rank + 1, 0, MPI_COMM_WORLD, &RRrequest);
   }
-  if (rank - numberOfRanksPerRow > 0) {
-    MPI_Irecv(&topCells, M, MPI_DOUBLE, rank - numberOfRanksPerRow, 0, MPI_COMM_WORLD, &TRrequest);
+  if (rank - numberOfRanksPerRow >= 0) {
+    MPI_Irecv(&topCells, M, MPI_FLOAT, rank - numberOfRanksPerRow, 0, MPI_COMM_WORLD, &TRrequest);
   }
   if (rank + numberOfRanksPerRow < numberOfRanksPerRow * numberOfRanksPerRow) {
-    MPI_Irecv(&bottomCells, M, MPI_DOUBLE, rank + numberOfRanksPerRow, 0, MPI_COMM_WORLD, &DRrequest);
+    MPI_Irecv(&bottomCells, M, MPI_FLOAT, rank + numberOfRanksPerRow, 0, MPI_COMM_WORLD, &DRrequest);
   }
-
 
   // for each time step ..
   for (int t = 0; t < T; t++) {
     // .. we propagate the temperature
     //sync data
-    MPI_Wait(&LSrequest, MPI_STATUS_IGNORE);
-    MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
-  
-    MPI_Wait(&RSrequest, MPI_STATUS_IGNORE);
-    MPI_Wait(&RRrequest, MPI_STATUS_IGNORE);
-
-    MPI_Wait(&TSrequest, MPI_STATUS_IGNORE);
-    MPI_Wait(&TRrequest, MPI_STATUS_IGNORE);
-
-    MPI_Wait(&DSrequest, MPI_STATUS_IGNORE);
-    MPI_Wait(&DRrequest, MPI_STATUS_IGNORE);
+    if (rank % numberOfRanksPerRow != 0) {
+      MPI_Wait(&LSrequest, MPI_STATUS_IGNORE);
+      MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
+    }
+    if (rank % numberOfRanksPerRow != numberOfRanksPerRow - 1) {
+      MPI_Wait(&RSrequest, MPI_STATUS_IGNORE);
+      MPI_Wait(&RRrequest, MPI_STATUS_IGNORE);
+    }
+    if (rank - numberOfRanksPerRow >= 0) {
+      MPI_Wait(&TSrequest, MPI_STATUS_IGNORE);
+      MPI_Wait(&TRrequest, MPI_STATUS_IGNORE);
+    }
+    if (rank + numberOfRanksPerRow < numberOfRanksPerRow * numberOfRanksPerRow) {
+      MPI_Wait(&DSrequest, MPI_STATUS_IGNORE);
+      MPI_Wait(&DRrequest, MPI_STATUS_IGNORE);
+    }
 
     for (int y = 0; y < M; y++) {
       for (int x = 0; x < M; x++) {
-        int i = IDX_2D(x,y,N);
-        // center stays constant (the heat is still on)
-        if (x + (rank * M) == source_x && y + (rank * M) == source_y) {
+	int i = IDX_2D(x,y,M);
+        // the heat is still on
+        if (x + (rank * M*M) == source_x && y + (rank * M*M) == source_y) {
           B[i] = A[i];
         }
         else {
@@ -159,13 +163,13 @@ int main(int argc, char **argv) {
           value_t tc = A[i];
 
           // get temperatures of adjacent cells
-          value_t tl = rank % numberOfRanksPerRow != 0 ? (x != 0) ? A[IDX_2D(x-1,y,N)] : leftCells[y] : A[i];
-          value_t tr = rank % numberOfRanksPerRow != numberOfRanksPerRow - 1 ? (x != M - 1) ? A[IDX_2D(x+1,y,N)] : rightCells[y] : A[i];
-          value_t tu = rank - numberOfRanksPerRow > 0 ? (y != 0) ? A[IDX_2D(x,y-1,N)] : topCells[x] : A[i];
-          value_t tb = rank + numberOfRanksPerRow < numberOfRanksPerRow * numberOfRanksPerRow ? (y != M - 1) ? A[IDX_2D(x,y+1,N)] : bottomCells[x] : A[i];
+          value_t tl = rank % numberOfRanksPerRow != 0 ? (x != 0) ? A[IDX_2D(x-1,y,M)] : leftCells[y] : A[i];
+          value_t tr = rank % numberOfRanksPerRow != numberOfRanksPerRow - 1 ? (x != M - 1) ? A[IDX_2D(x+1,y,M)] : rightCells[y] : A[i];
+          value_t tu = rank - numberOfRanksPerRow >= 0 ? (y != 0) ? A[IDX_2D(x,y-1,M)] : topCells[x] : A[i];
+          value_t tb = rank + numberOfRanksPerRow < numberOfRanksPerRow * numberOfRanksPerRow ? (y != M - 1) ? A[IDX_2D(x,y+1,M)] : bottomCells[x] : A[i];
 
           // compute new temperature at current position
-		    	B[i] = tc + 0.2 * (tl + tr + tu + tb + (-4 * tc));
+    	  B[i] = tc + 0.2 * (tl + tr + tu + tb + (-4 * tc));
         }
       }
     }
@@ -176,34 +180,36 @@ int main(int argc, char **argv) {
     B = H;
 
     if (rank % numberOfRanksPerRow != 0) {
-      double leftCellsToSend[M];
-      calculate_leftCellsToSend(A, leftCellsToSend, M);
-      MPI_Isend(&(leftCellsToSend[0]), M, MPI_DOUBLE, rank - 1, 0, MPI_COMM_WORLD, &LSrequest);
+      value_t leftCellsToSend[M];
+      calculate_leftCellsToSend(&(A[0]), &(leftCellsToSend[0]), M);
+      MPI_Isend(&(leftCellsToSend[0]), M, MPI_FLOAT, rank - 1, 0, MPI_COMM_WORLD, &LSrequest);
     }
     if (rank % numberOfRanksPerRow != numberOfRanksPerRow - 1) {
-      double rightCellsToSend[M];
-      calculate_rightCellsToSend(A, rightCellsToSend, M);
-      MPI_Isend(&(rightCellsToSend[0]), M, MPI_DOUBLE, rank + 1, 0, MPI_COMM_WORLD, &RSrequest);
+      value_t rightCellsToSend[M];
+      calculate_rightCellsToSend(&(A[0]), &(rightCellsToSend[0]), M);
+      MPI_Isend(&(rightCellsToSend[0]), M, MPI_FLOAT, rank + 1, 0, MPI_COMM_WORLD, &RSrequest);
     }
-    if (rank - numberOfRanksPerRow > 0) {
-      MPI_Isend(&(A[0]), M, MPI_DOUBLE, rank - numberOfRanksPerRow, 0, MPI_COMM_WORLD, &TSrequest);
+    if (rank - numberOfRanksPerRow >= 0) {
+      MPI_Isend(&(A[0]), M, MPI_FLOAT, rank - numberOfRanksPerRow, 0, MPI_COMM_WORLD, &TSrequest);
     }
     if (rank + numberOfRanksPerRow < numberOfRanksPerRow * numberOfRanksPerRow) {
-      MPI_Isend(&(A[M*M-M-1]), M, MPI_DOUBLE, rank + numberOfRanksPerRow, 0, MPI_COMM_WORLD, &DSrequest);
+      MPI_Isend(&(A[M*M-M-1]), M, MPI_FLOAT, rank + numberOfRanksPerRow, 0, MPI_COMM_WORLD, &DSrequest);
     }
-    
+
     if (rank % numberOfRanksPerRow != 0) {
-      MPI_Irecv(&leftCells, M, MPI_DOUBLE, rank -1, 0, MPI_COMM_WORLD, &LRrequest);
+      MPI_Irecv(&leftCells, M, MPI_FLOAT, rank -1, 0, MPI_COMM_WORLD, &LRrequest);
     }
     if (rank % numberOfRanksPerRow != numberOfRanksPerRow - 1) {
-      MPI_Irecv(&rightCells, M, MPI_DOUBLE, rank + 1, 0, MPI_COMM_WORLD, &RRrequest);
+      MPI_Irecv(&rightCells, M, MPI_FLOAT, rank + 1, 0, MPI_COMM_WORLD, &RRrequest);
     }
-    if (rank - numberOfRanksPerRow > 0) {
-      MPI_Irecv(&topCells, M, MPI_DOUBLE, rank - numberOfRanksPerRow, 0, MPI_COMM_WORLD, &TRrequest);
+    if (rank - numberOfRanksPerRow >= 0) {
+      MPI_Irecv(&topCells, M, MPI_FLOAT, rank - numberOfRanksPerRow, 0, MPI_COMM_WORLD, &TRrequest);
     }
     if (rank + numberOfRanksPerRow < numberOfRanksPerRow * numberOfRanksPerRow) {
-      MPI_Irecv(&bottomCells, M, MPI_DOUBLE, rank + numberOfRanksPerRow, 0, MPI_COMM_WORLD, &DRrequest);
+      MPI_Irecv(&bottomCells, M, MPI_FLOAT, rank + numberOfRanksPerRow, 0, MPI_COMM_WORLD, &DRrequest);
     }
+
+    
 
     // show intermediate step
     if (!(t % 1000))
@@ -211,7 +217,7 @@ int main(int argc, char **argv) {
       MPI_Gather(A, M, MPI_DOUBLE, AA, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
       if (rank == 0)
       {
-        printf("Step t=%d:\t", t);
+        printf("Step t=%d:\n", t);
         printTemperature(AA, N, N);
         printf("\n");
       }
@@ -224,7 +230,7 @@ int main(int argc, char **argv) {
 
   MPI_Gather(A, M, MPI_DOUBLE, AA, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   if (rank == 0){
-    printf("Final:\t\t");
+    printf("Final:\n");
     printTemperature(AA, N, N);
     printf("\n");
   }
@@ -299,7 +305,7 @@ void printTemperature(Vector m, int nx, int ny) {
   }
 }
 
-void calculate_leftCellsToSend(double* src, double* dest, int M) {
+void calculate_leftCellsToSend(value_t* src, value_t* dest, int M) {
   int k = 0;
   for(int i = 0; i < M*M; i += M) {
     dest[k] = src[i];
@@ -307,7 +313,7 @@ void calculate_leftCellsToSend(double* src, double* dest, int M) {
   }
 }
 
-void calculate_rightCellsToSend(double* src, double* dest, int M) {
+void calculate_rightCellsToSend(value_t* src, value_t* dest, int M) {
   int k = 0;
   for(int i = M-1; i < M*M; i +=M) {
     dest[k] = src[i];

@@ -1,6 +1,6 @@
 ### PROGRAMS ###
 SEQUENTIAL_ARRAY = seq_3D seq_2D
-PARALLEL_ARRAY = mpi_2D mpi_1D
+PARALLEL_ARRAY = mpi_2D
 DEPENDENCY_ARRAY = heat_stencil verification
 DEFINES = #-DVERBOSE
 LANGUAGE = c
@@ -17,11 +17,11 @@ PRINT_FILES = print_files.py
 # --> use 'make run_mpi_single' for submitting a single job. 
 NUM_RUNS = 1
 
-NUM_RANKS_ARRAY = 4 8
+NUM_RANKS_ARRAY = 4
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
-PROBLEM_SIZE_ARRAY = 100 200
+PROBLEM_SIZE_ARRAY = 4
 
 
 ### OUTPUT + ERRORS ###
