@@ -49,8 +49,7 @@ int main(int argc, char **argv) {
   // get the adjacent slices
   int top_rank = rank;
   int bottom_rank = rank;
-  MPI_Cart_shift(slices_2D, 0, 1, &rank, &top_rank);
-  MPI_Cart_shift(slices_2D, 0, -1, &rank, &bottom_rank);
+  MPI_Cart_shift(slices_2D, 0, 1, &bottom_rank, &top_rank);
   printf("rank after shift %d\n",rank);
   if(top_rank == MPI_PROC_NULL) { top_rank = rank; }
   if(bottom_rank == MPI_PROC_NULL) { bottom_rank = rank; }
@@ -99,12 +98,13 @@ int main(int argc, char **argv) {
     {
 	  //sync data
 	  if (z == 0){
-	    MPI_Wait(&topSRequest, MPI_STATUS_IGNORE);
-	    MPI_Wait(&bottomRRequest, MPI_STATUS_IGNORE);}
-	  else if (z == Mz - 1){
 	    MPI_Wait(&bottomSRequest, MPI_STATUS_IGNORE);
 	    MPI_Wait(&topRRequest, MPI_STATUS_IGNORE);
+          } else if (z == Mz - 1){
+	    MPI_Wait(&topSRequest, MPI_STATUS_IGNORE);
+	    MPI_Wait(&bottomRRequest, MPI_STATUS_IGNORE);
   	  }
+	  printf("wait done %d\n",rank);
       for (int y = 0; y < Ny; y++)
       {
         for (int x = 0; x < Nx; x++)
@@ -159,6 +159,7 @@ int main(int argc, char **argv) {
   printf("ok? %d\n",rank);
   Vector AA = NULL;
   if(rank == top_rank){
+	  printf("top is %d\n",rank);
 	  AA = createVector(Nx*Ny*Nz);
   }
   printf("hey %d\n",rank);
