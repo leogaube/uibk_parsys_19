@@ -54,6 +54,9 @@ in the same distribution.
 Results:
 - The same problems as in the verification along one axis. The boundary conditions lead to a reflection
 that is not accounted for.
+- Further uncertainties result from the distance to the source not exactly following an Euclidean distance.
+Heat can only propagate along straight lines, and not along diagonals in this model. -> The distance to the center
+of a diagonal element is not sqrt(x^2+y^2) but more like |x|+|y|. 
 
 
 ## Exercise 2
