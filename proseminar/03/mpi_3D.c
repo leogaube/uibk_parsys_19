@@ -84,9 +84,10 @@ int main(int argc, char **argv) {
   Vector top_layer = createVector(Nx*Ny);
   Vector bottom_layer = createVector(Nx*Ny);
 
+  printf("start\n");
   // for each time step ..
   for (int t = 0; t < T; t++) {
-
+    printf("t=%d %d\n",t,rank);
 	// send the uppermost and lowest layer to upper and lower slices
 	MPI_Isend(A, Nx*Ny, MPI_FLOAT, top_rank, 0, slices_2D, &topSRequest);
 	MPI_Isend(&(A[IDX_3D(0,0,Mz-1,Nx,Ny)]), Nx*Ny, MPI_FLOAT, bottom_rank, 0, slices_2D, &bottomSRequest);
@@ -143,7 +144,9 @@ int main(int argc, char **argv) {
   if(rank == 0){
 	  AA = createVector(Nx*Ny*Nz);
   }
+  printf("Gather started %d\n",rank);
   MPI_Gather(A, Nx*Ny*Mz, MPI_FLOAT, AA, Nx*Ny*Mz, MPI_FLOAT, 0, slices_2D);
+  printf("Gather ended %d\n",rank);
   releaseVector(A);
 
   if (rank == 0){
@@ -167,6 +170,7 @@ int main(int argc, char **argv) {
     printf("The process took %g seconds to finish. \n", end - start);
   }
 
+  printf("all done %d\n",rank);
   MPI_Finalize();
 
   // done

@@ -21,7 +21,7 @@ NUM_RANKS_ARRAY = 4 8
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
-PROBLEM_SIZE_ARRAY = 25 50
+PROBLEM_SIZE_ARRAY = 32 64
 
 
 ### OUTPUT + ERRORS ###
@@ -45,7 +45,7 @@ CC = gcc
 CC_FLAGS = -O2 -std=c99 -Wall
 
 MPI = mpicc									#mpi++ for c++!
-MPI_FLAGS = -O2 -std=c99 -Wall
+MPI_FLAGS = -O2 -std=c99 -Wall -lm
 
 
 PYTHON = python
