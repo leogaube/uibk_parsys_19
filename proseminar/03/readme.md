@@ -16,6 +16,19 @@ This exercise consists in extending the heat stencil application of Assignment 2
 
 ## Task 1&2 (Implementation)
 - See mpi_2D/3D and seq_2D/3D.
+- The function T = Tc + 0.2 ( Tl + Tr + (-2 Tc )) has to be adapted for higher dimensions.
+    - In 1D the function describes that the temperature of a cell is the sum of its own temperature Tc
+    and **40% of the mean** temperature difference with respect to the surrounding cells.
+    - To keep this value, the 2D case has to exchange the factor 0.2=0.4/2 such that T = Tc + 0.4/4 ( Tl + Tr + Tu + Td + (-4 Tc )).
+    - In 3D this leads to T = Tc + 0.4/6 ( Tl + Tr + Tu + Td + Tf + Tb + (-6 Tc )).
+
+- The function T = Tc + 0.2 ( Tl + Tr + Tu + Td + Tf + Tb + (-6 Tc )) **would not be valid**:
+    - If the difference between Tc and the surrounding cells is too large, the central cell could cool down
+    below the T of the coldest neighboring cell. If all neighboring cells are at T=0, the function yields
+    T = - 0.2 Tc. -> **Negative temperatures** are not physical.
+    - The value 0.2 or the whole function have to be adapted.
+- In 2D this effect is not existing as T = Tc + 0.2 ( Tl + Tr + Tu + Td + (-4 Tc )) can at most evaluate
+to T=0.2Tc. An overestimation of the cooling/heating effect of the neighboring cells however still occurs.
 
 ## Task 3 (Verification)
 Idea: Use already verified 1D version to verify in more dimensions.
@@ -26,11 +39,12 @@ in the same output as the 1D code.
 
 Results:
 * see `out_verification2D.dat` and `out_verification3D.dat`
-* The results match well as long as the heat is not **hitting a wall**.
+* The results match the 1D example from the previous homework, but slightly deviate from the result of the verification function.
+* As long as the heat is not **hitting a wall**, the heat is distributed symmetrically around the source.
     * The assumption that the wall has the same temperature as the first/last cell of the room 
-leads to a reflection of the heat towards the center and therefore a deviation.
-    * If this is not desired/valid, **other boundary conditions** would have to be chosen.
-    * Periodic boundary conditions help, but lead to multiple heat sources due to periodicity.
+leads to a reflection of the heat towards the center and therefore a deviation from this symmetry.
+    * If this is not desired/valid, **other boundary conditions** have to be chosen.
+    * Periodic boundary conditions on the other hand introduce multiple heat sources.
 
 ### Verification in multiple dimensions
 Given the program is valid, a point source should produce a spherically symmetric heat distribution. 
@@ -38,14 +52,8 @@ Therefore, calculating the problem in 1D and 'rotating' the result with the orig
 in the same distribution.
 
 Results:
-- The same problems as in the verification along one axis.
-- Furthermore it seems like the function T = Tc + 0.2 ( Tl + Tr + Tu + Td + Tf + Tb + (-6 Tc )) is **not valid**:
-    - If the difference between Tc and the surrounding cells is too large, the central cell could cool down
-    below the T of the coldest neighboring cell. If all neighboring cells are at T=0, the function yields
-    T = - 0.2 Tc. -> **Negative temperatures** are not physical.
-    - The value 0.2 or the whole function have to be adapted.
-- In 2D this effect is not existing as T = Tc + 0.2 ( Tl + Tr + Tu + Td + (-4 Tc )) can at most evaluate
-to T=0.2Tc. An overestimation of the cooling/heating effect of the neighboring cells might however still occur.
+- The same problems as in the verification along one axis. The boundary conditions lead to a reflection
+that is not accounted for.
 
 
 ## Exercise 2

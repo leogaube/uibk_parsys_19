@@ -19,7 +19,7 @@ int main(int argc, char **argv) {
 	  Nx = atoi(argv[1]);
 	  Ny = atoi(argv[2]);
   }
-  int T = MAX(Nx, Ny) * 500;
+  int T = MAX(Nx, Ny) * 100;
 #ifdef VERBOSE
   printf("Computing heat-distribution for room size Nx=%d, Ny=%d for T=%d timesteps\n", Nx, Ny, T);
 #endif
@@ -75,7 +75,7 @@ int main(int argc, char **argv) {
         value_t td = (y != Ny - 1) ? A[IDX_2D(x, y + 1, Nx)] : tc;
 
         // compute new temperature at current position
-        B[i] = tc + 0.16666 * (tl + tr + tu + td + (-4 * tc));
+        B[i] = tc + 0.4/4 * (tl + tr + tu + td + (-4 * tc));
       }
     }
 

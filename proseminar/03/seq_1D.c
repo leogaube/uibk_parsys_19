@@ -59,7 +59,7 @@ int main(int argc, char **argv) {
       value_t tr = (i != N - 1) ? A[i + 1] : tc;
 
       // compute new temperature at current position
-      B[i] = tc + 0.16666 * (tl + tr + (-2 * tc));
+      B[i] = tc + 0.2 * (tl + tr + (-2 * tc));
     }
 
     // swap matrices (just pointers, not content)

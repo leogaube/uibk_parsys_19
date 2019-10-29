@@ -21,7 +21,7 @@ int main(int argc, char **argv) {
 	  Ny = atoi(argv[2]);
 	  Nz = atoi(argv[3]);
   }
-  int T = MAX(MAX(Nx, Ny), Nz)*500;
+  int T = MAX(MAX(Nx, Ny), Nz)*100;
 #ifdef VERBOSE
   printf("Computing heat-distribution for room size Nx=%d, Ny=%d, Nz=%d for T=%d timesteps\n", Nx, Ny, Nz, T);
 #endif
@@ -82,7 +82,7 @@ int main(int argc, char **argv) {
           value_t tb = (z != Nz - 1) ? A[IDX_3D(x, y, z + 1, Nx, Ny)] : tc;
 
           // compute new temperature at current position
-          B[i] = tc + 0.16666 * (tl + tr + tu + td + tf + tb + (-6 * tc));
+          B[i] = tc + 0.4/6 * (tl + tr + tu + td + tf + tb + (-6 * tc));
         }
       }
     }
