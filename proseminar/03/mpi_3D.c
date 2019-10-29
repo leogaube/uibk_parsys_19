@@ -40,11 +40,12 @@ int main(int argc, char **argv) {
   int Mz = Nz / numProcs;
 
   MPI_Comm slices_2D;
-  int dims[1] = {1};
+  int dims[1] = {numProcs};
   int periods[1] = {0};
-  MPI_Dims_create(numProcs, 1, dims);
-  MPI_Cart_create(MPI_COMM_WORLD, 1, dims, periods, 1, &slices_2D);
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  //MPI_Dims_create(numProcs, 1, dims);
+  MPI_Cart_create(MPI_COMM_WORLD, 1, dims, periods, 0, &slices_2D);
+  MPI_Comm_rank(slices_2D, &rank);
+
 
   // get the adjacent slices
   int top_rank = rank;
@@ -72,6 +73,7 @@ int main(int argc, char **argv) {
   int source_x = Nx / 4;
   int source_y = Ny / 4;
   int source_z = Nz / 4;
+
   if(rank*Mz<=source_z && (rank+1)*Mz>source_z){
 	  A[IDX_3D(source_x,source_y, source_z,Nx,Ny)] = 273 + 60;
   }
@@ -88,7 +90,6 @@ int main(int argc, char **argv) {
 	// send the uppermost and lowest layer to upper and lower slices
 	MPI_Isend(A, Nx*Ny, MPI_FLOAT, top_rank, 0, slices_2D, &topSRequest);
 	MPI_Isend(&(A[IDX_3D(0,0,Mz-1,Nx,Ny)]), Nx*Ny, MPI_FLOAT, bottom_rank, 0, slices_2D, &bottomSRequest);
-
 	// .. we propagate the temperature
     for (int z = 0; z < Mz; z++)
     {
@@ -131,16 +132,18 @@ int main(int argc, char **argv) {
     Vector H = A;
     A = B;
     B = H;
-
+printf("t/T: %d/%d %d\n",t,T,rank);
   }
 
   releaseVector(B);
   releaseVector(bottom_layer);
   releaseVector(top_layer);
+printf("ok? %d\n",rank);
   Vector AA = NULL;
   if(rank == 0){
 	  AA = createVector(Nx*Ny*Nz);
   }
+printf("hey %d\n",rank);
   MPI_Gather(A, Nx*Ny*Mz, MPI_FLOAT, AA, Nx*Ny*Mz, MPI_FLOAT, 0, slices_2D);
   releaseVector(A);
 
