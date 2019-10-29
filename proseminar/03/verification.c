@@ -71,7 +71,7 @@ Vector get_result_1D(int N, int T){
   A[source_x] = 273 + 60;
 #ifdef VERBOSE
 	  printf("1D initial:\n");
-	  printTemperature_1D(A, N, 1, 1);
+	  printTemperature(A, N, 1, 1);
 #endif
 
   // ---------- compute ----------
@@ -108,7 +108,7 @@ Vector get_result_1D(int N, int T){
   releaseVector(B);
 #ifdef VERBOSE
 	  printf("1D final:\n");
-	  printTemperature_1D(A, N, 1, 1);
+	  printTemperature(A, N, 1, 1);
 #endif
 
   return A;

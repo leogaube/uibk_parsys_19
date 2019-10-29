@@ -50,11 +50,17 @@ def outputs2csv():
 			print("incompatible file: %s" % filename)
 			continue
 
-		typ, dim, problem_size = filename.split(".")[0].split("_")
-		name = typ
+		basename = filename.split(".")[0]
+		if basename.count("_") == 2:
+			program_type, dim, problem_size = basename.split("_")
+			name = program_type
+		elif basename.count("_") == 4:
+			program_type, dim, problem_size, slot_distribute, num_slots = basename.split("_")
+			name = "_".join(program_type, num_slots, slot_distribute)
+		else:
+			print("unsupported_basename: %s"%basename)
 
-		# vor 3D problem size 200 --> 200x200x200
-		#problem_size = (("%sx"%problem_size)*find_ints_in_string(dim)[0]).rstrip("x")
+
 		problem_size = int(problem_size)
 		if dim not in results:
 			results[dim] = {}

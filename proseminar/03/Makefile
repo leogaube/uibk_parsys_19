@@ -2,7 +2,7 @@
 SEQUENTIAL_ARRAY = seq_3D seq_2D seq_1D
 PARALLEL_ARRAY = #mpi_1D
 DEPENDENCY_ARRAY = heat_stencil verification
-DEFINES = -DVERBOSE -DSLICE_3D
+DEFINES = -D VERBOSE -D SLICE_3D
 LANGUAGE = c
 #LANGUAGE = cpp
 
@@ -22,7 +22,7 @@ NUM_RANKS_ARRAY = 4 8
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
-PROBLEM_SIZE_ARRAY = 8 16 32 64
+PROBLEM_SIZE_ARRAY = 8 16 32
 
 
 ### OUTPUT + ERRORS ###
@@ -32,7 +32,7 @@ DATA_DIR = ./data
 RESULTS_DIR = ./results
 
 SEQ_NAME = $${sequential}_$${problem_size}
-MPI_NAME = $${parallel}_$${problem_size}_$${slot_distribute}_$${num_ranks}_slots
+MPI_NAME = $${parallel}_$${problem_size}_$${slot_distribute}_$${num_ranks}-slots
 
 SEQ_OUTPUT_FILENAME = $(OUTPUTS_DIR)/$(SEQ_NAME).dat
 MPI_OUTPUT_FILENAME = $(OUTPUTS_DIR)/$(MPI_NAME).dat
