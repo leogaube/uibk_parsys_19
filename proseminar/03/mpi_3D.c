@@ -42,16 +42,16 @@ int main(int argc, char **argv) {
   MPI_Comm slices_2D;
   int dims[1] = {numProcs};
   int periods[1] = {0};
-  //MPI_Dims_create(numProcs, 1, dims);
   MPI_Cart_create(MPI_COMM_WORLD, 1, dims, periods, 0, &slices_2D);
   MPI_Comm_rank(slices_2D, &rank);
-
+  printf("rank after init %d\n",rank);
 
   // get the adjacent slices
   int top_rank = rank;
   int bottom_rank = rank;
   MPI_Cart_shift(slices_2D, 0, 1, &rank, &top_rank);
   MPI_Cart_shift(slices_2D, 0, -1, &rank, &bottom_rank);
+  printf("rank after shift %d\n",rank);
   if(top_rank == MPI_PROC_NULL) { top_rank = rank; }
   if(bottom_rank == MPI_PROC_NULL) { bottom_rank = rank; }
 
@@ -85,21 +85,26 @@ int main(int argc, char **argv) {
   Vector top_layer = createVector(Nx*Ny);
   Vector bottom_layer = createVector(Nx*Ny);
 
+  MPI_Isend(A, Nx*Ny, MPI_FLOAT, top_rank, 0, slices_2D, &topSRequest);
+  MPI_Isend(&(A[IDX_3D(0,0,Mz-1,Nx,Ny)]), Nx*Ny, MPI_FLOAT, bottom_rank, 0, slices_2D, &bottomSRequest);
+
+  MPI_Irecv(bottom_layer, Nx*Ny, MPI_FLOAT, bottom_rank, 0, slices_2D, &bottomRRequest);
+  MPI_Irecv(top_layer, Nx*Ny, MPI_FLOAT, top_rank, 0, slices_2D, &topRRequest);
+
   // for each time step ..
   for (int t = 0; t < T; t++) {
 	// send the uppermost and lowest layer to upper and lower slices
-	MPI_Isend(A, Nx*Ny, MPI_FLOAT, top_rank, 0, slices_2D, &topSRequest);
-	MPI_Isend(&(A[IDX_3D(0,0,Mz-1,Nx,Ny)]), Nx*Ny, MPI_FLOAT, bottom_rank, 0, slices_2D, &bottomSRequest);
 	// .. we propagate the temperature
     for (int z = 0; z < Mz; z++)
     {
-      if(z==0){
-    	  MPI_Irecv(top_layer, Nx*Ny, MPI_FLOAT, top_rank, 0, slices_2D, &topRRequest);
-	  MPI_Wait(&topRRequest, MPI_STATUS_IGNORE);
-      } else if (z==Mz-1){
-    	  MPI_Irecv(bottom_layer, Nx*Ny, MPI_FLOAT, bottom_rank, 0, slices_2D, &bottomRRequest);
-	  MPI_Wait(&bottomRRequest, MPI_STATUS_IGNORE);
-      }
+	  //sync data
+	  if (z == 0){
+	    MPI_Wait(&topSRequest, MPI_STATUS_IGNORE);
+	    MPI_Wait(&bottomRRequest, MPI_STATUS_IGNORE);}
+	  else if (z == Mz - 1){
+	    MPI_Wait(&bottomSRequest, MPI_STATUS_IGNORE);
+	    MPI_Wait(&topRRequest, MPI_STATUS_IGNORE);
+  	  }
       for (int y = 0; y < Ny; y++)
       {
         for (int x = 0; x < Nx; x++)
@@ -129,27 +134,39 @@ int main(int argc, char **argv) {
           B[i] = tc + 0.4/6 * (tl + tr + tu + td + tf + tb + (-6 * tc));
         }
       }
+
+      // send/receive "data corners" to/from the prev/next rank
+      if (z == 0){
+    	  MPI_Isend(A, Nx*Ny, MPI_FLOAT, top_rank, 0, slices_2D, &topSRequest);
+    	  MPI_Irecv(bottom_layer, Nx*Ny, MPI_FLOAT, bottom_rank, 0, slices_2D, &bottomRRequest);
+      }
+      else if (z == Mz - 1){
+    	  MPI_Isend(&(A[IDX_3D(0,0,Mz-1,Nx,Ny)]), Nx*Ny, MPI_FLOAT, bottom_rank, 0, slices_2D, &bottomSRequest);
+    	  MPI_Irecv(top_layer, Nx*Ny, MPI_FLOAT, top_rank, 0, slices_2D, &topRRequest);
+      }
     }
     // swap matrices (just pointers, not content)
     Vector H = A;
     A = B;
     B = H;
-printf("t/T: %d/%d %d\n",t,T,rank);
+    printf("t/T: %d/%d %d\n",t,T,rank);
   }
+  printf("DONE %d\n", rank);
 
   releaseVector(B);
   releaseVector(bottom_layer);
   releaseVector(top_layer);
-printf("ok? %d\n",rank);
+  printf("ok? %d\n",rank);
   Vector AA = NULL;
-  if(rank == 0){
+  if(rank == top_rank){
 	  AA = createVector(Nx*Ny*Nz);
   }
-printf("hey %d\n",rank);
+  printf("hey %d\n",rank);
   MPI_Gather(A, Nx*Ny*Mz, MPI_FLOAT, AA, Nx*Ny*Mz, MPI_FLOAT, 0, slices_2D);
+  printf("final %d\n",rank);
   releaseVector(A);
 
-  if (rank == 0){
+  if (rank == top_rank){
 #ifdef VERBOSE
 		printf("Final:\t\t");
 		printTemperature(AA, Nx, Ny, Nz);
