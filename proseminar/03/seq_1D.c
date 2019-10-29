@@ -99,7 +99,7 @@ int main(int argc, char **argv) {
   releaseVector(A);
 
   clock_t end = clock();
-  printf("The process took %g seconds to finish. \n", ((double)(end - start)) / CLOCKS_PER_SEC);
+  printf("The process took %f seconds to finish. \n", ((double)(end - start)) / CLOCKS_PER_SEC);
 
   // done
   return (success) ? EXIT_SUCCESS : EXIT_FAILURE;

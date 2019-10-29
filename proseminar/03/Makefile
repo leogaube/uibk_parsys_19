@@ -22,7 +22,7 @@ NUM_RANKS_ARRAY = 4 8
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
-PROBLEM_SIZE_ARRAY = 25 50
+PROBLEM_SIZE_ARRAY = 8 16 32
 
 
 ### OUTPUT + ERRORS ###
@@ -68,6 +68,9 @@ ifeq ($(OS), Windows_NT)
 	MPI_FLAGS += -I "$(CYGWIN_PATH)\usr\include" 
 	MPI_FLAGS += -I "$(CYGWIN_PATH)\lib\openmpi"
 
+	#[ $${sequential} = seq_1D ] && problem_size="$$(($${problem_size}*$${problem_size}*$${problem_size}))"; \
+	[ $${sequential} = seq_2D ] && problem_size="$$(($${problem_size}*$${problem_size}))"; \
+
 	SEQ_EXEC_COMMAND = echo "running '$(SEQ_NAME)'";
 	SEQ_EXEC_COMMAND += ./$${sequential} $${problem_size} 1>> $(SEQ_OUTPUT_FILENAME) 2>> $(SEQ_ERROR_FILENAME)
 
@@ -99,7 +102,10 @@ else
 	SGE_MPI_FLAGS += -pe openmpi-$$slot_distribute $$num_ranks
 	#cannot use '-b yes' because openmpi module needs to be loaded on lcc2 cluster TODO
 
-	SEQ_EXEC_COMMAND = qsub $(SGE_SEQ_FLAGS) ./$${sequential} $${problem_size}
+	SEQ_EXEC_COMMAND = [ $${parallel} = seq_1D ] && problem_size=eval "awk -v num=$${problem_size} 'BEGIN{print int(num^(3))}'";
+	SEQ_EXEC_COMMAND += [ $${parallel} = seq_2D ] && problem_size=eval "awk -v num=$${problem_size} 'BEGIN{print int(num^(3/2))}'";
+	SEQ_EXEC_COMMAND += echo $${problem_size};
+	SEQ_EXEC_COMMAND += qsub $(SGE_SEQ_FLAGS) ./$${sequential} $${problem_size}
 
 	MPI_EXEC_COMMAND = echo -e "module load openmpi/$(MPI_VERSION) 2>/dev/null\nmpiexec -n $${num_ranks} ./$${parallel} $${problem_size}" > job.tmp;
 	MPI_EXEC_COMMAND += qsub $(SGE_MPI_FLAGS) job.tmp;
@@ -127,7 +133,7 @@ $(RESULTS_DIR):
 ### COMPILE ###
 %.o: %.$(LANGUAGE) %.h
 	@echo "compiling $@"
-	@$(CC) $(CC_FLAGS) $(DEFINES) -c $< -o $@
+	$(CC) $(CC_FLAGS) $(DEFINES) -c $< -o $@
 	@echo
 
 $(SEQ_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
@@ -181,7 +187,7 @@ run_mpi run_mpi_single: $(MPI_EXECUTABLES) $(OUTPUTS_DIR) $(ERRORS_DIR)
 .PHONEY: run
 run: super_clean run_seq run_mpi
 ifeq ($(OS), Windows_NT)
-run: plots check
+#run: plots check
 else
 	@qstat
 endif
@@ -226,6 +232,7 @@ clean:
 .PHONEY: super_clean
 super_clean: clean
 	@rm -r $(OUTPUTS_DIR) 2>/dev/null  || true
+	@rm -r $(DATA_DIR) 2>/dev/null  || true
 	@rm -r $(RESULTS_DIR) 2>/dev/null  || true
 	@echo "... and also outputs and results!"
 	@echo 
