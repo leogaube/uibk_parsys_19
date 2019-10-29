@@ -95,8 +95,10 @@ int main(int argc, char **argv) {
     {
       if(z==0){
     	  MPI_Irecv(top_layer, Nx*Ny, MPI_FLOAT, top_rank, 0, slices_2D, &topRRequest);
+	  MPI_Wait(&topRRequest, MPI_STATUS_IGNORE);
       } else if (z==Mz-1){
     	  MPI_Irecv(bottom_layer, Nx*Ny, MPI_FLOAT, bottom_rank, 0, slices_2D, &bottomRRequest);
+	  MPI_Wait(&bottomRRequest, MPI_STATUS_IGNORE);
       }
       for (int y = 0; y < Ny; y++)
       {
