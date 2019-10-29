@@ -3,7 +3,7 @@
 
 #include <time.h>
 
-typedef float value_t;
+#include "heat_stencil.h"
 
 // -- simulation code ---
 
@@ -42,6 +42,7 @@ int main(int argc, char **argv) {
   int source_z = Nz / 4;
   A[IDX_3D(source_x,source_y, source_z,Nx,Ny)] = 273 + 60;
 
+#ifdef VERBOSE
   printf("Initial:\n");
   printTemperature(A, Nx, Ny, Nz);
 #endif
@@ -118,10 +119,5 @@ int main(int argc, char **argv) {
   printf("The process took %g seconds to finish. \n", ((double)(end - start)) / CLOCKS_PER_SEC);
 
   // done
-  return (success) ? EXIT_SUCCESS : EXIT_FAILURE;
-}
-
-Vector createVector(int N) {
-  // create data and index vector
-  return malloc(sizeof(value_t) * N);
+  return EXIT_SUCCESS;
 }
