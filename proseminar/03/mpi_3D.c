@@ -42,6 +42,7 @@ int main(int argc, char **argv) {
   MPI_Comm slices_2D;
   int dims[1] = {1};
   int periods[1] = {0};
+  MPI_Dims_create(numProcs, 1, dims);
   MPI_Cart_create(MPI_COMM_WORLD, 1, dims, periods, 1, &slices_2D);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -84,10 +85,8 @@ int main(int argc, char **argv) {
   Vector top_layer = createVector(Nx*Ny);
   Vector bottom_layer = createVector(Nx*Ny);
 
-  printf("start\n");
   // for each time step ..
   for (int t = 0; t < T; t++) {
-    printf("t=%d %d\n",t,rank);
 	// send the uppermost and lowest layer to upper and lower slices
 	MPI_Isend(A, Nx*Ny, MPI_FLOAT, top_rank, 0, slices_2D, &topSRequest);
 	MPI_Isend(&(A[IDX_3D(0,0,Mz-1,Nx,Ny)]), Nx*Ny, MPI_FLOAT, bottom_rank, 0, slices_2D, &bottomSRequest);
@@ -144,9 +143,7 @@ int main(int argc, char **argv) {
   if(rank == 0){
 	  AA = createVector(Nx*Ny*Nz);
   }
-  printf("Gather started %d\n",rank);
   MPI_Gather(A, Nx*Ny*Mz, MPI_FLOAT, AA, Nx*Ny*Mz, MPI_FLOAT, 0, slices_2D);
-  printf("Gather ended %d\n",rank);
   releaseVector(A);
 
   if (rank == 0){
@@ -159,18 +156,14 @@ int main(int argc, char **argv) {
 	  // ---------- check ----------
 	  double residual = is_verified_3D(AA, Nx, Ny, Nz, source_x, source_y, source_z, T);
 	  printf("The maximal deviation from the 1D theory is %fK.", residual);
-  }
 
-  // ---------- cleanup ----------
-  releaseVector(AA);
+	  // ---------- cleanup ----------
+	  releaseVector(AA);
 
-  if (rank == 0)
-  {
     double end = MPI_Wtime();
     printf("The process took %g seconds to finish. \n", end - start);
   }
 
-  printf("all done %d\n",rank);
   MPI_Finalize();
 
   // done
