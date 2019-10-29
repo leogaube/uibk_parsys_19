@@ -175,6 +175,7 @@ void printTemperature_1D(Vector m, int N) {
     c = (c >= numColors) ? numColors - 1 : ((c < 0) ? 0 : c);
 
     // print the average temperature
+    // if numbers are desired use printf("%2.2f\t",temp-273);
     printf("%c", colors[c]);
   }
   // right wall
