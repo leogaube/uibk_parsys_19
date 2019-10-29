@@ -52,7 +52,7 @@ PYTHON = python
 
 ### Windows/LCC2 specific setup ###
 ifeq ($(OS), Windows_NT)
-	MPI_VERSION = 3.1.3
+	MPI_VERSION = 3.1.1
 
 	LOAD_MPI = ""
 
@@ -72,7 +72,7 @@ ifeq ($(OS), Windows_NT)
 	MPI_EXEC_COMMAND = echo "running '$(MPI_NAME)'";
 	MPI_EXEC_COMMAND += mpiexec -n $${num_ranks} --oversubscribe ./$${parallel} $${problem_size} 1>> $(MPI_OUTPUT_FILENAME) 2>> $(MPI_ERROR_FILENAME)
 else
-	MPI_VERSION = 4.0.1
+	MPI_VERSION = 3.1.1
 
 	LOAD_MPI = module load openmpi/$(MPI_VERSION) 2>/dev/null && 
 

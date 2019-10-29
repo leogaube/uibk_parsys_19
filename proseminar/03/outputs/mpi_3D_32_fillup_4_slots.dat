@@ -1,0 +1,42 @@
+Computing heat-distribution for room size Nx=32, Ny=32, Nz=32 for T=3200 timesteps
+Computing heat-distribution for room size Nx=32, Ny=32, Nz=32 for T=3200 timesteps
+Computing heat-distribution for room size Nx=32, Ny=32, Nz=32 for T=3200 timesteps
+Computing heat-distribution for room size Nx=32, Ny=32, Nz=32 for T=3200 timesteps
+Final:		########### ONLY DISPLAYING SLICE 0 of 3D room ##############
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+
+##################################
+
+1D initial:
+X@                        X
+
+##################################
+1D final:
+X@@@@@@@@@@@@@@%#XX^**++==X
+
+##################################
+The maximal deviation from the 1D theory is -60.000000K.The process took 0.589179 seconds to finish. 

@@ -51,12 +51,7 @@ int main(int argc, char **argv) {
   MPI_Cart_shift(slices_2D, 0, 1, &bottom_rank, &top_rank);
   if(top_rank == MPI_PROC_NULL) { top_rank = rank; }
   if(bottom_rank == MPI_PROC_NULL) { bottom_rank = rank; }
-  printf("t: %d, b: %d, self:%d\n",top_rank, bottom_rank, rank);
 
-  MPI_Request topSRequest;
-  MPI_Request topRRequest;
-  MPI_Request bottomSRequest;
-  MPI_Request bottomRRequest;
   // ---------- setup ----------
 
   // create a buffer for storing temperature fields
@@ -88,17 +83,17 @@ int main(int argc, char **argv) {
   for (int t = 0; t < T; t++) {
 	if(rank != top_rank){
 	  // everyone except the highest send to top
-	  MPI_Send(A, Nx*Ny, MPI_FLOAT, top_rank, 0, slices_2D, &topSRequest);
+	  MPI_Ssend(A, Nx*Ny, MPI_FLOAT, top_rank, 0, slices_2D);
 	}
 	if(rank != bottom_rank){
 	  // everyone except the lowest receive from bottom
-	  MPI_Recv(bottom_layer, Nx*Ny, MPI_FLOAT, bottom_rank, 0, slices_2D, &bottomRRequest);
+	  MPI_Recv(bottom_layer, Nx*Ny, MPI_FLOAT, bottom_rank, 0, slices_2D, MPI_STATUS_IGNORE);
 	  // everyone except the lowest send to bottom
-	  MPI_Send(&(A[IDX_3D(0,0,Mz-1,Nx,Ny)]), Nx*Ny, MPI_FLOAT, bottom_rank, 0, slices_2D, &bottomSRequest);
+	  MPI_Ssend(&(A[IDX_3D(0,0,Mz-1,Nx,Ny)]), Nx*Ny, MPI_FLOAT, bottom_rank, 0, slices_2D);
 	}
 	if(rank != top_rank){
 	  // everyone except highest receive from top
-	  MPI_Recv(top_layer, Nx*Ny, MPI_FLOAT, top_rank, 0, slices_2D, &topRRequest);
+	  MPI_Recv(top_layer, Nx*Ny, MPI_FLOAT, top_rank, 0, slices_2D, MPI_STATUS_IGNORE);
 	}
 	// send the uppermost and lowest layer to upper and lower slices
 	// .. we propagate the temperature
@@ -147,22 +142,18 @@ int main(int argc, char **argv) {
     Vector H = A;
     A = B;
     B = H;
-    printf("t/T: %d/%d %d\n",t,T,rank);
   }
-  printf("DONE %d\n", rank);
 
   releaseVector(B);
   releaseVector(bottom_layer);
   releaseVector(top_layer);
-  printf("ok? %d\n",rank);
   Vector AA = NULL;
   if(rank == 0){
-	  printf("%d is done as well\n",rank);
 	  AA = createVector(Nx*Ny*Nz);
   }
-  printf("hey %d\n",rank);
+
   MPI_Gather(A, Nx*Ny*Mz, MPI_FLOAT, AA, Nx*Ny*Mz, MPI_FLOAT, 0, slices_2D);
-  printf("final %d\n",rank);
+
   releaseVector(A);
 
   if (rank == 0){
