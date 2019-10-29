@@ -49,12 +49,10 @@ int main(int argc, char **argv) {
   // get the adjacent slices
   int top_rank = rank;
   int bottom_rank = rank;
-  if(rank>0){
-	  MPI_Cart_shift(slices_2D, 0, 1, &rank, &top_rank);
-  }
-  if(rank<numProcs-1){
-	  MPI_Cart_shift(slices_2D, 0, -1, &rank, &bottom_rank);
-  }
+  MPI_Cart_shift(slices_2D, 0, 1, &rank, &top_rank);
+  MPI_Cart_shift(slices_2D, 0, -1, &rank, &bottom_rank);
+  if(top_rank == MPI_PROC_NULL) { top_rank = rank; }
+  if(bottom_rank == MPI_PROC_NULL) { bottom_rank = rank; }
 
   MPI_Request topSRequest;
   MPI_Request topRRequest;
