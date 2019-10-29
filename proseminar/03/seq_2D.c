@@ -5,10 +5,6 @@
 
 #include "heat_stencil.h"
 
-#define RESOLUTION 120
-
-void printTemperature(Vector m, int nx, int ny);
-
 // -- simulation code ---
 
 int main(int argc, char **argv) {
@@ -23,7 +19,7 @@ int main(int argc, char **argv) {
 	  Nx = atoi(argv[1]);
 	  Ny = atoi(argv[2]);
   }
-  int T = Nx+Ny;
+  int T = MAX(Nx, Ny) * 500;
 #ifdef VERBOSE
   printf("Computing heat-distribution for room size Nx=%d, Ny=%d for T=%d timesteps\n", Nx, Ny, T);
 #endif
@@ -44,7 +40,7 @@ int main(int argc, char **argv) {
 
 #ifdef VERBOSE
   printf("Initial:\n");
-  printTemperature(A, Nx, Ny);
+  printTemperature(A, Nx, Ny, 1);
 #endif
 
   // ---------- compute ----------
@@ -54,46 +50,54 @@ int main(int argc, char **argv) {
 
   // for each time step ..
   for (int t = 0; t < T; t++) {
-	// .. we propagate the temperature
-	for (int y = 0; y < Ny; y++) {
-		for(int x = 0; x < Nx; x++){
-			// get the current idx
-			long i = IDX_2D(x,y,Nx);
+    // .. we propagate the temperature
+    for (int y = 0; y < Ny; y++)
+    {
+      for (int x = 0; x < Nx; x++)
+      {
+        // get the current idx
+        long i = IDX_2D(x, y, Nx);
 
-			// center stays constant (the heat is still on)
-			if (x == source_x && y == source_y) {
-				B[i] = A[i];
-				continue;
-			}
+        // center stays constant (the heat is still on)
+        if (x == source_x && y == source_y)
+        {
+          B[i] = A[i];
+          continue;
+        }
 
-			// get temperature at current position
-			value_t tc = A[i];
+        // get temperature at current position
+        value_t tc = A[i];
 
-			// get temperatures of adjacent cells
-		    value_t tl = (x != 0) ? A[IDX_2D(x-1,y,Nx)] : tc;
-		    value_t tr = (x != Nx - 1) ? A[IDX_2D(x+1,y,Nx)] : tc;
-		    value_t tu = (y != 0) ? A[IDX_2D(x,y-1,Nx)] : tc;
-		    value_t td = (y != Ny - 1) ? A[IDX_2D(x,y+1,Nx)] : tc;
+        // get temperatures of adjacent cells
+        value_t tl = (x != 0) ? A[IDX_2D(x - 1, y, Nx)] : tc;
+        value_t tr = (x != Nx - 1) ? A[IDX_2D(x + 1, y, Nx)] : tc;
+        value_t tu = (y != 0) ? A[IDX_2D(x, y - 1, Nx)] : tc;
+        value_t td = (y != Ny - 1) ? A[IDX_2D(x, y + 1, Nx)] : tc;
 
+        // compute new temperature at current position
+        B[i] = tc + 0.16666 * (tl + tr + tu + td + (-4 * tc));
+      }
+    }
 
-			// compute new temperature at current position
-			B[i] = tc + 0.2 * (tl + tr + tu + td + (-4 * tc));
-		}
-	}
+    // swap matrices (just pointers, not content)
+    Vector H = A;
+    A = B;
+    B = H;
+
 #ifdef VERBOSE
-	printf("time %i:\n",t);
-	printTemperature(B, Nx, Ny);
+    if (!(t % 1000))
+    {
+      printf("Step t=%d:\n", t);
+      printTemperature(A, Nx, Ny, 1);
+      printf("\n");
+    }
 #endif
-	// swap matrices (just pointers, not content)
-	Vector H = A;
-	A = B;
-	B = H;
   }
 
   releaseVector(B);
 #ifdef VERBOSE
   printf("Final:\n");
-  printTemperature(A, Nx, Ny);
+  printTemperature(A, Nx, Ny, 1);
 #endif
 
   // ---------- check ----------
@@ -109,50 +113,4 @@ int main(int argc, char **argv) {
 
   // done
   return EXIT_SUCCESS;
-}
-
-void printTemperature(Vector m, int nx, int ny) {
-  const char *colors = " .-:=+*^X#%@";
-  const int numColors = 12;
-
-  // boundaries for temperature (for simplicity hard-coded)
-  const value_t max = 273 + 30;
-  const value_t min = 273 + 0;
-
-  // set the 'render' resolution
-  int Wx = RESOLUTION;
-  int Wy = RESOLUTION;
-  if(Wx>nx){	Wx=nx;	};
-  if(Wy>ny){	Wy=ny;	};
-
-  // step size in each dimension
-  int sWx = nx / Wx;
-  int sWy = ny / Wy;
-
-  // room
-  // actual room
-  for(int j=0; j<Wy; j++){
-	  // left wall
-	  printf("X");
-	  for (int i = 0; i < Wx; i++) {
-		// get max temperature in this tile
-		value_t max_t = 0;
-		for (int y = sWy * j; y < sWy * j + sWy; y++) {
-			for (int x = sWx * i; x < sWx * i + sWx; x++) {
-				max_t = (max_t < m[IDX_2D(x,y,nx)]) ? m[IDX_2D(x,y,nx)] : max_t;
-			}
-		}
-		value_t temp = max_t;
-
-		// pick the 'color'
-		int c = ((temp - min) / (max - min)) * numColors;
-		c = (c >= numColors) ? numColors - 1 : ((c < 0) ? 0 : c);
-
-		// print the average temperature
-	    // if numbers are desired use printf("%2.2f\t",temp-273);
-		printf("%c", colors[c]);
-	  }
-	  // right wall
-	  printf("X\n");
-  }
 }

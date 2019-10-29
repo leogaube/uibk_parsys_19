@@ -4,11 +4,8 @@
 
 #include "heat_stencil.h"
 
-#define RESOLUTION 120
-
 Vector get_result_1D(int N, int T);
 double get_expected_T(Vector result_1D, int dx, int dy, int dz, int room_size_1D);
-void printTemperature_1D(Vector m, int N);
 
 double is_verified_3D(Vector result_3D, int nx, int ny, int nz, int source_x, int source_y, int source_z, int T){
 	/**
@@ -74,7 +71,7 @@ Vector get_result_1D(int N, int T){
   A[source_x] = 273 + 60;
 #ifdef VERBOSE
 	  printf("1D initial:\n");
-	  printTemperature_1D(A, N);
+	  printTemperature_1D(A, N, 1, 1);
 #endif
 
   // ---------- compute ----------
@@ -111,7 +108,7 @@ Vector get_result_1D(int N, int T){
   releaseVector(B);
 #ifdef VERBOSE
 	  printf("1D final:\n");
-	  printTemperature_1D(A, N);
+	  printTemperature_1D(A, N, 1, 1);
 #endif
 
   return A;
@@ -138,46 +135,4 @@ double get_expected_T(Vector result_1D, int dx, int dy, int dz, int room_size_1D
 	double T_2 = result_1D[(int)ceil(d)];
 	double T_expected = T_1 + (T_2 - T_1) * (ceil(d) - d);
 	return T_expected;
-}
-
-
-void printTemperature_1D(Vector m, int N) {
-  const char *colors = " .-:=+*^X#%@";
-  const int numColors = 12;
-
-  // boundaries for temperature (for simplicity hard-coded)
-  const value_t max = 273 + 30;
-  const value_t min = 273 + 0;
-
-  // set the 'render' resolution
-  int W = RESOLUTION;
-  if(N<W){
-	  W=N;
-  }
-
-  // step size in each dimension
-  int sW = N / W;
-
-  // room
-  // left wall
-  printf("X");
-  // actual room
-  for (int i = 0; i < W; i++) {
-    // get max temperature in this tile
-    value_t max_t = 0;
-    for (int x = sW * i; x < sW * i + sW; x++) {
-      max_t = (max_t < m[x]) ? m[x] : max_t;
-    }
-    value_t temp = max_t;
-
-    // pick the 'color'
-    int c = ((temp - min) / (max - min)) * numColors;
-    c = (c >= numColors) ? numColors - 1 : ((c < 0) ? 0 : c);
-
-    // print the average temperature
-    // if numbers are desired use printf("%2.2f\t",temp-273);
-    printf("%c", colors[c]);
-  }
-  // right wall
-  printf("X\n");
 }
