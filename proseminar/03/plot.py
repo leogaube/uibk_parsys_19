@@ -18,14 +18,14 @@ def plot_data(dirs, filename):
 
 	fig = make_subplots(
 		rows=2, cols=2, 
-		subplot_titles=("runtime", "runtime (log_scale)", "speedup", "efficiency"),
+		specs=[[{"colspan": 2}, None], [{}, {}]],
+		subplot_titles=("runtime", "speedup", "efficiency"),
 		horizontal_spacing=0.1,
 		vertical_spacing=0.15)
 
 	fig.update_layout(title_text=filename.split(".")[0] + " heat stencil")
 	fig.update_xaxes(title="room size in all dimensions", type="log")
-	fig.update_yaxes(title="runtime in s", rangemode="tozero", row = 1, col = 1)
-	fig.update_yaxes(title="runtime in s (log scale)", rangemode="tozero", type="log", row = 1, col = 2)
+	fig.update_yaxes(title="runtime in s", rangemode="tozero", type="log", row=1, col=1)
 	fig.update_yaxes(title="absolute speedup", rangemode="tozero", row=2, col=1)
 	fig.update_yaxes(title="absolute efficiency", range=[0., 1.], row = 2, col = 2)
 
@@ -37,7 +37,6 @@ def plot_data(dirs, filename):
             legendgroup=column, name=column, marker=dict(color=DEFAULT_PLOTLY_COLORS[0]))
 
 	fig.add_trace(seq_runtime_trace, row=1, col=1)
-	fig.add_trace(seq_runtime_trace, row=1, col=2)
 
 	for i, column in enumerate(df.columns):
 		if column in ["room_size", "seq"]:
@@ -61,7 +60,6 @@ def plot_data(dirs, filename):
 			legendgroup=column, marker=dict(color=DEFAULT_PLOTLY_COLORS[1+i]), showlegend=False)
 		
 		fig.add_trace(runtime_trace, row=1, col=1)
-		fig.add_trace(runtime_trace, row=1, col=2)
 		fig.add_trace(speedup_trace, row=2, col=1)
 		fig.add_trace(efficiency_trace, row=2, col=2)
 
