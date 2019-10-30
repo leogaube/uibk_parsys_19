@@ -5,22 +5,7 @@
 
 #include <time.h>
 
-typedef double value_t;
-
-#define RESOLUTION 120
-
-#define MAX(x, y) (((x) > (y)) ? (x) : (y))
-#define MIN(x, y) (((x) < (y)) ? (x) : (y))
-
-// -- vector utilities --
-
-typedef value_t *Vector;
-
-Vector createVector(int N);
-
-void releaseVector(Vector m);
-
-void printTemperature(Vector m, int N);
+#include "heat_stencil.h"
 
 // -- simulation code ---
 
@@ -72,10 +57,10 @@ int main(int argc, char **argv) {
     AA[source_x] = 273 + 60;
 
     printf("Initial:\t");
-    printTemperature(AA, N);
+    printTemperature(AA, N, 1, 1);
     printf("\n");
   }
-  MPI_Scatter(AA, M, MPI_DOUBLE, A, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Scatter(AA, M, MPI_FLOAT, A, M, MPI_FLOAT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&source_x, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
   // ---------- compute ----------
@@ -89,14 +74,14 @@ int main(int argc, char **argv) {
   MPI_Request RRrequest;
   MPI_Request RSrequest;
 
-  double leftCell;
-  double rightCell;
+  value_t leftCell;
+  value_t rightCell;
 
-  MPI_Isend(&(A[0]), 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, &LSrequest);
-  MPI_Isend(&(A[M - 1]), 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, &RSrequest);
+  MPI_Isend(&(A[0]), 1, MPI_FLOAT, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, &LSrequest);
+  MPI_Isend(&(A[M - 1]), 1, MPI_FLOAT, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, &RSrequest);
 
-  MPI_Irecv(&leftCell, 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, &LRrequest);
-  MPI_Irecv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, &RRrequest);
+  MPI_Irecv(&leftCell, 1, MPI_FLOAT, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, &LRrequest);
+  MPI_Irecv(&rightCell, 1, MPI_FLOAT, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, &RRrequest);
 
   // for each time step ..
   for (int t = 0; t < T; t++) {
@@ -130,12 +115,12 @@ int main(int argc, char **argv) {
 
       // send/receive "data corners" to/from the prev/next rank
       if (i == 0){
-        MPI_Isend(&(B[i]), 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, &LSrequest);
-        MPI_Irecv(&leftCell, 1, MPI_DOUBLE, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, &LRrequest);
+        MPI_Isend(&(B[i]), 1, MPI_FLOAT, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, &LSrequest);
+        MPI_Irecv(&leftCell, 1, MPI_FLOAT, MAX(rank - 1, 0), 0, MPI_COMM_WORLD, &LRrequest);
       }
       else if (i == M-1){
-        MPI_Isend(&(B[i]), 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, &RSrequest);
-        MPI_Irecv(&rightCell, 1, MPI_DOUBLE, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, &RRrequest);
+        MPI_Isend(&(B[i]), 1, MPI_FLOAT, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, &RSrequest);
+        MPI_Irecv(&rightCell, 1, MPI_FLOAT, MIN(rank + 1, numProcs - 1), 0, MPI_COMM_WORLD, &RRrequest);
       }
       //printf("timestep: %d, %lld, %d\n", t, i, rank);
     }
@@ -148,11 +133,11 @@ int main(int argc, char **argv) {
     // show intermediate step
     if (!(t % 1000))
     {
-      MPI_Gather(A, M, MPI_DOUBLE, AA, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Gather(A, M, MPI_FLOAT, AA, M, MPI_FLOAT, 0, MPI_COMM_WORLD);
       if (rank == 0)
       {
         printf("Step t=%d:\t", t);
-        printTemperature(AA, N);
+        printTemperature(AA, N, 1, 1);
         printf("\n");
       }
     }
@@ -162,10 +147,10 @@ int main(int argc, char **argv) {
 
   // ---------- check ----------
 
-  MPI_Gather(A, M, MPI_DOUBLE, AA, M, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Gather(A, M, MPI_FLOAT, AA, M, MPI_FLOAT, 0, MPI_COMM_WORLD);
   if (rank == 0){
     printf("Final:\t\t");
-    printTemperature(AA, N);
+    printTemperature(AA, N, 1, 1);
     printf("\n");
   }
 
@@ -200,48 +185,4 @@ int main(int argc, char **argv) {
 
   // done
   return (success) ? EXIT_SUCCESS : EXIT_FAILURE;
-}
-
-Vector createVector(int N) {
-  // create data and index vector
-  return malloc(sizeof(value_t) * N);
-}
-
-void releaseVector(Vector m) { free(m); }
-
-void printTemperature(Vector m, int N) {
-  const char *colors = " .-:=+*^X#%@";
-  const int numColors = 12;
-
-  // boundaries for temperature (for simplicity hard-coded)
-  const value_t max = 273 + 30;
-  const value_t min = 273 + 0;
-
-  // set the 'render' resolution
-  int W = RESOLUTION;
-
-  // step size in each dimension
-  int sW = N / W;
-
-  // room
-  // left wall
-  printf("X");
-  // actual room
-  for (int i = 0; i < W; i++) {
-    // get max temperature in this tile
-    value_t max_t = 0;
-    for (int x = sW * i; x < sW * i + sW; x++) {
-      max_t = (max_t < m[x]) ? m[x] : max_t;
-    }
-    value_t temp = max_t;
-
-    // pick the 'color'
-    int c = ((temp - min) / (max - min)) * numColors;
-    c = (c >= numColors) ? numColors - 1 : ((c < 0) ? 0 : c);
-
-    // print the average temperature
-    printf("%c", colors[c]);
-  }
-  // right wall
-  printf("X");
 }

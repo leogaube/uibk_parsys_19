@@ -1,6 +1,6 @@
 ### PROGRAMS ###
-SEQUENTIAL_ARRAY = seq_3D seq_2D
-PARALLEL_ARRAY = mpi_3D mpi_2D
+SEQUENTIAL_ARRAY = seq_3D seq_2D seq_1D
+PARALLEL_ARRAY = mpi_3D mpi_2D mpi_1D
 DEPENDENCY_ARRAY = heat_stencil verification
 DEFINES = -D VERBOSE -D SLICE_3D
 LANGUAGE = c
