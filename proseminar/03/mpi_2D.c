@@ -17,10 +17,7 @@ int main(int argc, char **argv) {
   if (argc == 2) {
     Nx = Ny = atoi(argv[1]);
   }
-  int T = MAX(Nx, Ny)*100;
-#ifdef VERBOSE
-  printf("Computing heat-distribution for room size Nx=%d, Ny=%d, Nz=%d for T=%d timesteps\n", Nx, Ny, Nz, T);
-#endif
+  int T = MAX(Nx, Ny)*500;
 
   // MPI setup
   int rank, numProcs;
@@ -34,11 +31,17 @@ int main(int argc, char **argv) {
   }
   int My = Ny / numProcs;
 
+
   MPI_Comm stripes_1D;
   int dims[1] = {numProcs};
   int periods[1] = {0};
   MPI_Cart_create(MPI_COMM_WORLD, 1, dims, periods, 1, &stripes_1D);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+#ifdef VERBOSE
+  if (rank == 0)
+    printf("Computing heat-distribution for room size Nx=%d, Ny=%d for T=%d timesteps\n", Nx, Ny, T);
+#endif
 
   // get the adjacent slices
   int top_rank = rank;
@@ -106,7 +109,7 @@ int main(int argc, char **argv) {
           // get temperatures of adjacent cells
           value_t tl = (x != 0) ? A[IDX_2D(x - 1, y, Nx)] : tc;
           value_t tr = (x != Nx - 1) ? A[IDX_2D(x + 1, y, Nx)] : tc;
-	  value_t tu, td;
+	        value_t tu, td;
           if(rank == top_rank){
             tu = (y != 0) ? A[IDX_2D(x, y - 1, Nx)] : tc;
           } else {
@@ -129,7 +132,7 @@ int main(int argc, char **argv) {
 
 #ifdef VERBOSE
     // show intermediate step
-    if (!(t % 500))
+    if (!(t % 1000))
     {
       MPI_Gather(A, Nx*My, MPI_FLOAT, AA, Nx*My, MPI_FLOAT, 0, stripes_1D);
       if (rank == 0)
@@ -149,9 +152,11 @@ int main(int argc, char **argv) {
   releaseVector(A);
 
   if (rank == 0){
-    printf("Final:\t\n");
+#ifdef VERBOSE
+    printf("Final:\n");
     printTemperature(AA, Nx, Ny, 1);
     printf("\n");
+#endif
 
     // ---------- check ----------
     double residual = is_verified_2D(AA, Nx, Ny, source_x, source_y, T);
