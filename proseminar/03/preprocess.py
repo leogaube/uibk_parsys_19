@@ -42,10 +42,9 @@ def get_avg_runtime(path, filename):
 		return None
 
 	str_runtimes = " - ".join([s.split("seconds")[0] for s in output.split("The process took") if "seconds" in s])
-	if "seq" in filename:
-		print(filename, str_runtimes)
 	runtimes = find_floats_in_string(str_runtimes)
 	if len(runtimes) == 0:
+		print("missing value for '%s'"%filename)
 		return None
 
 	return sum(runtimes)/len(runtimes)
@@ -73,7 +72,7 @@ def outputs2csv():
 			results[dim] = {}
 		if name not in results[dim]:
 			results[dim][name] = {}
-		print("extracting data from %s" % filename)
+		#print("extracting data from %s" % filename)
 
 		results[dim][name][problem_size] = get_avg_runtime(OUTPUTS_PATH, filename)
 
