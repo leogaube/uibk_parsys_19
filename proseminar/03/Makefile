@@ -1,6 +1,6 @@
 ### PROGRAMS ###
-SEQUENTIAL_ARRAY = seq_3D seq_2D seq_1D
-PARALLEL_ARRAY = mpi_3D mpi_2D mpi_1D
+SEQUENTIAL_ARRAY = seq_2D seq_1D
+PARALLEL_ARRAY = mpi_2D mpi_1D
 DEPENDENCY_ARRAY = heat_stencil verification
 DEFINES = -D VERBOSE -D SLICE_3D
 LANGUAGE = c
@@ -16,13 +16,13 @@ PRINT_FILES = print_files.py
 # --> use 'make run' for submitting multiple jobs with different configurations
 # the default configuration consists of all first elements of the *_ARRAY variables
 # --> use 'make run_mpi_single' for submitting a single job. 
-NUM_RUNS = 2
+NUM_RUNS = 1
 
-NUM_RANKS_ARRAY = 2 4 8
+NUM_RANKS_ARRAY = 2 4 8 16
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
-PROBLEM_SIZE_ARRAY = 8 16 32
+PROBLEM_SIZE_ARRAY = 128 256
 
 
 ### OUTPUT + ERRORS ###
@@ -76,7 +76,7 @@ ifeq ($(OS), Windows_NT)
 	MPI_EXEC_COMMAND = echo "running '$(MPI_NAME)'";
 	MPI_EXEC_COMMAND += mpiexec -n $${num_ranks} --oversubscribe ./$${parallel} $${problem_size} 1>> $(MPI_OUTPUT_FILENAME) 2>> $(MPI_ERROR_FILENAME)
 else
-	MPI_VERSION = 4.0.1
+	MPI_VERSION = 3.1.1
 
 	LOAD_MPI = module load openmpi/$(MPI_VERSION) 2>/dev/null && 
 
@@ -185,7 +185,7 @@ run_mpi run_mpi_single: $(MPI_EXECUTABLES) $(OUTPUTS_DIR) $(ERRORS_DIR)
 
 
 .PHONEY: run
-run: super_clean run_seq run_mpi
+run: run_seq run_mpi
 ifeq ($(OS), Windows_NT)
 run: plots check
 else
@@ -226,7 +226,7 @@ check: check_errors check_outputs
 .PHONEY: clean
 clean:
 	@rm -r $(ERRORS_DIR) 2>/dev/null  || true
-	@rm $(DEP_OBJECTS) $(SEQ_EXECUTABLES) $(MPI_EXECUTABLES) 2>/dev/null || true
+	@rm $(SEQ_EXECUTABLES) $(MPI_EXECUTABLES) 2>/dev/null || true
 	@echo "your directory has been cleaned of executables and errors!"
 
 .PHONEY: super_clean
