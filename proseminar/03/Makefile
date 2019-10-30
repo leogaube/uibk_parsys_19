@@ -6,6 +6,7 @@ DEFINES = -D VERBOSE -D SLICE_3D
 LANGUAGE = c
 #LANGUAGE = cpp
 
+PREPROCESS = preprocess.py
 PLOT = plot.py
 PRINT_FILES = print_files.py
 
@@ -15,22 +16,23 @@ PRINT_FILES = print_files.py
 # --> use 'make run' for submitting multiple jobs with different configurations
 # the default configuration consists of all first elements of the *_ARRAY variables
 # --> use 'make run_mpi_single' for submitting a single job. 
-NUM_RUNS = 1
+NUM_RUNS = 2
 
-NUM_RANKS_ARRAY = 4 8
+NUM_RANKS_ARRAY = 2 4 8
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
-PROBLEM_SIZE_ARRAY = 32
+PROBLEM_SIZE_ARRAY = 8 16 32
 
 
 ### OUTPUT + ERRORS ###
 OUTPUTS_DIR = ./outputs
 ERRORS_DIR = ./errors
+DATA_DIR = ./data
 RESULTS_DIR = ./results
 
 SEQ_NAME = $${sequential}_$${problem_size}
-MPI_NAME = $${parallel}_$${problem_size}_$${slot_distribute}_$${num_ranks}_slots
+MPI_NAME = $${parallel}_$${problem_size}_$${slot_distribute}_$${num_ranks}-slots
 
 SEQ_OUTPUT_FILENAME = $(OUTPUTS_DIR)/$(SEQ_NAME).dat
 MPI_OUTPUT_FILENAME = $(OUTPUTS_DIR)/$(MPI_NAME).dat
@@ -42,12 +44,10 @@ MPI_ERROR_FILENAME = $(ERRORS_DIR)/$(MPI_NAME).err
 ######## SETUP ##########
 ### COMPILERS + FLAGS ###
 CC = gcc
-CC_FLAGS = -O2 -std=c99 -Wall -lm $(DEFINES)
+CC_FLAGS = -O2 -std=c99 -Wall -lm
 
 MPI = mpicc									#mpi++ for c++!
-MPI_FLAGS = -O2 -std=c99 -Wall -lm $(DEFINES)
-
-DEP_FLAGS = -DVERBOSE
+MPI_FLAGS = -O2 -std=c99 -Wall -lm
 
 PYTHON = python
 
@@ -66,6 +66,9 @@ ifeq ($(OS), Windows_NT)
 	# Windows environmental variable 'CYGWIN_PATH --> C:\cygwin' required
 	MPI_FLAGS += -I "$(CYGWIN_PATH)\usr\include" 
 	MPI_FLAGS += -I "$(CYGWIN_PATH)\lib\openmpi"
+
+	#[ $${sequential} = seq_1D ] && problem_size="$$(($${problem_size}*$${problem_size}*$${problem_size}))"; \
+	[ $${sequential} = seq_2D ] && problem_size="$$(($${problem_size}*$${problem_size}))"; \
 
 	SEQ_EXEC_COMMAND = echo "running '$(SEQ_NAME)'";
 	SEQ_EXEC_COMMAND += ./$${sequential} $${problem_size} 1>> $(SEQ_OUTPUT_FILENAME) 2>> $(SEQ_ERROR_FILENAME)
@@ -98,8 +101,12 @@ else
 	SGE_MPI_FLAGS += -pe openmpi-$$slot_distribute $$num_ranks
 	#cannot use '-b yes' because openmpi module needs to be loaded on lcc2 cluster TODO
 
-	SEQ_EXEC_COMMAND = qsub $(SGE_SEQ_FLAGS) ./$${sequential} $${problem_size}
+	SEQ_EXEC_COMMAND = [ $${sequential} = seq_1D ] && problem_size=eval awk -v num=$${problem_size} 'BEGIN{print int(num^(3))}';
+	SEQ_EXEC_COMMAND += [ $${sequential} = seq_2D ] && problem_size=eval awk -v num=$${problem_size} 'BEGIN{print int(num^(3/2))}';
+	SEQ_EXEC_COMMAND += qsub $(SGE_SEQ_FLAGS) ./$${sequential} $${problem_size}
 
+	MPI_EXEC_COMMAND = [ $${parallel} = seq_1D ] && problem_size=eval awk -v num=$${problem_size} 'BEGIN{print int(num^(3))}';
+	MPI_EXEC_COMMAND += [ $${parallel} = seq_2D ] && problem_size=eval awk -v num=$${problem_size} 'BEGIN{print int(num^(3/2))}';
 	MPI_EXEC_COMMAND = echo -e "module load openmpi/$(MPI_VERSION) 2>/dev/null\nmpiexec -n $${num_ranks} ./$${parallel} $${problem_size}" > job.tmp;
 	MPI_EXEC_COMMAND += qsub $(SGE_MPI_FLAGS) job.tmp;
 	MPI_EXEC_COMMAND += rm job.tmp
@@ -116,24 +123,27 @@ $(OUTPUTS_DIR):
 $(ERRORS_DIR):
 	@mkdir -p $@
 
+$(DATA_DIR):
+	@mkdir -p $@
+
 $(RESULTS_DIR):
 	@mkdir -p $@
 
 
 ### COMPILE ###
-%.o: %.$(LANGUAGE)
+%.o: %.$(LANGUAGE) %.h
 	@echo "compiling $@"
-	@$(CC) $(DEP_FLAGS) $(CC_FLAGS) -c $^ -o $@
+	$(CC) $(CC_FLAGS) $(DEFINES) -c $< -o $@
 	@echo
 
 $(SEQ_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
 	@echo "compiling $@"
-	@$(CC) $(CC_FLAGS) $^ -o $@
+	@$(CC) $(CC_FLAGS) $(DEFINES) $^ -o $@
 	@echo
 
 $(MPI_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
 	@echo "compiling $@"
-	@$(LOAD_MPI)$(MPI) $(MPI_FLAGS) $^ -o $@
+	@$(LOAD_MPI)$(MPI) $(MPI_FLAGS) $(DEFINES) $^ -o $@
 	@echo
 
 compile_all: $(SEQ_EXECUTABLES) $(MPI_EXECUTABLES)
@@ -177,7 +187,7 @@ run_mpi run_mpi_single: $(MPI_EXECUTABLES) $(OUTPUTS_DIR) $(ERRORS_DIR)
 .PHONEY: run
 run: super_clean run_seq run_mpi
 ifeq ($(OS), Windows_NT)
-run: check
+run: plots check
 else
 	@qstat
 endif
@@ -185,10 +195,16 @@ endif
 
 ### VISUALIZE ###
 # TODO --> runtime, speedup, efficiency, ...
+.PHONEY: preprocess
+preprocess: $(OUTPUTS_DIR) $(DATA_DIR)
+	@echo "preprocessing outputs"
+	@$(PYTHON) ./$(PREPROCESS) $(OUTPUTS_DIR) $(DATA_DIR)
+	@echo
+
 .PHONEY: plots
-plots: $(PLOT) $(OUTPUTS_DIR) $(RESULTS_DIR)
+plots: preprocess $(DATA_DIR) $(RESULTS_DIR)
 	@echo "creating some fancy plots..."
-	#@$(PYTHON) ./$(PLOT) $(OUTPUTS_DIR) $(RESULTS_DIR)
+	@$(PYTHON) ./$(PLOT) $(DATA_DIR) $(RESULTS_DIR)
 	@echo 
 
 ### CHECK OUTPUTS & ERRORS ###
@@ -216,6 +232,7 @@ clean:
 .PHONEY: super_clean
 super_clean: clean
 	@rm -r $(OUTPUTS_DIR) 2>/dev/null  || true
+	@rm -r $(DATA_DIR) 2>/dev/null  || true
 	@rm -r $(RESULTS_DIR) 2>/dev/null  || true
 	@echo "... and also outputs and results!"
 	@echo 
