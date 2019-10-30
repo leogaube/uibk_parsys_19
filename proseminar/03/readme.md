@@ -69,6 +69,26 @@ This exercise consists in measuring all heat stencil variants (1D, 2D and 3D) to
 - Illustrate the data in appropriate figures and discuss them. What can you observe?
 - Bonus question: Measure and illustrate an application throughput metric. What can you observe?
 
+## Solution 2
+
+-> See the results folder for plots.
+
+### 1D:
+speedup as already discussed in last homework
+
+### 2D:
+- no speedup measured.
+- probable issues:
+    - room size too small
+    - non-optimal communication
+- optimization strategy:
+    - change the communication such that it is not blocking and
+    - that odd ranks communicate with even ranks
+    
+### 3D:
+- speedup for some runs, same issue as in 2D
+- same optimization strategy as for 2D
+
 ## General Notes
 
 All the material required by the tasks above (e.g. code, figures, etc...) must be part of the solution that is handed in. Your experiments should be reproducible and comparable to your own measurements using the solution materials that you hand in. For source code, please provide a makefile or other, intuitive means of compiling with the required flags and settings.
