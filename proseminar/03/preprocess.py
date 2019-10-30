@@ -22,7 +22,8 @@ def dict2csv(dim_dict, filename):
 		for ps in problem_sizes:
 			row = {"room_size": ps}
 			for col_name in dim_dict:
-				if ps in dim_dict[col_name]:
+				#print(col_name, dim_dict[col_name])
+				if dim_dict[col_name] is not None and ps in dim_dict[col_name]:
 					row[col_name] = dim_dict[col_name][ps]
 				else:
 					dim_dict[col_name] = None
@@ -66,7 +67,6 @@ def outputs2csv():
 		else:
 			print("unsupported_basename: %s"%basename)
 
-
 		problem_size = int(problem_size)
 		if dim not in results:
 			results[dim] = {}
@@ -76,8 +76,9 @@ def outputs2csv():
 
 		results[dim][name][problem_size] = get_avg_runtime(OUTPUTS_PATH, filename)
 
-	print(results)
+	#print(results)
 	for dim in results:
+		print(dim)
 		dict2csv(results[dim], dim+".csv")
 	
 

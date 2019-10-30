@@ -37,6 +37,7 @@ def plot_data(dirs, filename):
             legendgroup=column, name=column, marker=dict(color=DEFAULT_PLOTLY_COLORS[0]))
 
 	fig.add_trace(seq_runtime_trace, row=1, col=1)
+	fig.add_trace(seq_runtime_trace, row=1, col=2)
 
 	for i, column in enumerate(df.columns):
 		if column in ["room_size", "seq"]:
