@@ -1,8 +1,8 @@
 ### PROGRAMS ###
-SEQUENTIAL_ARRAY = seq_3D seq_2D seq_1D
-PARALLEL_ARRAY = mpi_3D
+SEQUENTIAL_ARRAY = seq_3D seq_2D
+PARALLEL_ARRAY = mpi_2D
 DEPENDENCY_ARRAY = heat_stencil verification
-DEFINES = -DVERBOSE -DSLICE_3D
+DEFINES = #-DVERBOSE
 LANGUAGE = c
 #LANGUAGE = cpp
 
@@ -21,7 +21,7 @@ NUM_RANKS_ARRAY = 4 8
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
-PROBLEM_SIZE_ARRAY = 32 64
+PROBLEM_SIZE_ARRAY = 16 64
 
 
 ### OUTPUT + ERRORS ###
@@ -42,17 +42,18 @@ MPI_ERROR_FILENAME = $(ERRORS_DIR)/$(MPI_NAME).err
 ######## SETUP ##########
 ### COMPILERS + FLAGS ###
 CC = gcc
-CC_FLAGS = -O2 -std=c99 -Wall
+CC_FLAGS = -O2 -std=c99 -Wall -lm $(DEFINES)
 
 MPI = mpicc									#mpi++ for c++!
-MPI_FLAGS = -O2 -std=c99 -Wall -lm
+MPI_FLAGS = -O2 -std=c99 -Wall -lm $(DEFINES)
 
+DEP_FLAGS = -DVERBOSE
 
 PYTHON = python
 
 ### Windows/LCC2 specific setup ###
 ifeq ($(OS), Windows_NT)
-	MPI_VERSION = 3.1.1
+	MPI_VERSION = 3.1.3
 
 	LOAD_MPI = ""
 
@@ -72,7 +73,7 @@ ifeq ($(OS), Windows_NT)
 	MPI_EXEC_COMMAND = echo "running '$(MPI_NAME)'";
 	MPI_EXEC_COMMAND += mpiexec -n $${num_ranks} --oversubscribe ./$${parallel} $${problem_size} 1>> $(MPI_OUTPUT_FILENAME) 2>> $(MPI_ERROR_FILENAME)
 else
-	MPI_VERSION = 3.1.1
+	MPI_VERSION = 4.0.1
 
 	LOAD_MPI = module load openmpi/$(MPI_VERSION) 2>/dev/null && 
 
@@ -120,19 +121,19 @@ $(RESULTS_DIR):
 
 
 ### COMPILE ###
-%.o: %.$(LANGUAGE) %.h
+%.o: %.$(LANGUAGE)
 	@echo "compiling $@"
-	@$(CC) $(CC_FLAGS) $(DEFINES) -c $< -o $@
+	@$(CC) $(DEP_FLAGS) $(CC_FLAGS) -c $^ -o $@
 	@echo
 
 $(SEQ_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
 	@echo "compiling $@"
-	@$(CC) $(CC_FLAGS) $(DEFINES) $^ -o $@
+	@$(CC) $(CC_FLAGS) $^ -o $@
 	@echo
 
 $(MPI_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
 	@echo "compiling $@"
-	@$(LOAD_MPI)$(MPI) $(MPI_FLAGS) $(DEFINES) $^ -o $@
+	@$(LOAD_MPI)$(MPI) $(MPI_FLAGS) $^ -o $@
 	@echo
 
 compile_all: $(SEQ_EXECUTABLES) $(MPI_EXECUTABLES)
