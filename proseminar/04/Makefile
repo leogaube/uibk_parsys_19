@@ -1,6 +1,6 @@
 ### PROGRAMS ###
 SEQUENTIAL_ARRAY = 
-PARALLEL_ARRAY = slabs_blocking
+PARALLEL_ARRAY = slabs # slabs_blocking
 DEPENDENCY_ARRAY = heat_stencil
 DEFINES = -D VERBOSE -D SLICE_3D
 LANGUAGE = c
