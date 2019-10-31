@@ -1,7 +1,7 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <stdbool.h>
 #include <time.h>
 
 #include "heat_stencil.h"
@@ -142,8 +142,13 @@ int main(int argc, char **argv)
     }
 
     // .. we propagate the temperature
-    for (int z = 0; z < Mz; z++)
+    int is_last_loop = false;
+    for (int z = 1; !is_last_loop; z++)
     {
+      if(z==Mz){
+    	  z = 0;
+    	  is_last_loop = true;
+      }
       for (int y = 0; y < Ny; y++)
       {
         for (int x = 0; x < Nx; x++)
