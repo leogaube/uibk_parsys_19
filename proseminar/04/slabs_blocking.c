@@ -26,7 +26,7 @@ int main(int argc, char **argv)
     Ny = atoi(argv[2]);
     Nz = atoi(argv[3]);
   }
-  int T = MAX(MAX(Nx, Ny), Nz) * 500;
+  int T = MAX(MAX(Nx, Ny), Nz) * 10;
 
   // MPI setup
   int rank, numProcs;
@@ -102,24 +102,41 @@ int main(int argc, char **argv)
   // for each time step ..
   for (int t = 0; t < T; t++)
   {
-    if ((rank % 2 == 1) && (rank != top_rank))
+    if (rank % 2 == 1) // odd ranks send first and receive afterwards
     {
-      // every odd rank (and explicitly not the uppermost one) send to top
-      MPI_Ssend(A, Nx * Ny, MPI_FLOAT, top_rank, 0, slabs);
+      if (rank != top_rank) {
+    	  // every odd rank sends to top
+    	  MPI_Ssend(A, Nx * Ny, MPI_FLOAT, top_rank, 0, slabs);
+      }
+      if (rank != bottom_rank) {
+		  // ... and bottom
+		  MPI_Ssend(&(A[IDX_3D(0, 0, Mz - 1, Nx, Ny)]), Nx * Ny, MPI_FLOAT, bottom_rank, 0, slabs);
+		  // ... and then receives from bottom
+		  MPI_Recv(bottom_layer, Nx * Ny, MPI_FLOAT, bottom_rank, 0, slabs, MPI_STATUS_IGNORE);
+      }
+      if (rank != top_rank){
+    	  // ... and top
+    	  MPI_Recv(top_layer, Nx * Ny, MPI_FLOAT, top_rank, 0, slabs, MPI_STATUS_IGNORE);
+      }
     }
-    if ((rank % 2 == 0) && (rank != bottom_rank))
+    if (rank % 2 == 0) // even ranks receive first and send afterwards
     {
-      // every even rank (and explicitly not the lowest one) receive from bottom
-      MPI_Recv(bottom_layer, Nx * Ny, MPI_FLOAT, bottom_rank, 0, slabs, MPI_STATUS_IGNORE);
-      // every even rank (and explicitly not the lowest one) send to bottom
-      MPI_Ssend(&(A[IDX_3D(0, 0, Mz - 1, Nx, Ny)]), Nx * Ny, MPI_FLOAT, bottom_rank, 0, slabs);
+      if (rank != bottom_rank) {
+    	  // every even rank receives from bottom
+    	  MPI_Recv(bottom_layer, Nx * Ny, MPI_FLOAT, bottom_rank, 0, slabs, MPI_STATUS_IGNORE);
+      }
+      if (rank != top_rank) {
+    	  // ... and top
+    	  MPI_Recv(top_layer, Nx * Ny, MPI_FLOAT, top_rank, 0, slabs, MPI_STATUS_IGNORE);
+    	  // ... and then sends to top
+    	  MPI_Ssend(A, Nx * Ny, MPI_FLOAT, top_rank, 0, slabs);
+      }
+      if (rank != bottom_rank) {
+		  // ... and bottom
+		  MPI_Ssend(&(A[IDX_3D(0, 0, Mz - 1, Nx, Ny)]), Nx * Ny, MPI_FLOAT, bottom_rank, 0, slabs);
+      }
     }
-    if ((rank % 2 == 1) && (rank != top_rank))
-    {
-      // every odd rank (and explicitly not the uppermost one) receive from top
-      MPI_Recv(top_layer, Nx * Ny, MPI_FLOAT, top_rank, 0, slabs, MPI_STATUS_IGNORE);
-    }
-    // send the uppermost and lowest layer to upper and lower slices
+
     // .. we propagate the temperature
     for (int z = 0; z < Mz; z++)
     {

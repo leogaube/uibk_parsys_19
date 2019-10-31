@@ -18,7 +18,7 @@ PRINT_FILES = print_files.py
 # --> use 'make run_mpi_single' for submitting a single job. 
 NUM_RUNS = 1
 
-NUM_RANKS_ARRAY = 2 #4 8 16
+NUM_RANKS_ARRAY = 2 4 8 16
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
@@ -227,6 +227,7 @@ check: check_errors check_outputs
 clean:
 	@rm -r $(ERRORS_DIR) 2>/dev/null  || true
 	@rm $(SEQ_EXECUTABLES) $(MPI_EXECUTABLES) 2>/dev/null || true
+	@rm -rf *.o
 	@echo "your directory has been cleaned of executables and errors!"
 
 .PHONEY: super_clean
