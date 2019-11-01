@@ -8,16 +8,22 @@
 
 # Name your job. Unless you use the -o and -e options, output will
 # go to a unique file name.ojob_id for each job.
-#$ -N heat_stencil
+#$ -N heat_stencil_4_2perhost
 
 # Redirect output stream to this file.
-#$ -o out
+#$ -o output_mpi_4_2perhost
 
 # Redirect error stream to this file.
 #$ -e err
 
-#$ -pe openmpi-fillup 8
+#$ -pe openmpi-2perhost 4
 
-mpicc -Wall heat_stencil_1D_mpi.c -o heat_stencil_1D_mpi
+module load openmpi/4.0.1
 
-mpiexec -n 8 ./heat_stencil_1D_mpi
+problem_size=2000
+while [ $problem_size -le 16000 ]
+do
+  echo $problem_size >> output_mpi_4_2perhost
+  mpiexec -n 4 ./heat_stencil_1D_mpi $problem_size
+  problem_size=$((problem_size*2))
+done

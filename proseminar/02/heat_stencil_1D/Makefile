@@ -5,6 +5,7 @@ MPI_FLAGS=-O2 -std=c99 -Wall
 
 #on windows add include directories 
 ifeq ($(OS), Windows_NT)
+	NUM_RANKS=4
 	MPI_FLAGS+=-I"C:\cygwin64\usr\include" -I"C:\cygwin64\lib\openmpi"
 endif
 
@@ -16,7 +17,11 @@ heat_stencil_1D_seq: heat_stencil_1D_seq.c
 .PHONEY: run_seq
 run_seq: heat_stencil_1D_seq
 	@echo "Sequential:"
+ifeq ($(OS), Windows_NT)
 	@./heat_stencil_1D_seq
+else
+	@qsub job_seq.script
+endif
 	@echo
 
 # parallel
@@ -28,9 +33,10 @@ heat_stencil_1D_mpi: heat_stencil_1D_mpi.c
 run_mpi: heat_stencil_1D_mpi
 	@echo "MPI:"
 ifeq ($(OS), Windows_NT)
-	@mpiexec -n 5 heat_stencil_1D_mpi
+	@mpiexec -n $(NUM_RANKS) heat_stencil_1D_mpi
 else
-	@qsub job.script
+	@qsub job_fillup.script
+	@qsub job_2perhost.script
 endif
 	@echo
 
@@ -46,3 +52,4 @@ run: run_seq run_mpi
 clean:
 	@rm heat_stencil_1D_seq 2> /dev/null || true
 	@rm heat_stencil_1D_mpi 2> /dev/null || true
+	@rm output* 2> /dev/null || true

@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# Execute job in the queue "std.q" unless you have special requirements.
+#$ -q std.q
+
+# The batch system should use the current directory as working directory.
+#$ -cwd
+
+# Name your job. Unless you use the -o and -e options, output will
+# go to a unique file name.ojob_id for each job.
+#$ -N heat_stencil_seq
+
+# Redirect output stream to this file.
+#$ -o output_seq
+
+# Redirect error stream to this file.
+#$ -e err
+
+module load openmpi/4.0.1
+
+problem_size=2000
+while [ $problem_size -le 16000 ]
+do
+  echo $problem_size >> output_seq
+  ./heat_stencil_1D_seq $problem_size >> output_seq
+  problem_size=$((problem_size*2))
+done

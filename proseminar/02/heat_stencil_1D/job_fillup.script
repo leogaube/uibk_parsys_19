@@ -1,0 +1,29 @@
+#!/bin/bash
+
+# Execute job in the queue "std.q" unless you have special requirements.
+#$ -q std.q
+
+# The batch system should use the current directory as working directory.
+#$ -cwd
+
+# Name your job. Unless you use the -o and -e options, output will
+# go to a unique file name.ojob_id for each job.
+#$ -N heat_stencil_4_fillup
+
+# Redirect output stream to this file.
+#$ -o output_mpi_4_fillup
+
+# Redirect error stream to this file.
+#$ -e err
+
+#$ -pe openmpi-fillup 4
+
+module load openmpi/4.0.1
+
+problem_size=2000
+while [ $problem_size -le 16000 ]
+do
+  echo $problem_size >> output_mpi_4_fillup
+  mpiexec -n 4 ./heat_stencil_1D_mpi $problem_size
+  problem_size=$((problem_size*2))
+done

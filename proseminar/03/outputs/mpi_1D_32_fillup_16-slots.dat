@@ -1,0 +1,90 @@
+Computing heat-distribution for room size N=32 for T=16000 timesteps using 16 processes with subroom size M=2
+Initial:	X        @                X
+
+##################################
+
+Step t=0:	X       =@=               X
+
+##################################
+
+Step t=1000:	X@@@@@@@@@@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=2000:	X@@@@@@@@@@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=3000:	X@@@@@@@@@@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=4000:	X@@@@@@@@@@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=5000:	X@@@@@@@@@@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=6000:	X@@@@@@@@@@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=7000:	X@@@@@@@@@@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=8000:	X@@@@@@@@@@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=9000:	X@@@@@@@@@@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=10000:	X@@@@@@@@@@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=11000:	X@@@@@@@@@@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=12000:	X@@@@@@@@@@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=13000:	X@@@@@@@@@@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=14000:	X@@@@@@@@@@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=15000:	X@@@@@@@@@@@@@@@@@@@@@@@@@X
+
+##################################
+
+Verification for rank 6: OK
+Final:		X@@@@@@@@@@@@@@@@@@@@@@@@@X
+
+##################################
+
+Verification for rank 0: OK
+The process took 0.423057 seconds to finish. 
+Verification for rank 2: OK
+Verification for rank 4: OK
+Verification for rank 8: OK
+Verification for rank 10: OK
+Verification for rank 12: OK
+Verification for rank 14: OK
+Verification for rank 5: OK
+Verification for rank 1: OK
+Verification for rank 3: OK
+Verification for rank 13: OK
+Verification for rank 15: OK
+Verification for rank 9: OK
+Verification for rank 7: OK
+Verification for rank 11: OK

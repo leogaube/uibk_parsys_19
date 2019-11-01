@@ -1,0 +1,181 @@
+  Loading openmpi/4.0.1 for compiler gnu-4.8.5
+number of trials = 96, estimate of pi is 3.66667 
+The process took 1.32643 seconds to finish. 
+number of trials = 1000, estimate of pi is 3.232 
+The process took 2.65883 seconds to finish. 
+number of trials = 10000, estimate of pi is 3.1488 
+The process took 2.6438 seconds to finish. 
+number of trials = 100000, estimate of pi is 3.13248 
+The process took 2.44565 seconds to finish. 
+number of trials = 1000000, estimate of pi is 3.13971 
+The process took 2.6858 seconds to finish. 
+number of trials = 10000000, estimate of pi is 3.14178 
+The process took 2.86133 seconds to finish. 
+number of trials = 100000000, estimate of pi is 3.14166 
+The process took 7.92782 seconds to finish. 
+number of trials = 1000000000, estimate of pi is 3.14149 
+The process took 52.0668 seconds to finish. 
+number of trials = 10000000000, estimate of pi is 3.14159 
+The process took 374.956 seconds to finish. 
+number of trials = 96, estimate of pi is 3.66667 
+The process took 2.45377 seconds to finish. 
+number of trials = 1000, estimate of pi is 3.104 
+The process took 2.45417 seconds to finish. 
+number of trials = 10000, estimate of pi is 3.1168 
+The process took 2.42906 seconds to finish. 
+number of trials = 100000, estimate of pi is 3.13952 
+The process took 2.47158 seconds to finish. 
+number of trials = 1000000, estimate of pi is 3.1464 
+The process took 2.4809 seconds to finish. 
+number of trials = 10000000, estimate of pi is 3.14472 
+The process took 2.76742 seconds to finish. 
+number of trials = 100000000, estimate of pi is 3.14243 
+The process took 6.13005 seconds to finish. 
+number of trials = 1000000000, estimate of pi is 3.14161 
+The process took 39.5786 seconds to finish. 
+number of trials = 10000000000, estimate of pi is 3.14155 
+The process took 373.589 seconds to finish. 
+number of trials = 96, estimate of pi is 3.33333 
+The process took 2.46919 seconds to finish. 
+number of trials = 1000, estimate of pi is 3.04 
+The process took 2.45973 seconds to finish. 
+number of trials = 10000, estimate of pi is 3.1072 
+The process took 2.45042 seconds to finish. 
+number of trials = 100000, estimate of pi is 3.13056 
+The process took 2.44376 seconds to finish. 
+number of trials = 1000000, estimate of pi is 3.14432 
+The process took 2.54527 seconds to finish. 
+number of trials = 10000000, estimate of pi is 3.14024 
+The process took 2.81778 seconds to finish. 
+number of trials = 100000000, estimate of pi is 3.14159 
+The process took 6.31843 seconds to finish. 
+number of trials = 1000000000, estimate of pi is 3.14182 
+The process took 39.6214 seconds to finish. 
+number of trials = 10000000000, estimate of pi is 3.14163 
+The process took 373.681 seconds to finish. 
+number of trials = 96, estimate of pi is 3.33333 
+The process took 2.53274 seconds to finish. 
+number of trials = 1000, estimate of pi is 3.072 
+The process took 2.51416 seconds to finish. 
+number of trials = 10000, estimate of pi is 3.2032 
+The process took 2.50632 seconds to finish. 
+number of trials = 100000, estimate of pi is 3.16 
+The process took 2.5032 seconds to finish. 
+number of trials = 1000000, estimate of pi is 3.13568 
+The process took 2.53009 seconds to finish. 
+number of trials = 10000000, estimate of pi is 3.14229 
+The process took 2.89283 seconds to finish. 
+number of trials = 100000000, estimate of pi is 3.14174 
+The process took 6.18687 seconds to finish. 
+number of trials = 1000000000, estimate of pi is 3.14167 
+The process took 39.5872 seconds to finish. 
+number of trials = 10000000000, estimate of pi is 3.14156 
+The process took 373.67 seconds to finish. 
+number of trials = 96, estimate of pi is 2.33333 
+The process took 2.51564 seconds to finish. 
+number of trials = 1000, estimate of pi is 3.296 
+The process took 2.56217 seconds to finish. 
+number of trials = 10000, estimate of pi is 3.0784 
+The process took 2.50664 seconds to finish. 
+number of trials = 100000, estimate of pi is 3.13536 
+The process took 2.50253 seconds to finish. 
+number of trials = 1000000, estimate of pi is 3.14531 
+The process took 2.50814 seconds to finish. 
+number of trials = 10000000, estimate of pi is 3.14198 
+The process took 2.78094 seconds to finish. 
+number of trials = 100000000, estimate of pi is 3.1418 
+The process took 6.22172 seconds to finish. 
+number of trials = 1000000000, estimate of pi is 3.14163 
+The process took 39.502 seconds to finish. 
+number of trials = 10000000000, estimate of pi is 3.14163 
+The process took 373.619 seconds to finish. 
+number of trials = 96, estimate of pi is 2.66667 
+The process took 2.46959 seconds to finish. 
+number of trials = 1000, estimate of pi is 3.136 
+The process took 2.48137 seconds to finish. 
+number of trials = 10000, estimate of pi is 3.1648 
+The process took 2.44632 seconds to finish. 
+number of trials = 100000, estimate of pi is 3.11232 
+The process took 2.42738 seconds to finish. 
+number of trials = 1000000, estimate of pi is 3.13866 
+The process took 2.45615 seconds to finish. 
+number of trials = 10000000, estimate of pi is 3.14111 
+The process took 2.76916 seconds to finish. 
+number of trials = 100000000, estimate of pi is 3.14181 
+The process took 4.43829 seconds to finish. 
+number of trials = 1000000000, estimate of pi is 3.14155 
+The process took 39.5583 seconds to finish. 
+number of trials = 10000000000, estimate of pi is 3.14159 
+The process took 373.619 seconds to finish. 
+number of trials = 96, estimate of pi is 2 
+The process took 2.45032 seconds to finish. 
+number of trials = 1000, estimate of pi is 3.168 
+The process took 2.47639 seconds to finish. 
+number of trials = 10000, estimate of pi is 3.1488 
+The process took 2.46443 seconds to finish. 
+number of trials = 100000, estimate of pi is 3.14624 
+The process took 2.46892 seconds to finish. 
+number of trials = 1000000, estimate of pi is 3.14502 
+The process took 2.44575 seconds to finish. 
+number of trials = 10000000, estimate of pi is 3.14333 
+The process took 2.80088 seconds to finish. 
+number of trials = 100000000, estimate of pi is 3.14087 
+The process took 6.11778 seconds to finish. 
+number of trials = 1000000000, estimate of pi is 3.1415 
+The process took 39.5499 seconds to finish. 
+number of trials = 10000000000, estimate of pi is 3.14164 
+The process took 373.634 seconds to finish. 
+number of trials = 96, estimate of pi is 2.66667 
+The process took 2.46216 seconds to finish. 
+number of trials = 1000, estimate of pi is 3.104 
+The process took 2.44805 seconds to finish. 
+number of trials = 10000, estimate of pi is 3.1456 
+The process took 2.43929 seconds to finish. 
+number of trials = 100000, estimate of pi is 3.1184 
+The process took 0.584049 seconds to finish. 
+number of trials = 1000000, estimate of pi is 3.13606 
+The process took 0.75901 seconds to finish. 
+number of trials = 10000000, estimate of pi is 3.14025 
+The process took 2.80661 seconds to finish. 
+number of trials = 100000000, estimate of pi is 3.14187 
+The process took 6.15232 seconds to finish. 
+number of trials = 1000000000, estimate of pi is 3.1417 
+The process took 39.5147 seconds to finish. 
+number of trials = 10000000000, estimate of pi is 3.14166 
+The process took 373.634 seconds to finish. 
+number of trials = 96, estimate of pi is 2.66667 
+The process took 0.697231 seconds to finish. 
+number of trials = 1000, estimate of pi is 3.36 
+The process took 2.49028 seconds to finish. 
+number of trials = 10000, estimate of pi is 3.12 
+The process took 2.52533 seconds to finish. 
+number of trials = 100000, estimate of pi is 3.13504 
+The process took 2.49359 seconds to finish. 
+number of trials = 1000000, estimate of pi is 3.14019 
+The process took 2.49715 seconds to finish. 
+number of trials = 10000000, estimate of pi is 3.14313 
+The process took 2.87442 seconds to finish. 
+number of trials = 100000000, estimate of pi is 3.14111 
+The process took 4.72317 seconds to finish. 
+number of trials = 1000000000, estimate of pi is 3.14166 
+The process took 39.5695 seconds to finish. 
+number of trials = 10000000000, estimate of pi is 3.14154 
+The process took 373.69 seconds to finish. 
+number of trials = 96, estimate of pi is 3 
+The process took 2.66017 seconds to finish. 
+number of trials = 1000, estimate of pi is 3.296 
+The process took 2.66544 seconds to finish. 
+number of trials = 10000, estimate of pi is 3.1328 
+The process took 2.64448 seconds to finish. 
+number of trials = 100000, estimate of pi is 3.15488 
+The process took 2.59945 seconds to finish. 
+number of trials = 1000000, estimate of pi is 3.13168 
+The process took 2.59846 seconds to finish. 
+number of trials = 10000000, estimate of pi is 3.13952 
+The process took 3.12346 seconds to finish. 
+number of trials = 100000000, estimate of pi is 3.14177 
+The process took 6.23946 seconds to finish. 
+number of trials = 1000000000, estimate of pi is 3.14156 
+The process took 39.7754 seconds to finish. 
+number of trials = 10000000000, estimate of pi is 3.14159 
+The process took 373.627 seconds to finish. 

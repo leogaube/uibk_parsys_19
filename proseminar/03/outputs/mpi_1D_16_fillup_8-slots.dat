@@ -1,0 +1,150 @@
+Computing heat-distribution for room size N=16 for T=8000 timesteps using 8 processes with subroom size M=2
+Initial:	X    @           X
+
+##################################
+
+Step t=0:	X   =@=          X
+
+##################################
+
+Step t=1000:	X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=2000:	X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=3000:	X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=4000:	X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=5000:	X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=6000:	X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=7000:	X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Verification for rank 6: OK
+Final:		X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Verification for rank 0: OK
+The process took 0.325381 seconds to finish. 
+Verification for rank 2: OK
+Verification for rank 4: OK
+Verification for rank 5: OK
+Verification for rank 1: OK
+Verification for rank 3: OK
+Verification for rank 7: OK
+Computing heat-distribution for room size N=16 for T=8000 timesteps using 8 processes with subroom size M=2
+Initial:	X    @           X
+
+##################################
+
+Step t=0:	X   =@=          X
+
+##################################
+
+Step t=1000:	X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=2000:	X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=3000:	X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=4000:	X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=5000:	X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=6000:	X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=7000:	X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Final:		X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Verification for rank 0: OK
+The process took 0.450335 seconds to finish. 
+Verification for rank 2: OK
+Verification for rank 7: OK
+Verification for rank 3: OK
+Verification for rank 4: OK
+Verification for rank 1: OK
+Verification for rank 6: OK
+Verification for rank 5: OK
+Computing heat-distribution for room size N=16 for T=8000 timesteps using 8 processes with subroom size M=2
+Initial:	X    @           X
+
+##################################
+
+Step t=0:	X   =@=          X
+
+##################################
+
+Step t=1000:	X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=2000:	X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=3000:	X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=4000:	X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=5000:	X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=6000:	X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Step t=7000:	X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Verification for rank 1: OK
+Verification for rank 6: OK
+Final:		X@@@@@@@@@@@@@@@@X
+
+##################################
+
+Verification for rank 0: OK
+The process took 0.222083 seconds to finish. 
+Verification for rank 4: OK
+Verification for rank 5: OK
+Verification for rank 7: OK
+Verification for rank 2: OK
+Verification for rank 3: OK
