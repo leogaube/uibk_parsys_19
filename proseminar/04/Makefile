@@ -1,5 +1,4 @@
 ### PROGRAMS ###
-SEQUENTIAL_ARRAY = 
 PARALLEL_ARRAY = slabs # slabs_blocking
 DEPENDENCY_ARRAY = heat_stencil
 DEFINES = -D VERBOSE -D SLICE_3D
@@ -18,7 +17,7 @@ PRINT_FILES = print_files.py
 # --> use 'make run_mpi_single' for submitting a single job. 
 NUM_RUNS = 1
 
-NUM_RANKS_ARRAY = 2 4 8 16
+NUM_RANKS_ARRAY = 2 4 
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
@@ -67,9 +66,6 @@ ifeq ($(OS), Windows_NT)
 	MPI_FLAGS += -I "$(CYGWIN_PATH)\usr\include" 
 	MPI_FLAGS += -I "$(CYGWIN_PATH)\lib\openmpi"
 
-	#[ $${sequential} = seq_1D ] && problem_size="$$(($${problem_size}*$${problem_size}*$${problem_size}))"; \
-	[ $${sequential} = seq_2D ] && problem_size="$$(($${problem_size}*$${problem_size}))"; \
-
 	SEQ_EXEC_COMMAND = echo "running '$(SEQ_NAME)'";
 	SEQ_EXEC_COMMAND += ./$${sequential} $${problem_size} 1>> $(SEQ_OUTPUT_FILENAME) 2>> $(SEQ_ERROR_FILENAME)
 
@@ -101,12 +97,8 @@ else
 	SGE_MPI_FLAGS += -pe openmpi-$$slot_distribute $$num_ranks
 	#cannot use '-b yes' because openmpi module needs to be loaded on lcc2 cluster TODO
 
-	SEQ_EXEC_COMMAND = [ $${sequential} = seq_1D ] && problem_size=eval awk -v num=$${problem_size} 'BEGIN{print int(num^(3))}';
-	SEQ_EXEC_COMMAND += [ $${sequential} = seq_2D ] && problem_size=eval awk -v num=$${problem_size} 'BEGIN{print int(num^(3/2))}';
 	SEQ_EXEC_COMMAND += qsub $(SGE_SEQ_FLAGS) ./$${sequential} $${problem_size}
 
-	MPI_EXEC_COMMAND = [ $${parallel} = seq_1D ] && problem_size=eval awk -v num=$${problem_size} 'BEGIN{print int(num^(3))}';
-	MPI_EXEC_COMMAND += [ $${parallel} = seq_2D ] && problem_size=eval awk -v num=$${problem_size} 'BEGIN{print int(num^(3/2))}';
 	MPI_EXEC_COMMAND = echo -e "module load openmpi/$(MPI_VERSION) 2>/dev/null\nmpiexec -n $${num_ranks} ./$${parallel} $${problem_size}" > job.tmp;
 	MPI_EXEC_COMMAND += qsub $(SGE_MPI_FLAGS) job.tmp;
 	MPI_EXEC_COMMAND += rm job.tmp
@@ -133,12 +125,7 @@ $(RESULTS_DIR):
 ### COMPILE ###
 %.o: %.$(LANGUAGE) %.h
 	@echo "compiling $@"
-	$(CC) $(CC_FLAGS) $(DEFINES) -c $< -o $@
-	@echo
-
-$(SEQ_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
-	@echo "compiling $@"
-	@$(CC) $(CC_FLAGS) $(DEFINES) $^ -o $@
+	@$(CC) $(CC_FLAGS) $(DEFINES) -c $< -o $@
 	@echo
 
 $(MPI_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
@@ -150,19 +137,6 @@ compile_all: $(SEQ_EXECUTABLES) $(MPI_EXECUTABLES)
 
 
 ### RUN ###
-.PHONEY: run_seq run_seq_single
-run_seq_single: SEQUENTIAL_ARRAY := $(word 1, $(SEQUENTIAL_ARRAY)) 
-run_seq_single: PROBLEM_SIZE_ARRAY := $(word 1, $(PROBLEM_SIZE_ARRAY)) 
-
-run_seq run_seq_single: $(SEQ_EXECUTABLES) $(OUTPUTS_DIR) $(ERRORS_DIR)
-	@for sequential in $(SEQUENTIAL_ARRAY); do \
-		for problem_size in $(PROBLEM_SIZE_ARRAY); do \
-			$(SEQ_EXEC_COMMAND); \
-		done \
-	done
-	@echo
-
-
 .PHONEY: run_mpi run_mpi_single
 run_mpi_single: PARALLEL_ARRAY := $(word 1, $(PARALLEL_ARRAY)) 
 run_mpi_single: PROBLEM_SIZE_ARRAY := $(word 1, $(PROBLEM_SIZE_ARRAY)) 
@@ -226,7 +200,7 @@ check: check_errors check_outputs
 .PHONEY: clean
 clean:
 	@rm -r $(ERRORS_DIR) 2>/dev/null  || true
-	@rm $(SEQ_EXECUTABLES) $(MPI_EXECUTABLES) 2>/dev/null || true
+	@rm $(DEP_OBJECTS) $(SEQ_EXECUTABLES) $(MPI_EXECUTABLES) 2>/dev/null || true
 	@rm -rf *.o
 	@echo "your directory has been cleaned of executables and errors!"
 
