@@ -1,5 +1,5 @@
 ### PROGRAMS ###
-PARALLEL_ARRAY = slabs # slabs_blocking
+PARALLEL_ARRAY = slabs_blocking slabs_alternative slabs # slabs_blocking
 DEPENDENCY_ARRAY = heat_stencil
 DEFINES = -D VERBOSE -D SLICE_3D
 LANGUAGE = c
@@ -17,11 +17,11 @@ PRINT_FILES = print_files.py
 # --> use 'make run_mpi_single' for submitting a single job. 
 NUM_RUNS = 1
 
-NUM_RANKS_ARRAY = 2 4 
+NUM_RANKS_ARRAY = 8
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
-PROBLEM_SIZE_ARRAY = 128 #256
+PROBLEM_SIZE_ARRAY = 256
 
 
 ### OUTPUT + ERRORS ###
@@ -30,23 +30,18 @@ ERRORS_DIR = ./errors
 DATA_DIR = ./data
 RESULTS_DIR = ./results
 
-SEQ_NAME = $${sequential}_$${problem_size}
 MPI_NAME = $${parallel}_$${problem_size}_$${slot_distribute}_$${num_ranks}-slots
-
-SEQ_OUTPUT_FILENAME = $(OUTPUTS_DIR)/$(SEQ_NAME).dat
 MPI_OUTPUT_FILENAME = $(OUTPUTS_DIR)/$(MPI_NAME).dat
-
-SEQ_ERROR_FILENAME = $(ERRORS_DIR)/$(SEQ_NAME).err
 MPI_ERROR_FILENAME = $(ERRORS_DIR)/$(MPI_NAME).err
 
 
 ######## SETUP ##########
 ### COMPILERS + FLAGS ###
 CC = gcc
-CC_FLAGS = -O2 -std=c99 -Wall -lm
+CC_FLAGS = -O2 -std=c99 -Wall -lm -g
 
 MPI = mpicc									#mpi++ for c++!
-MPI_FLAGS = -O2 -std=c99 -Wall -lm
+MPI_FLAGS = -O2 -std=c99 -Wall -lm -g
 
 PYTHON = python
 
@@ -57,7 +52,6 @@ ifeq ($(OS), Windows_NT)
 	LOAD_MPI = ""
 
 	DEP_OBJECTS = $(addsuffix .o, $(DEPENDENCY_ARRAY))
-	SEQ_EXECUTABLES = $(addsuffix .exe, $(SEQUENTIAL_ARRAY))
 	MPI_EXECUTABLES = $(addsuffix .exe, $(PARALLEL_ARRAY))
 	EXECUTABLE_PATTERN = %.exe
 
@@ -65,9 +59,6 @@ ifeq ($(OS), Windows_NT)
 	# Windows environmental variable 'CYGWIN_PATH --> C:\cygwin' required
 	MPI_FLAGS += -I "$(CYGWIN_PATH)\usr\include" 
 	MPI_FLAGS += -I "$(CYGWIN_PATH)\lib\openmpi"
-
-	SEQ_EXEC_COMMAND = echo "running '$(SEQ_NAME)'";
-	SEQ_EXEC_COMMAND += ./$${sequential} $${problem_size} 1>> $(SEQ_OUTPUT_FILENAME) 2>> $(SEQ_ERROR_FILENAME)
 
 	MPI_EXEC_COMMAND = echo "running '$(MPI_NAME)'";
 	MPI_EXEC_COMMAND += mpiexec -n $${num_ranks} --oversubscribe ./$${parallel} $${problem_size} 1>> $(MPI_OUTPUT_FILENAME) 2>> $(MPI_ERROR_FILENAME)
@@ -77,17 +68,8 @@ else
 	LOAD_MPI = module load openmpi/$(MPI_VERSION) 2>/dev/null && 
 
 	DEP_OBJECTS = $(addsuffix .o, $(DEPENDENCY_ARRAY))
-	SEQ_EXECUTABLES = $(SEQUENTIAL_ARRAY)
 	MPI_EXECUTABLES = $(PARALLEL_ARRAY)
 	EXECUTABLE_PATTERN = %
-
-	#TODO add and test with '-l h_rt= / h_vmem=' parameters
-	SGE_SEQ_FLAGS = -q std.q
-	SGE_SEQ_FLAGS += -cwd
-	SGE_SEQ_FLAGS += -N $(SEQ_NAME)
-	SGE_SEQ_FLAGS += -o $(SEQ_OUTPUT_FILENAME)
-	SGE_SEQ_FLAGS += -e $(SEQ_ERROR_FILENAME)
-	SGE_SEQ_FLAGS += -b yes
 
 	SGE_MPI_FLAGS = -q std.q
 	SGE_MPI_FLAGS += -cwd
@@ -96,8 +78,6 @@ else
 	SGE_MPI_FLAGS += -e $(MPI_ERROR_FILENAME)
 	SGE_MPI_FLAGS += -pe openmpi-$$slot_distribute $$num_ranks
 	#cannot use '-b yes' because openmpi module needs to be loaded on lcc2 cluster TODO
-
-	SEQ_EXEC_COMMAND += qsub $(SGE_SEQ_FLAGS) ./$${sequential} $${problem_size}
 
 	MPI_EXEC_COMMAND = echo -e "module load openmpi/$(MPI_VERSION) 2>/dev/null\nmpiexec -n $${num_ranks} ./$${parallel} $${problem_size}" > job.tmp;
 	MPI_EXEC_COMMAND += qsub $(SGE_MPI_FLAGS) job.tmp;
@@ -133,17 +113,23 @@ $(MPI_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
 	@$(LOAD_MPI)$(MPI) $(MPI_FLAGS) $(DEFINES) $^ -o $@
 	@echo
 
-compile_all: $(SEQ_EXECUTABLES) $(MPI_EXECUTABLES)
+.PHONEY: compile_all
+compile_all: $(MPI_EXECUTABLES)
 
 
 ### RUN ###
-.PHONEY: run_mpi run_mpi_single
-run_mpi_single: PARALLEL_ARRAY := $(word 1, $(PARALLEL_ARRAY)) 
-run_mpi_single: PROBLEM_SIZE_ARRAY := $(word 1, $(PROBLEM_SIZE_ARRAY)) 
-run_mpi_single: NUM_RANKS_ARRAY := $(word 1, $(NUM_RANKS_ARRAY)) 
+.PHONEY: run_mpi run_mpi_single run_mpi_single_clean
+run_mpi_single_clean: clean run_mpi_single
+
+run_mpi_single: PARALLEL_ARRAY := $(word 1, $(PARALLEL_ARRAY))
+run_mpi_single: PROBLEM_SIZE_ARRAY := $(word 1, $(PROBLEM_SIZE_ARRAY))
+run_mpi_single: NUM_RANKS_ARRAY := $(word 1, $(NUM_RANKS_ARRAY))
 run_mpi_single: SLOT_DIRSTRIBUTE_ARRAY := $(word 1, $(SLOT_DISTRIBUTE_ARRAY))
 
-run_mpi run_mpi_single: $(MPI_EXECUTABLES) $(OUTPUTS_DIR) $(ERRORS_DIR)
+run_mpi_single: $(word 1, $(MPI_EXECUTABLES))
+run_mpi: $(MPI_EXECUTABLES)
+
+run_mpi run_mpi_single: $(OUTPUTS_DIR) $(ERRORS_DIR)
 	@for parallel in $(PARALLEL_ARRAY); do \
 		for run in in $(seq 1 $(NUM_RUNS)); do \
 			for problem_size in $(PROBLEM_SIZE_ARRAY); do \
@@ -158,8 +144,10 @@ run_mpi run_mpi_single: $(MPI_EXECUTABLES) $(OUTPUTS_DIR) $(ERRORS_DIR)
 	@echo
 
 
-.PHONEY: run
-run: run_seq run_mpi
+.PHONEY: run run_clean
+run_clean: clean run
+
+run: run_mpi
 ifeq ($(OS), Windows_NT)
 run: plots check
 else
@@ -200,14 +188,25 @@ check: check_errors check_outputs
 .PHONEY: clean
 clean:
 	@rm -r $(ERRORS_DIR) 2>/dev/null  || true
-	@rm $(DEP_OBJECTS) $(SEQ_EXECUTABLES) $(MPI_EXECUTABLES) 2>/dev/null || true
-	@rm -rf *.o
-	@echo "your directory has been cleaned of executables and errors!"
-
-.PHONEY: super_clean
-super_clean: clean
 	@rm -r $(OUTPUTS_DIR) 2>/dev/null  || true
 	@rm -r $(DATA_DIR) 2>/dev/null  || true
 	@rm -r $(RESULTS_DIR) 2>/dev/null  || true
-	@echo "... and also outputs and results!"
+	@echo "your directory has been cleaned errors, outputs, data and results!"
 	@echo 
+
+.PHONEY: clean_executables
+clean_executables:
+	@rm $(DEP_OBJECTS) $(MPI_EXECUTABLES) 2>/dev/null || true
+	@echo "your directory has been cleaned of executables and dependency objects!"
+	@echo
+
+.PHONEY: clean_core_dumps
+clean_core_dumps:
+	@rm *.stackdump 2>/dev/null || true
+	@rm core.* 2>/dev/null || true
+	@echo "your directory has been cleaned of core dumps!"
+	@echo
+
+.PHONEY: super_clean
+super_clean: clean clean_executables clean_core_dumps
+
