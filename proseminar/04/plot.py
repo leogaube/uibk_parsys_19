@@ -7,7 +7,9 @@ import pandas as pd
 import plotly.offline as ply
 import plotly.graph_objs as go
 from plotly.subplots import make_subplots
-from plotly.colors import DEFAULT_PLOTLY_COLORS
+import colorlover as cl
+
+COLORS = cl.scales["12"]["qual"]["Paired"]
 
 def find_int_in_string(string):
 	ints_in_string = re.findall(r'\d+', string)
@@ -49,7 +51,7 @@ def plot_data(dirs, filename):
 
 		seq_runtime_trace = go.Scatter(
                     x=df[problem_size_column], y=df[seq_column],
-                				legendgroup=seq_column, name=seq_column, marker=dict(color=DEFAULT_PLOTLY_COLORS[0]))
+                				legendgroup=seq_column, name=seq_column, marker=dict(color=COLORS[0]))
 		fig.add_trace(seq_runtime_trace, row=1, col=1)
 	else:
 		comparison_column, comparison_num_ranks = get_least_ranks(df)
@@ -62,8 +64,8 @@ def plot_data(dirs, filename):
 		if column in [problem_size_column, seq_column]:
 			continue
 
+		program_group = column.split("_fillup_")[1]
 		num_ranks = find_int_in_string(column)
-		print(column)
 
 		runtimes = df[column]
 		speedups = (df[comparison_column]*comparison_num_ranks) / runtimes
@@ -71,15 +73,15 @@ def plot_data(dirs, filename):
 
 		runtime_trace = go.Scatter(
 			x=df[problem_size_column], y=runtimes, 
-			legendgroup=column, name=column, marker=dict(color=DEFAULT_PLOTLY_COLORS[1+i]))
+			legendgroup=program_group, name=column, marker=dict(color=COLORS[1+i]))
 
 		speedup_trace = go.Scatter(
 			x=df[problem_size_column], y=speedups, 
-			legendgroup=column, marker=dict(color=DEFAULT_PLOTLY_COLORS[1+i]), showlegend=False)
+			legendgroup=program_group, marker=dict(color=COLORS[1+i]), showlegend=False)
 
 		efficiency_trace = go.Scatter(
 			x=df[problem_size_column], y=efficiencies, 
-			legendgroup=column, marker=dict(color=DEFAULT_PLOTLY_COLORS[1+i]), showlegend=False)
+			legendgroup=program_group, marker=dict(color=COLORS[1+i]), showlegend=False)
 		
 		fig.add_trace(runtime_trace, row=1, col=1)
 		fig.add_trace(speedup_trace, row=2, col=1)

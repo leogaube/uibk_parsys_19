@@ -1,27 +1,30 @@
 #include <stdio.h>
 #include <stdlib.h>
-
 #include <time.h>
 
 #include "heat_stencil.h"
 
 // -- simulation code ---
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
   clock_t start = clock();
 
   // 'parsing' optional input parameter = problem size
   int Nx = 10;
   int Ny = 10;
   int Nz = 10;
-  if (argc == 2) {
+  if (argc == 2)
+  {
     Nx = Ny = Nz = atoi(argv[1]);
-  } else if (argc == 4){
-	  Nx = atoi(argv[1]);
-	  Ny = atoi(argv[2]);
-	  Nz = atoi(argv[3]);
   }
-  int T = MAX(MAX(Nx, Ny), Nz)*10;
+  else if (argc == 4)
+  {
+    Nx = atoi(argv[1]);
+    Ny = atoi(argv[2]);
+    Nz = atoi(argv[3]);
+  }
+  int T = MAX(MAX(Nx, Ny), Nz) * TIMESTEPS_MUL;
 #ifdef VERBOSE
   printf("Computing heat-distribution for room size Nx=%d, Ny=%d, Nz=%d for T=%d timesteps\n", Nx, Ny, Nz, T);
 #endif
@@ -29,10 +32,11 @@ int main(int argc, char **argv) {
   // ---------- setup ----------
 
   // create a buffer for storing temperature fields
-  Vector A = createVector(Nx*Ny*Nz);
+  Vector A = createVector(Nx * Ny * Nz);
 
   // set up initial conditions in A
-  for (long i = 0; i < Nx*Ny*Nz; i++) {
+  for (long i = 0; i < Nx * Ny * Nz; i++)
+  {
     A[i] = 273; // temperature is 0° C everywhere (273 K)
   }
 
@@ -40,7 +44,7 @@ int main(int argc, char **argv) {
   int source_x = Nx / 4;
   int source_y = Ny / 4;
   int source_z = Nz / 4;
-  A[IDX_3D(source_x,source_y, source_z,Nx,Ny)] = 273 + 60;
+  A[IDX_3D(source_x, source_y, source_z, Nx, Ny)] = 273 + 60;
 
 #ifdef VERBOSE
   printf("Initial:\n");
@@ -49,10 +53,11 @@ int main(int argc, char **argv) {
   // ---------- compute ----------
 
   // create a second buffer for the computation
-  Vector B = createVector(Nx*Ny*Nz);
+  Vector B = createVector(Nx * Ny * Nz);
 
   // for each time step ..
-  for (int t = 0; t < T; t++) {
+  for (int t = 0; t < T; t++)
+  {
     // .. we propagate the temperature
     for (int z = 0; z < Nz; z++)
     {
@@ -82,7 +87,7 @@ int main(int argc, char **argv) {
           value_t tb = (z != Nz - 1) ? A[IDX_3D(x, y, z + 1, Nx, Ny)] : tc;
 
           // compute new temperature at current position
-          B[i] = tc + 0.4/6 * (tl + tr + tu + td + tf + tb + (-6 * tc));
+          B[i] = tc + 0.4 / 6 * (tl + tr + tu + td + tf + tb + (-6 * tc));
         }
       }
     }

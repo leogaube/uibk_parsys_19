@@ -24,7 +24,7 @@ int main(int argc, char **argv)
     Ny = atoi(argv[2]);
     Nz = atoi(argv[3]);
   }
-  int T = MAX(MAX(Nx, Ny), Nz) * 10;
+  int T = MAX(MAX(Nx, Ny), Nz) * TIMESTEPS_MUL;
 
   // MPI setup
   int rank, numProcs;
