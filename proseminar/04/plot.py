@@ -9,7 +9,7 @@ import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 import colorlover as cl
 
-COLORS = cl.scales["12"]["qual"]["Paired"]
+COLORS = cl.scales["7"]["qual"]["Dark2"]
 
 def find_int_in_string(string):
 	ints_in_string = re.findall(r'\d+', string)
@@ -29,6 +29,19 @@ def get_least_ranks(df):
 			min_col = col
 
 	return min_col, min_ranks
+
+def get_most_ranks(df):
+	max_col = None
+	max_ranks = None
+	for col in df.columns:
+		if df[col].isnull().values.any():
+			continue
+		num_ranks = find_int_in_string(col)
+		if num_ranks is not None and (max_ranks is None or num_ranks > max_ranks):
+			max_ranks = num_ranks
+			max_col = col
+
+	return max_col, max_ranks
 
 
 def plot_data(dirs, filename):
@@ -51,7 +64,7 @@ def plot_data(dirs, filename):
 
 		seq_runtime_trace = go.Scatter(
                     x=df[problem_size_column], y=df[seq_column],
-                				legendgroup=seq_column, name=seq_column, marker=dict(color=COLORS[0]))
+                				legendgroup=seq_column, name=seq_column, marker=dict(color=COLORS.pop(0)))
 		fig.add_trace(seq_runtime_trace, row=1, col=1)
 	else:
 		comparison_column, comparison_num_ranks = get_least_ranks(df)
@@ -60,12 +73,18 @@ def plot_data(dirs, filename):
 		print("sequential data missing or containing holes!\n--> doing relative speedup instead with '%s' as reference"%comparison_column)
 
 
+	_, max_ranks = get_most_ranks(df)
+	next_color_index = 0
+	colors = {}
 	for i, column in enumerate(df.columns):
 		if column in [problem_size_column, seq_column]:
 			continue
 
-		program_group = column.split("_fillup_")[1]
+		program_group, rank_group = column.split("_fillup_")
 		num_ranks = find_int_in_string(column)
+		if program_group not in colors:
+			colors[program_group] = COLORS[next_color_index]
+			next_color_index += 1
 
 		runtimes = df[column]
 		speedups = (df[comparison_column]*comparison_num_ranks) / runtimes
@@ -73,15 +92,15 @@ def plot_data(dirs, filename):
 
 		runtime_trace = go.Scatter(
 			x=df[problem_size_column], y=runtimes, 
-			legendgroup=program_group, name=column, marker=dict(color=COLORS[1+i]))
+			legendgroup=num_ranks, name=column, marker=dict(color=colors[program_group]), visible=True if (num_ranks == max_ranks) else "legendonly")
 
 		speedup_trace = go.Scatter(
 			x=df[problem_size_column], y=speedups, 
-			legendgroup=program_group, marker=dict(color=COLORS[1+i]), showlegend=False)
+			legendgroup=num_ranks, marker=dict(color=colors[program_group]), showlegend=False, visible=True if (num_ranks == max_ranks) else "legendonly")
 
 		efficiency_trace = go.Scatter(
 			x=df[problem_size_column], y=efficiencies, 
-			legendgroup=program_group, marker=dict(color=COLORS[1+i]), showlegend=False)
+			legendgroup=num_ranks, marker=dict(color=colors[program_group]), showlegend=False, visible=True if (num_ranks == max_ranks) else "legendonly")
 		
 		fig.add_trace(runtime_trace, row=1, col=1)
 		fig.add_trace(speedup_trace, row=2, col=1)
