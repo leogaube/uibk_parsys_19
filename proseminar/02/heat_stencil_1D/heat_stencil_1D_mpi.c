@@ -43,7 +43,8 @@ int main(int argc, char **argv) {
   MPI_Comm_size(MPI_COMM_WORLD, &numProcs);
 
   if (N % numProcs != 0){
-    printf("This Problem cannot be split up evenly among MPI ranks! (N mod numProcs != 0)");
+    if (rank == 0)
+      printf("This Problem cannot be split up evenly among MPI ranks! (N mod numProcs != 0)\n");
     MPI_Finalize();
     return EXIT_FAILURE;
   }
