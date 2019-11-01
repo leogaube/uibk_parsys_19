@@ -90,7 +90,7 @@ def plot_data(dirs, filename):
 
 	fig.update_layout(title_text=filename.split(".")[0], xaxis_type="log")
 
-	fig.update_xaxes(title="room size in all dimensions", type="log")
+	fig.update_xaxes(title="room size in all dimensions", type="log", tickvals=df[problem_size_column])
 
 	fig.update_yaxes(title="runtime in s", rangemode="tozero", type="log", row=1, col=1)
 	fig.update_yaxes(title="%s speedup"%speedup_type, rangemode="tozero", row=2, col=1)
