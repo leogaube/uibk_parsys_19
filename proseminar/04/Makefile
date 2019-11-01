@@ -174,9 +174,9 @@ run_mpi: $(MPI_EXECUTABLES)
 run_mpi run_mpi_single: $(OUTPUTS_DIR) $(ERRORS_DIR)
 	@for parallel in $(PARALLEL_ARRAY); do \
 		for run in in $(seq 1 $(NUM_RUNS)); do \
-			for problem_size in $(PROBLEM_SIZE_ARRAY); do \
-				for num_ranks in $(NUM_RANKS_ARRAY); do \
-					for slot_distribute in $(SLOT_DISTRIBUTE_ARRAY); do \
+			for num_ranks in $(NUM_RANKS_ARRAY); do \
+				for slot_distribute in $(SLOT_DISTRIBUTE_ARRAY); do \
+					for problem_size in $(PROBLEM_SIZE_ARRAY); do \
 						$(MPI_EXEC_COMMAND); \
 					done \
 				done \
