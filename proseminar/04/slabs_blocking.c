@@ -148,7 +148,7 @@ int main(int argc, char **argv)
           long i = IDX_3D(x, y, z, Nx, Ny);
 
           // center stays constant (the heat is still on)
-          if (i == IDX_3D(source_x, source_y, source_z-(rank*Mz), Nx, Ny))
+          if (IDX_3D(x, y, z + (rank * Mz), Nx, Ny) == IDX_3D(source_x, source_y, source_z, Nx, Ny))
           {
             B[i] = A[i];
             continue;
