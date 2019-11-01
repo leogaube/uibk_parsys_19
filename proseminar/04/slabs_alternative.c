@@ -1,7 +1,6 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 
 #include "heat_stencil.h"
 
@@ -199,6 +198,8 @@ int main(int argc, char **argv)
   releaseVector(top_layer);
 
   MPI_Gather(A, Nx * Ny * Mz, MPI_FLOAT, AA, Nx * Ny * Mz, MPI_FLOAT, 0, slabs);
+  
+  releaseVector(A);
 
   if (rank == 0)
   {
@@ -219,7 +220,6 @@ int main(int argc, char **argv)
     printf("The process took %f seconds to finish. \n", end - start);
   }
 
-  releaseVector(A);
   MPI_Finalize();
 
   // done

@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <time.h>
 
 #include "heat_stencil.h"
 
@@ -250,7 +249,7 @@ int main(int argc, char **argv)
     releaseVector(AA);
 
     double end = MPI_Wtime();
-    printf("The process took %g seconds to finish. \n", end - start);
+    printf("The process took %f seconds to finish. \n", end - start);
   }
 
   MPI_Finalize();
