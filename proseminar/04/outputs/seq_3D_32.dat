@@ -1,0 +1,98 @@
+Computing heat-distribution for room size Nx=32, Ny=32, Nz=32 for T=320 timesteps
+Initial:
+########### ONLY DISPLAYING SLICE 0 of 3D room ##############
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+
+##################################
+Step t=0:
+########### ONLY DISPLAYING SLICE 0 of 3D room ##############
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+
+##################################
+
+Final:
+########### ONLY DISPLAYING SLICE 0 of 3D room ##############
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+X                         X
+
+##################################
+1D initial:
+X@                        X
+
+##################################
+1D final:
+X@@@@@#*+:-..             X
+
+##################################
+The maximal deviation from the 1D theory is -43.245453K.The process took 0.220000 seconds to finish. 
