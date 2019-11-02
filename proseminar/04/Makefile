@@ -2,7 +2,7 @@
 SEQUENTIAL_ARRAY = seq_3D
 PARALLEL_ARRAY = cubes slabs slabs_alternative slabs_blocking
 DEPENDENCY_ARRAY = heat_stencil
-DEFINES = -D VERBOSE -D SLICE_3D
+DEFINES = -D VERBOSE -D SLICE_3D -D DEBUG
 LANGUAGE = c
 #LANGUAGE = cpp
 
@@ -18,11 +18,11 @@ PRINT_FILES = print_files.py
 # --> use 'make run_mpi_single' for submitting a single job. 
 NUM_RUNS = 1
 
-NUM_RANKS_ARRAY = 2 32
+NUM_RANKS_ARRAY = 8
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
-PROBLEM_SIZE_ARRAY = 32 64 128 256
+PROBLEM_SIZE_ARRAY = 64
 
 
 ### OUTPUT + ERRORS ###

@@ -3,8 +3,8 @@
 
 typedef float value_t;
 
-#define RESOLUTION 25
-#define TIMESTEPS_MUL 10
+#define RESOLUTION 32
+#define TIMESTEPS_MUL 100
 
 #define IDX_3D(x, y, z, nx, ny) ((x) + (y) * (nx) + (z) * (nx) * (ny))
 #define IDX_2D(x, y, nx) IDX_3D(x, y, 0, nx, 0)

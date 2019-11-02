@@ -7,9 +7,9 @@
 int local2global(int r, int i, int mx, int my, int mz, int cx, int cy){
     int global_x = (r % cx)*mx + (i % mx);
     int global_y = (r / cx)*my + (i / mx);
-    int global_z = (r / (cx cy))*mz + (i / (mx*my));
+    int global_z = (r / (cx * cy))*mz + (i / (mx*my));
 
-  return IDX_3D(global_x, global_y, global_z, mx*cx, my*cy)
+  return IDX_3D(global_x, global_y, global_z, mx*cx, my*cy);
 }
 
 Vector
