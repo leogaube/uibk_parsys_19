@@ -1,8 +1,8 @@
 ### PROGRAMS ###
 SEQUENTIAL_ARRAY = seq_2D seq_1D
-PARALLEL_ARRAY = mpi_2D mpi_1D
+PARALLEL_ARRAY = mpi_3D_poles
 DEPENDENCY_ARRAY = heat_stencil verification
-DEFINES = -D VERBOSE -D SLICE_3D
+DEFINES = -D VERBOSE
 LANGUAGE = c
 #LANGUAGE = cpp
 
@@ -18,11 +18,11 @@ PRINT_FILES = print_files.py
 # --> use 'make run_mpi_single' for submitting a single job. 
 NUM_RUNS = 1
 
-NUM_RANKS_ARRAY = 2 4 8 16
+NUM_RANKS_ARRAY = 4
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
-PROBLEM_SIZE_ARRAY = 128 256
+PROBLEM_SIZE_ARRAY = 4
 
 
 ### OUTPUT + ERRORS ###
@@ -44,16 +44,16 @@ MPI_ERROR_FILENAME = $(ERRORS_DIR)/$(MPI_NAME).err
 ######## SETUP ##########
 ### COMPILERS + FLAGS ###
 CC = gcc
-CC_FLAGS = -O2 -std=c99 -Wall -lm
+CC_FLAGS = -O2 -std=c99 -Wall -lm -g
 
 MPI = mpicc									#mpi++ for c++!
-MPI_FLAGS = -O2 -std=c99 -Wall -lm
+MPI_FLAGS = -O2 -std=c99 -Wall -lm -g
 
 PYTHON = python
 
 ### Windows/LCC2 specific setup ###
 ifeq ($(OS), Windows_NT)
-	MPI_VERSION = 3.1.3
+	MPI_VERSION = 3.1.1
 
 	LOAD_MPI = ""
 
