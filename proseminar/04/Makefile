@@ -2,7 +2,7 @@
 SEQUENTIAL_ARRAY = seq_3D
 PARALLEL_ARRAY = cubes slabs slabs_alternative slabs_blocking
 DEPENDENCY_ARRAY = heat_stencil
-DEFINES = -D VERBOSE -D SLICE_3D -D DEBUG
+DEFINES = -D VERBOSE -D SLICE_3D
 LANGUAGE = c
 #LANGUAGE = cpp
 
@@ -22,7 +22,7 @@ NUM_RANKS_ARRAY = 8
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
-PROBLEM_SIZE_ARRAY = 64
+PROBLEM_SIZE_ARRAY = 16
 
 
 ### OUTPUT + ERRORS ###
@@ -44,43 +44,37 @@ MPI_ERROR_FILENAME = $(ERRORS_DIR)/$(MPI_NAME).err
 ######## SETUP ##########
 ### COMPILERS + FLAGS ###
 CC = gcc
-CC_FLAGS = -O2 -std=c99 -Wall -lm -g
+CC_FLAGS = -O2 -std=c99 -Wall -g
 
 MPI = mpicc									#mpi++ for c++!
-MPI_FLAGS = -O2 -std=c99 -Wall -lm -g
+MPI_FLAGS = -O2 -std=c99 -Wall -g
+LIBRARIES = -lm
 
 PYTHON = python
 
-### Windows/LCC2 specific setup ###
+### Executables ###
+DEP_OBJECTS = $(addsuffix .o, $(DEPENDENCY_ARRAY))
+SEQ_EXECUTABLES = $(addsuffix $(EXECUTABLE_EXT), $(SEQUENTIAL_ARRAY))
+MPI_EXECUTABLES = $(addsuffix $(EXECUTABLE_EXT), $(PARALLEL_ARRAY))
+EXECUTABLE_PATTERN = %$(EXECUTABLE_EXT)
+
+### Windows/Linux specific setup ###
 ifeq ($(OS), Windows_NT)
 	MPI_VERSION = 3.1.3
-
-	LOAD_MPI = ""
-
-	DEP_OBJECTS = $(addsuffix .o, $(DEPENDENCY_ARRAY))
-	SEQ_EXECUTABLES = $(addsuffix .exe, $(SEQUENTIAL_ARRAY))
-	MPI_EXECUTABLES = $(addsuffix .exe, $(PARALLEL_ARRAY))
-	EXECUTABLE_PATTERN = %.exe
 
 	# additional linking required on Windows
 	# Windows environmental variable 'CYGWIN_PATH --> C:\cygwin' required
 	MPI_FLAGS += -I "$(CYGWIN_PATH)\usr\include" 
 	MPI_FLAGS += -I "$(CYGWIN_PATH)\lib\openmpi"
 
-	SEQ_EXEC_COMMAND = echo "running '$(SEQ_NAME)'";
-	SEQ_EXEC_COMMAND += ./$${sequential} $${problem_size} 1>> $(SEQ_OUTPUT_FILENAME) 2>> $(SEQ_ERROR_FILENAME)
-
-	MPI_EXEC_COMMAND = echo "running '$(MPI_NAME)'";
-	MPI_EXEC_COMMAND += mpiexec -n $${num_ranks} --oversubscribe ./$${parallel} $${problem_size} 1>> $(MPI_OUTPUT_FILENAME) 2>> $(MPI_ERROR_FILENAME)
+	EXECUTABLE_EXT = .exe
 else
 	MPI_VERSION = 3.1.1
+endif
 
-	LOAD_MPI = module load openmpi/$(MPI_VERSION) 2>/dev/null && 
-
-	DEP_OBJECTS = $(addsuffix .o, $(DEPENDENCY_ARRAY))
-	SEQ_EXECUTABLES = $(SEQUENTIAL_ARRAY)
-	MPI_EXECUTABLES = $(PARALLEL_ARRAY)
-	EXECUTABLE_PATTERN = %
+### LCC2 specific setup ###
+ifeq ($(SGE_CELL), lcc2)
+	LOAD_MPI = module load openmpi/$(MPI_VERSION) 2>/dev/null &&
 
 	SGE_SEQ_FLAGS = -q std.q
 	SGE_SEQ_FLAGS += -cwd
@@ -102,6 +96,12 @@ else
 	MPI_EXEC_COMMAND = echo -e "module load openmpi/$(MPI_VERSION) 2>/dev/null\nmpiexec -n $${num_ranks} ./$${parallel} $${problem_size}" > job.tmp;
 	MPI_EXEC_COMMAND += qsub $(SGE_MPI_FLAGS) job.tmp;
 	MPI_EXEC_COMMAND += rm job.tmp
+else
+	SEQ_EXEC_COMMAND = echo "running '$(SEQ_NAME)'";
+	SEQ_EXEC_COMMAND += ./$${sequential} $${problem_size} 1>> $(SEQ_OUTPUT_FILENAME) 2>> $(SEQ_ERROR_FILENAME)
+
+	MPI_EXEC_COMMAND = echo "running '$(MPI_NAME)'";
+	MPI_EXEC_COMMAND += mpiexec -n $${num_ranks} --oversubscribe ./$${parallel}$(EXECUTABLE_EXT) $${problem_size} 1>> $(MPI_OUTPUT_FILENAME) 2>> $(MPI_ERROR_FILENAME)
 endif
 
 
@@ -125,17 +125,17 @@ $(RESULTS_DIR):
 ### COMPILE ###
 %.o: %.$(LANGUAGE) %.h
 	@echo "compiling $@"
-	@$(CC) $(CC_FLAGS) $(DEFINES) -c $< -o $@
+	@$(CC) $(CC_FLAGS) $(DEFINES) -c $< $(LIBRARIES) -o $@
 	@echo
 
 $(SEQ_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
 	@echo "compiling $@"
-	@$(CC) $(CC_FLAGS) $(DEFINES) $^ -o $@
+	@$(CC) $(CC_FLAGS) $(DEFINES) $^ $(LIBRARIES) -o $@
 	@echo
 
 $(MPI_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
 	@echo "compiling $@"
-	@$(LOAD_MPI)$(MPI) $(MPI_FLAGS) $(DEFINES) $^ -o $@
+	@$(LOAD_MPI)$(MPI) $(MPI_FLAGS) $(DEFINES) $^ $(LIBRARIES) -o $@
 	@echo
 
 .PHONEY: compile_all

@@ -48,6 +48,7 @@ int main(int argc, char **argv) {
   int My = Ny / Cy;
   int Mz = Nz / Cz;
 
+
   MPI_Request topRrequest, topSrequest, bottomRrequest, bottomSrequest;
   MPI_Request frontRrequest, frontSrequest, backRrequest, backSrequest;
   MPI_Request leftRrequest, leftSrequest, rightRrequest, rightSrequest;
@@ -57,12 +58,14 @@ int main(int argc, char **argv) {
   int dims[3] = {Cx, Cy, Cz};
   int periods[3] = {0, 0, 0};
 
-  MPI_Cart_create(MPI_COMM_WORLD, 1, dims, periods, 1, &cubes);
+  MPI_Cart_create(MPI_COMM_WORLD, 3, dims, periods, 1, &cubes);
   MPI_Comm_rank(cubes, &rank);
 
 #ifdef VERBOSE
-  if (rank == 0)
+  if (rank == 0){
     printf("Computing heat-distribution for room size Nx=%d, Ny=%d, Nz=%d for T=%d timesteps\n", Nx, Ny, Nz, T);
+    printf("C: %d, Mx: %d\n\n", C, Mx);
+  }
 #endif
 
   // get the adjacent slices
@@ -73,9 +76,9 @@ int main(int argc, char **argv) {
   int top_rank = rank;
   int bottom_rank = rank;
 
-  MPI_Cart_shift(cubes, 0, 1, &left_rank, &right_rank);
+  MPI_Cart_shift(cubes, 0, 1, &top_rank, &bottom_rank);
   MPI_Cart_shift(cubes, 1, 1, &front_rank, &back_rank);
-  MPI_Cart_shift(cubes, 2, 1, &bottom_rank, &top_rank);
+  MPI_Cart_shift(cubes, 2, 1, &left_rank, &right_rank);
 
   // possibly send data to yourself
   if (left_rank == MPI_PROC_NULL)
@@ -97,12 +100,24 @@ int main(int argc, char **argv) {
 #endif
 
   MPI_Datatype x_slice, y_slice, z_slice;
-  MPI_Type_vector(Ny * Nz, 1, Nx * Ny, MPI_FLOAT, &x_slice);
-  MPI_Type_vector(Nz, Nx, Nx * Ny, MPI_FLOAT, &y_slice);
-  MPI_Type_vector(1, Nx * Ny, 1, MPI_FLOAT, &z_slice);
+  MPI_Type_vector(My * Mz, 1, Mx, MPI_FLOAT, &x_slice);
+  MPI_Type_vector(Mz, Mx, Mx * My, MPI_FLOAT, &y_slice);
+  MPI_Type_vector(1, Mx * My, 1, MPI_FLOAT, &z_slice);
   MPI_Type_commit(&x_slice);
   MPI_Type_commit(&y_slice);
   MPI_Type_commit(&z_slice);
+
+/*
+  int room_sizes[3] = {Nx, Ny, Nz};
+  int subroom_sizes[3] = {Mx, My, Mz};
+  int start_array[3] = {0, 0, 0};
+  MPI_Datatype subroom_cube;
+  MPI_Type_create_subarray(3, room_sizes, subroom_sizes, start_array, MPI_ORDER_C, MPI_FLOAT, &subroom_cube);
+
+  int* displacement_array = malloc(sizeof(int) * numProcs);
+  for (int i=0; i<numProcs; i++){
+    displacement_array[i] = i;
+  }*/
 
   // ---------- setup ----------
 
@@ -118,15 +133,15 @@ int main(int argc, char **argv) {
   int source_x = Nx / 4;
   int source_y = Ny / 4;
   int source_z = Nz / 4;
-  int source_i = IDX_3D(source_x, source_y, source_z, Nx, Ny);
+  int global_source = IDX_3D(source_x, source_y, source_z, Nx, Ny);
+  int local_source = IDX_3D(source_x % Mx, source_y % My, source_z % Mz, Mx, My);
 
-  if (rank * Mx <= source_x && (rank + 1) * Mx > source_x &&
-      rank * My <= source_y && (rank + 1) * My > source_y &&
-      rank * Mz <= source_z && (rank + 1) * Mz > source_z) {
-#ifdef DEBUG
-    printf("hello from source init; rank: %d, x: %d, y:%d, z:%d", rank, source_x, source_y, source_z);
-#endif
-    A[IDX_3D(source_x - (rank * Mx), source_y - (rank * My), source_z - (rank * Mz), Nx, Ny)] = 273 + 60;
+  if (local2global(rank, local_source, Mx, My, Mz, Cx, Cy) == global_source) {
+    A[local_source] = 273 + 60;
+
+    printf("Initial:\n");
+    printTemperature(A, Mx, My, Mz);
+    printf("\n");
   }
 
   // ---------- compute ----------
@@ -135,12 +150,12 @@ int main(int argc, char **argv) {
   Vector B = createVector(Mx * My * Mz);
 
   // create ghost exchange layers
-  Vector top_layer = createVector(Nx * Ny);
-  Vector bottom_layer = createVector(Nx * Ny);
-  Vector front_layer = createVector(Nx * Nz);
-  Vector back_layer = createVector(Nx * Nz);
-  Vector left_layer = createVector(Ny * Nz);
-  Vector right_layer = createVector(Ny * Nz);
+  Vector left_layer = createVector(My * Mz);
+  Vector right_layer = createVector(My * Mz);
+  Vector front_layer = createVector(Mx * Mz);
+  Vector back_layer = createVector(Mx * Mz);
+  Vector top_layer = createVector(Mx * My);
+  Vector bottom_layer = createVector(Mx * My);
 
   // create buffer of the entire room
   Vector AA = NULL;
@@ -149,19 +164,19 @@ int main(int argc, char **argv) {
   }
 
   // exchange ghost cells for the very first iteration
-  MPI_Isend(A, Nx * Ny, MPI_FLOAT, top_rank, 0, cubes, &topSrequest);
-  MPI_Isend(&(A[IDX_3D(0, 0, Mz - 1, Nx, Ny)]), Nx * Ny, MPI_FLOAT, bottom_rank, 0, cubes, &bottomSrequest);
-  MPI_Isend(A, Nx * Ny, MPI_FLOAT, front_rank, 0, cubes, &frontSrequest);
-  MPI_Isend(&(A[IDX_3D(0, 0, Mz - 1, Nx, Ny)]), Nx * Ny, MPI_FLOAT, back_rank, 0, cubes, &backSrequest);
-  MPI_Isend(A, Ny * Nz, MPI_FLOAT, left_rank, 0, cubes, &leftSrequest);
-  MPI_Isend(&(A[IDX_3D(0, 0, Mz - 1, Ny, Nz)]), Ny * Nz, MPI_FLOAT, right_rank, 0, cubes, &rightSrequest);
+  MPI_Isend(A, 1, x_slice, left_rank, 0, cubes, &leftSrequest);
+  MPI_Isend(&(A[IDX_3D(Mx - 1, 0, 0, Mx, My)]), 1, x_slice, right_rank, 0, cubes, &rightSrequest);
+  MPI_Isend(A, 1, y_slice, front_rank, 0, cubes, &frontSrequest);
+  MPI_Isend(&(A[IDX_3D(0, My - 1, 0, Mx, My)]), 1, y_slice, back_rank, 0, cubes, &backSrequest);
+  MPI_Isend(A, 1, z_slice, top_rank, 0, cubes, &topSrequest);
+  MPI_Isend(&(A[IDX_3D(0, 0, Mz - 1, Mx, My)]), 1, z_slice, bottom_rank, 0, cubes, &bottomSrequest);
 
-  MPI_Irecv(top_layer, Nx * Ny, MPI_FLOAT, top_rank, 0, cubes, &topRrequest);
-  MPI_Irecv(bottom_layer, Nx * Ny, MPI_FLOAT, bottom_rank, 0, cubes, &bottomRrequest);
-  MPI_Irecv(front_layer, Nx * Ny, MPI_FLOAT, front_rank, 0, cubes, &frontRrequest);
-  MPI_Irecv(back_layer, Nx * Ny, MPI_FLOAT, back_rank, 0, cubes, &backRrequest);
-  MPI_Irecv(left_layer, Nx * Ny, MPI_FLOAT, left_rank, 0, cubes, &leftRrequest);
-  MPI_Irecv(right_layer, Nx * Ny, MPI_FLOAT, right_rank, 0, cubes, &rightRrequest);
+  MPI_Irecv(left_layer, My * Mz, MPI_FLOAT, left_rank, 0, cubes, &leftRrequest);
+  MPI_Irecv(right_layer, My * Mz, MPI_FLOAT, right_rank, 0, cubes, &rightRrequest);
+  MPI_Irecv(front_layer, Mx * Mz, MPI_FLOAT, front_rank, 0, cubes, &frontRrequest);
+  MPI_Irecv(back_layer, Mx * Mz, MPI_FLOAT, back_rank, 0, cubes, &backRrequest);
+  MPI_Irecv(top_layer, Mx * My, MPI_FLOAT, top_rank, 0, cubes, &topRrequest);
+  MPI_Irecv(bottom_layer, Mx * My, MPI_FLOAT, bottom_rank, 0, cubes, &bottomRrequest);
 
   // for each time step ..
   for (int t = 0; t < T; t++) {
@@ -180,18 +195,18 @@ int main(int argc, char **argv) {
         MPI_Wait(&bottomSrequest, MPI_STATUS_IGNORE);
       }
       for (int y = 0; y < My; y++) {
-        if (y == 0) {
+        if (y == 0 && z == 0) {
           MPI_Wait(&frontRrequest, MPI_STATUS_IGNORE);
           MPI_Wait(&frontSrequest, MPI_STATUS_IGNORE);
-        } else if (y == My - 1) {
+        } else if (y == My - 1 && z == 0) {
           MPI_Wait(&backRrequest, MPI_STATUS_IGNORE);
           MPI_Wait(&backSrequest, MPI_STATUS_IGNORE);
         }
         for (int x = 0; x < Mx; x++) {
-          if (y == 0) {
+          if (x == 0 && y == 0 && z == 0) {
             MPI_Wait(&leftRrequest, MPI_STATUS_IGNORE);
             MPI_Wait(&leftSrequest, MPI_STATUS_IGNORE);
-          } else if (y == My - 1) {
+          } else if (x == Mx - 1 && y == 0 && z == 0) {
             MPI_Wait(&rightRrequest, MPI_STATUS_IGNORE);
             MPI_Wait(&rightSrequest, MPI_STATUS_IGNORE);
           }
@@ -199,7 +214,7 @@ int main(int argc, char **argv) {
           int i = IDX_3D(x, y, z, Mx, My);
 
           // center stays constant (the heat is still on)
-          if (local2global(rank, i, Mx, My, Mz, Cx, Cy) == source_i) {
+          if (local2global(rank, i, Mx, My, Mz, Cx, Cy) == global_source) {
             B[i] = A[i];
             continue;
           }
@@ -218,35 +233,34 @@ int main(int argc, char **argv) {
           // compute new temperature at current position
           B[i] = tc + 0.16666 * (tl + tr + tu + td + tf + tb + (-6 * tc));
 
-          //printf("%f, %f, %f, %f, %f, %f, %f", tc, tl, tr, tu, td, tf, tb);
-
           // send left/right layer to corresponding ranks immediately after the entire corresponding x_layer has been computed
           // also start receiving from neighbouring ranks - don't block, just continue calculations
           // don't send/receive in last timestep or you will get errors during gather!
-          if (y == 0 && z == Mz - 1 && t != T - 1) {
-            MPI_Isend(A, Nx * Ny, MPI_FLOAT, left_rank, 0, cubes, &leftSrequest);
-            MPI_Irecv(left_layer, Nx * Ny, MPI_FLOAT, left_rank, 0, cubes, &leftRrequest);
-          } else if (y == My - 1 && z == Mz - 1 && t != T - 1) {
-            MPI_Isend(&(A[IDX_3D(0, 0, Mz - 1, Nx, Ny)]), Nx * Ny, MPI_FLOAT, right_rank, 0, cubes, &rightSrequest);
-            MPI_Irecv(right_layer, Nx * Ny, MPI_FLOAT, right_rank, 0, cubes, &rightRrequest);
+          if (x == 0 && y == My -1 && z == Mz - 1 && t != T - 1) {
+            MPI_Isend(A, 1, x_slice, left_rank, 0, cubes, &leftSrequest);
+            MPI_Irecv(left_layer, My * Mz, MPI_FLOAT, left_rank, 0, cubes, &leftRrequest);
+          } else if (x == Mx - 1 && y == My - 1 && z == Mz - 1 && t != T - 1) {
+            MPI_Isend(&(A[IDX_3D(Mx - 1, 0, 0, Mx, My)]), 1, x_slice, right_rank, 0, cubes, &rightSrequest);
+            MPI_Irecv(right_layer, My * Mz, MPI_FLOAT, right_rank, 0, cubes, &rightRrequest);
           }
         }
         if (y == 0 && z == Mz - 1 && t != T - 1) {
-          MPI_Isend(A, Nx * Ny, MPI_FLOAT, front_rank, 0, cubes, &frontSrequest);
-          MPI_Irecv(front_layer, Nx * Ny, MPI_FLOAT, front_rank, 0, cubes, &frontRrequest);
+          MPI_Isend(A, 1, y_slice, front_rank, 0, cubes, &frontSrequest);
+          MPI_Irecv(front_layer, Mx * Mz, MPI_FLOAT, front_rank, 0, cubes, &frontRrequest);
         } else if (y == My - 1 && z == Mz - 1 && t != T - 1) {
-          MPI_Isend(&(A[IDX_3D(0, 0, Mz - 1, Nx, Ny)]), Nx * Ny, MPI_FLOAT, back_rank, 0, cubes, &backSrequest);
-          MPI_Irecv(back_layer, Nx * Ny, MPI_FLOAT, back_rank, 0, cubes, &backRrequest);
+          MPI_Isend(&(A[IDX_3D(0, My - 1, 1, Mx, My)]), 1, y_slice, back_rank, 0, cubes, &backSrequest);
+          MPI_Irecv(back_layer, Mx * Mz, MPI_FLOAT, back_rank, 0, cubes, &backRrequest);
         }
       }
       if (z == 0 && t != T - 1) {
-        MPI_Isend(A, Nx * Ny, MPI_FLOAT, top_rank, 0, cubes, &topSrequest);
-        MPI_Irecv(top_layer, Nx * Ny, MPI_FLOAT, top_rank, 0, cubes, &topRrequest);
+        MPI_Isend(A, 1, z_slice, top_rank, 0, cubes, &topSrequest);
+        MPI_Irecv(top_layer, Mx * My, MPI_FLOAT, top_rank, 0, cubes, &topRrequest);
       } else if (z == Mz - 1 && t != T - 1) {
-        MPI_Isend(&(A[IDX_3D(0, 0, Mz - 1, Nx, Ny)]), Nx * Ny, MPI_FLOAT, bottom_rank, 0, cubes, &bottomSrequest);
-        MPI_Irecv(bottom_layer, Nx * Ny, MPI_FLOAT, bottom_rank, 0, cubes, &bottomRrequest);
+        MPI_Isend(&(A[IDX_3D(0, 0, Mz - 1, Mx, My)]), 1, z_slice, bottom_rank, 0, cubes, &bottomSrequest);
+        MPI_Irecv(bottom_layer, Mx * My, MPI_FLOAT, bottom_rank, 0, cubes, &bottomRrequest);
       }
     }
+
     // swap matrices (just pointers, not content)
     Vector H = A;
     A = B;
@@ -254,12 +268,12 @@ int main(int argc, char **argv) {
 
 #ifdef VERBOSE
     // show intermediate step
-    if (!(t % 1000)) {
+    if (!(t % 1)) {
       //TODO
-      MPI_Gather(A, Nx * Ny * Mz, MPI_FLOAT, AA, Nx * Ny * Mz, MPI_FLOAT, 0, cubes);
+      //MPI_Gather(A, Nx * Ny * Mz, MPI_FLOAT, AA, Nx * Ny * Mz, MPI_FLOAT, 0, cubes);
       if (rank == 0) {
         printf("Step t=%d:\n", t);
-        printTemperature(AA, Nx, Ny, Nz);
+        printTemperature(A, Mx, My, Mz);
         printf("\n");
       }
     }
@@ -278,14 +292,15 @@ int main(int argc, char **argv) {
   printf("hello from rank %d", rank);
 #endif
   //TODO
-  MPI_Gather(A, Mx * My * Mz, MPI_FLOAT, AA, Mx * My * Mz, MPI_FLOAT, 0, cubes);
-
-  releaseVector(A);
+  //MPI_Gatherv(A, Mx * My * Mz, MPI_FLOAT, AA, 1, displacement_array, subroom_cube, 0, cubes);
+  //for (int z=0; z<Mz; z++){
+  //  MPI_Gather(&(A[IDX_3D(0, y, z, Mx, My)]), Mx, MPI_FLOAT, &(AA[IDX_3D(0, y, z, Nx, Ny)]), Mx, MPI_FLOAT, 0, cubes);
+  //}
 
   if (rank == 0) {
 #ifdef VERBOSE
     printf("Final:\n");
-    printTemperature(AA, Nx, Ny, Nz);
+    printTemperature(A, Mx, My, Mz);
     printf("\n");
 #endif
 
@@ -299,6 +314,7 @@ int main(int argc, char **argv) {
     double end = MPI_Wtime();
     printf("The process took %f seconds to finish. \n", end - start);
   }
+  releaseVector(A);
 
   MPI_Finalize();
 
