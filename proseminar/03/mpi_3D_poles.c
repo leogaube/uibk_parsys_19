@@ -48,11 +48,6 @@ int main(int argc, char **argv)
   MPI_Cart_create(MPI_COMM_WORLD, 2, dims, periods, 0, &poles_3D);
   MPI_Comm_rank(poles_3D, &rank);
 
-#ifdef VERBOSE
-  if (rank == 0)
-    printf("Computing heat-distribution for room size Nx=%d, Ny=%d, Nz=%d for T=%d timesteps\n", Nx, Ny, Nz, T);
-#endif
-
   // get the adjacent slices
   int top_rank = rank;
   int bottom_rank = rank;
@@ -73,11 +68,35 @@ int main(int argc, char **argv)
     back_rank = rank;
   }
 
+	// 2D subroom slices for each dimension --> useful for sending 2D ghost cell slices to neighbouring ranks
 	MPI_Datatype y_slice, z_slice;
   MPI_Type_vector(Mz, Nx, Nx * My, MPI_FLOAT, &y_slice);
   MPI_Type_vector(1, Nx * My, 1, MPI_FLOAT, &z_slice);
   MPI_Type_commit(&y_slice);
   MPI_Type_commit(&z_slice);
+
+	// create subroom_datatypes for MPI_Gatherv
+  //--> start of subroom determined by displacement_array
+  //--> end of subroom determined by resized_subroom datatype
+  int room_sizes[3] = {Nx, Ny, Nz};
+  int subroom_sizes[3] = {Nx, My, Mz};
+  int start_array[3] = {0, 0, 0};
+  MPI_Datatype pole_subroom, resized_subroom;
+  MPI_Type_create_subarray(3, room_sizes, subroom_sizes, start_array, MPI_ORDER_C, MPI_FLOAT, &pole_subroom);
+  // 'pretend' that subroom is only 1 floats in size
+  MPI_Type_create_resized(pole_subroom, 0, 1 * sizeof(float), &resized_subroom);
+  MPI_Type_commit(&resized_subroom);
+
+	int* recv_count_array = malloc(sizeof(int) * numProcs);
+  int*	displacement_array = malloc(sizeof(int) * numProcs);
+	if (rank == 0) {
+		for (int r=0; r<numProcs; r++){
+		  recv_count_array[r] = 1;
+		  // get the global index of every rank at its local position 0
+		  displacement_array[r] = local2global(r, 0, Nx, My, Mz, 1, sqrt(numProcs));
+			//printf("local2global value: %d\n", local2global(r, 0, Nx, My, Mz, 1, sqrt(numProcs)));
+		}
+	}
 
   // ---------- setup ----------
 
@@ -100,12 +119,20 @@ int main(int argc, char **argv)
   }
 
   Vector AA = NULL;
-  Vector output = NULL;
-  if (rank == 0)
-  {
+  if (rank == 0) {
     AA = createVector(Nx * Ny * Nz);
-    output = createVector(Nx * Ny * Nz);
   }
+
+	#ifdef VERBOSE
+  MPI_Gatherv(A, Nx * My * Mz, MPI_FLOAT, AA, recv_count_array, displacement_array, resized_subroom, 0, poles_3D);
+  if (rank == 0) {
+    printf("Computing heat-distribution for room size Nx=%d, Ny=%d, Nz=%d for T=%d timesteps\n", Nx, Ny, Nz, T);
+
+    printf("Initial:\n");
+    printTemperature(AA, Nx, Ny, Nz);
+    printf("\n");
+  }
+#endif
 
   // ---------- compute ----------
 
@@ -166,21 +193,16 @@ int main(int argc, char **argv)
     A = B;
     B = H;
 
-/*
-#ifdef VERBOSE
-    // show intermediate step
-    if (!(t % 1000))
-    {
-			MPI_Gather(A, Nx * My * Mz, MPI_FLOAT, AA, Nx * My * Mz, MPI_FLOAT, 0, poles_3D);
-			if (rank == 0) {
-				gatherCorrection(AA, output, numProcs, Nx, Ny, Nz, My, Mz);
-        printf("steps t = %d:\n", t);
-        printTemperature(output, Nx, Ny, Nz);
+		// show intermediate step
+    if (!(t % 1000)) {
+      MPI_Gatherv(A, Nx * My * Mz, MPI_FLOAT, AA, recv_count_array, displacement_array, resized_subroom, 0, poles_3D);
+
+      if (rank == 0) {
+        printf("t: %d\n", t);
+        printTemperature(AA, Nx, Ny, Nz);
         printf("\n");
-			}
+      }
     }
-#endif
-*/
   }
 
   releaseVector(B);
@@ -189,11 +211,14 @@ int main(int argc, char **argv)
   releaseVector(front_layer);
   releaseVector(back_layer);
 
-	printf("rank :%d\n", rank);
-  printTemperature(A, Nx, My, Mz);
-  printf("\n");
+	//printf("rank :%d\n", rank);
+  //printTemperature(A, Nx, My, Mz);
+  //printf("\n");
 
-  MPI_Gather(A, Nx * My * Mz, MPI_FLOAT, AA, Nx * My * Mz, MPI_FLOAT, 0, poles_3D);
+  MPI_Gather(A, Nx * My * Mz, MPI_FLOAT, AA, Nx * Ny * Nz, MPI_FLOAT, 0, poles_3D);
+	free(recv_count_array);
+	free(displacement_array);
+	
   releaseVector(A);
 
   if (rank == 0)
@@ -201,19 +226,17 @@ int main(int argc, char **argv)
 /*
 #ifdef VERBOSE
     printf("Final:\n");
-		gatherCorrection(AA, output, numProcs, Nx, Ny, Nz, My, Mz);
-    printTemperature(output, Nx, Ny, Nz);
+    printTemperature(AA, Nx, Ny, Nz);
     printf("\n");
 #endif
 
 
     // ---------- check ----------
-    double residual = is_verified_3D(output, Nx, Ny, Nz, source_x, source_y, source_z, T);
+    double residual = is_verified_3D(AA, Nx, Ny, Nz, source_x, source_y, source_z, T);
     printf("The maximal deviation from the 1D theory is %fK.", residual);
 */
     // ---------- cleanup ----------
     releaseVector(AA);
-		releaseVector(output);
 
     double end = MPI_Wtime();
     printf("The process took %g seconds to finish. \n", end - start);
