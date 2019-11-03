@@ -1,0 +1,123 @@
+Computing heat-distribution for room size Nx=256, Ny=256, Nz=256 for T=256 timesteps
+There are 2 subrooms (Px=2, Py=1, Pz=1) each of size Mx=128, My=256, Mz=256
+
+Initial:
+########### ONLY DISPLAYING SLICE 0 of 3D room ##############
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+
+############# END OF TIMESTEP ##############
+
+t: 0
+########### ONLY DISPLAYING SLICE 0 of 3D room ##############
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+
+############# END OF TIMESTEP ##############
+
+Final:
+########### ONLY DISPLAYING SLICE 0 of 3D room ##############
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+
+############# END OF TIMESTEP ##############
+
+1D initial:
+X@                               X
+
+############# END OF TIMESTEP ##############
+1D final:
+X@.                              X
+
+############# END OF TIMESTEP ##############
+The maximal deviation from the 1D theory is -273.000000K.The process took 82.158703 seconds to finish. 
