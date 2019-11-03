@@ -33,6 +33,7 @@ int main(int argc, char **argv) {
 
   if (Nx*Ny*Nz < numProcs){
     printf("Room is too small for %d ranks", numProcs);
+    MPI_Finalize();
     return EXIT_FAILURE;
   }
 
@@ -60,6 +61,12 @@ int main(int argc, char **argv) {
   if (Ny < Py){
     Px *= Py;
     Py = 1;
+  }
+
+  if (Nx % Px || Ny % Py || Nz % Pz){
+    printf("Room size (%dx%dx%d) cannot be split up evenly among ranks (%dx%dx%d)\n", Nx, Ny, Nz, Px, Py, Pz);
+    MPI_Finalize();
+    return EXIT_FAILURE;
   }
 
   // subroom sizes in all dimensions
