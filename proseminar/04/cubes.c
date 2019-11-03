@@ -45,13 +45,13 @@ int main(int argc, char **argv) {
   int c = floorf(cbrt(numProcs));
   while (numProcs%c)
     c--;
-  Px = c;
+  Pz = c;
 
-  int s = floorf(sqrt(numProcs / Px));
-  while ((numProcs / Px) % s)
+  int s = floorf(sqrt(numProcs / Pz));
+  while ((numProcs / Pz) % s)
     s--;
   Py = s;
-  Pz = numProcs / (Px * Py);
+  Px = numProcs / (Pz * Py);
   
   // also allow non-cubic or 1D/2D room sizes
   if (Nz < Pz){
@@ -118,7 +118,7 @@ int main(int argc, char **argv) {
   MPI_Type_commit(&y_slice);
   MPI_Type_commit(&z_slice);
 
-  // 
+  // create subroom_datatypes for MPI_Gatherv
   //--> start of subroom determined by displacement_array
   //--> end of subroom determined by resized_subroom datatype
   int room_sizes[3] = {Nx, Ny, Nz};
@@ -126,7 +126,7 @@ int main(int argc, char **argv) {
   int start_array[3] = {0, 0, 0};
   MPI_Datatype cubic_subroom, resized_subroom;
   MPI_Type_create_subarray(3, room_sizes, subroom_sizes, start_array, MPI_ORDER_C, MPI_FLOAT, &cubic_subroom);
-  // 'pretend' that subroom is only Mx floats in size
+  // 'pretend' that subroom is only 1 floats in size
   MPI_Type_create_resized(cubic_subroom, 0, 1 * sizeof(float), &resized_subroom);
   MPI_Type_commit(&resized_subroom);
 
@@ -170,7 +170,7 @@ int main(int argc, char **argv) {
 
 #ifdef VERBOSE
   MPI_Gatherv(A, Mx * My * Mz, MPI_FLOAT, AA, recv_count_array, displacement_array, resized_subroom, 0, cubes);
-  if (rank == 0){
+  if (rank == 0) {
     printf("Computing heat-distribution for room size Nx=%d, Ny=%d, Nz=%d for T=%d timesteps\n", Nx, Ny, Nz, T);
     printf("There are %d subrooms (Px=%d, Py=%d, Pz=%d) each of size Mx=%d, My=%d, Mz=%d\n\n", numProcs, Px, Py, Pz, Mx, My, Mz);
 
@@ -194,6 +194,7 @@ int main(int argc, char **argv) {
   MPI_Request topRrequest, topSrequest, bottomRrequest, bottomSrequest;
   MPI_Request frontRrequest, frontSrequest, backRrequest, backSrequest;
   MPI_Request leftRrequest, leftSrequest, rightRrequest, rightSrequest;
+  
 
   // exchange ghost cells for the very first iteration
   MPI_Isend(A, 1, x_slice, left_rank, 0, cubes, &leftSrequest);
@@ -338,6 +339,12 @@ int main(int argc, char **argv) {
   releaseVector(back_layer);
   releaseVector(left_layer);
   releaseVector(right_layer);
+
+  MPI_Type_free(&x_slice);
+  MPI_Type_free(&y_slice);
+  MPI_Type_free(&z_slice);
+  MPI_Type_free(&cubic_subroom);
+  MPI_Type_free(&resized_subroom);
 
   free(recv_count_array);
   free(displacement_array);
