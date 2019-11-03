@@ -1,0 +1,151 @@
+Computing heat-distribution for room size Nx=256, Ny=256, Nz=256 for T=2560 timesteps
+There are 1 subrooms (Px=1, Py=1, Pz=1) each of size Mx=256, My=256, Mz=256
+
+Initial:
+########### ONLY DISPLAYING SLICE 0 of 3D room ##############
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+
+############# END OF TIMESTEP ##############
+
+t: 0
+########### ONLY DISPLAYING SLICE 0 of 3D room ##############
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+
+############# END OF TIMESTEP ##############
+
+t: 1000
+########### ONLY DISPLAYING SLICE 0 of 3D room ##############
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+
+############# END OF TIMESTEP ##############
+
+t: 2000
+########### ONLY DISPLAYING SLICE 0 of 3D room ##############
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+
+############# END OF TIMESTEP ##############
+
