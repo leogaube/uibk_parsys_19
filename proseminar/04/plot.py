@@ -1,6 +1,7 @@
 import os
 import sys
 
+from math import log2
 import re
 import pandas as pd
 
@@ -9,13 +10,21 @@ import plotly.graph_objs as go
 from plotly.subplots import make_subplots
 import colorlover as cl
 
-COLORS = cl.scales["7"]["qual"]["Dark2"]
+def fade_color(color, strength):
+	values = [i*strength for i in find_ints_in_string(color)]
+	return "rgb(%d, %d, %d)" % (values[0], values[1], values[2])
+
+def find_ints_in_string(string):
+	ints_in_str = re.findall(r'\d+', string)
+	if len(ints_in_str) == 0:
+		return None
+	return [int(i) for i in ints_in_str]
 
 def find_int_in_string(string):
-	ints_in_string = re.findall(r'\d+', string)
-	if len(ints_in_string) == 0:
+	ints = find_ints_in_string(string)
+	if ints is None:
 		return None
-	return int(ints_in_string[0])
+	return ints[0]
 
 def get_least_ranks(df):
 	min_col = None
@@ -44,7 +53,7 @@ def get_most_ranks(df):
 	return max_col, max_ranks
 
 
-def plot_data(dirs, filename):
+def plot_data(dirs, filename, group_by="domain"):
 	df = pd.read_csv(os.path.join(DATA_PATH, filename))
 
 	fig = make_subplots(
@@ -62,9 +71,10 @@ def plot_data(dirs, filename):
 		comparison_num_ranks = 1
 		speedup_type = "absolute"
 
+		seq_color = "rgb(0,0,205)"
 		seq_runtime_trace = go.Scatter(
                     x=df[problem_size_column], y=df[seq_column],
-                				legendgroup=seq_column, name=seq_column, marker=dict(color=COLORS.pop(0)))
+					legendgroup=seq_column, name=seq_column, marker=dict(color=seq_color))
 		fig.add_trace(seq_runtime_trace, row=1, col=1)
 	else:
 		comparison_column, comparison_num_ranks = get_least_ranks(df)
@@ -75,16 +85,21 @@ def plot_data(dirs, filename):
 
 	_, max_ranks = get_most_ranks(df)
 	next_color_index = 0
-	colors = {}
-	for i, column in enumerate(df.columns):
-		if column in [problem_size_column, seq_column]:
-			continue
 
-		program_group, rank_group = column.split("_fillup_")
+	COLORS = cl.scales["9"]["seq"]
+	COLOR_NAMES = ["Greens", "Purples", "Reds", "Greys", "Oranges"]
+	colors = {}
+
+	mpi_columns = [column for column in df.columns if column not in [problem_size_column, seq_column]]
+	for i, column in enumerate(sorted(mpi_columns, key=find_int_in_string)):
 		num_ranks = find_int_in_string(column)
-		if program_group not in colors:
-			colors[program_group] = COLORS[next_color_index]
+		domain_group = column.split("_fillup_")[0]
+		legend_group = num_ranks if group_by == "domain" else domain_group
+		if domain_group not in colors:
+			colors[domain_group] = COLORS[COLOR_NAMES[next_color_index % len(COLOR_NAMES)]]
 			next_color_index += 1
+		color = colors[domain_group][int(2+log2(num_ranks))]
+		show_by_default = (num_ranks == max_ranks) if group_by == "domain" else (domain_group == "cubes")
 
 		runtimes = df[column]
 		speedups = (df[comparison_column]*comparison_num_ranks) / runtimes
@@ -92,15 +107,15 @@ def plot_data(dirs, filename):
 
 		runtime_trace = go.Scatter(
 			x=df[problem_size_column], y=runtimes, 
-			legendgroup=num_ranks, name=column, marker=dict(color=colors[program_group]), visible=True if (num_ranks == max_ranks) else "legendonly")
+			legendgroup=legend_group, name=column, marker=dict(color=color), visible=True if show_by_default else "legendonly")
 
 		speedup_trace = go.Scatter(
 			x=df[problem_size_column], y=speedups, 
-			legendgroup=num_ranks, marker=dict(color=colors[program_group]), showlegend=False, visible=True if (num_ranks == max_ranks) else "legendonly")
+			legendgroup=legend_group, marker=dict(color=color), showlegend=False, visible=True if show_by_default else "legendonly")
 
 		efficiency_trace = go.Scatter(
 			x=df[problem_size_column], y=efficiencies, 
-			legendgroup=num_ranks, marker=dict(color=colors[program_group]), showlegend=False, visible=True if (num_ranks == max_ranks) else "legendonly")
+			legendgroup=legend_group, marker=dict(color=color), showlegend=False, visible=True if show_by_default else "legendonly")
 		
 		fig.add_trace(runtime_trace, row=1, col=1)
 		fig.add_trace(speedup_trace, row=2, col=1)
@@ -115,7 +130,7 @@ def plot_data(dirs, filename):
 	fig.update_yaxes(title="%s speedup"%speedup_type, rangemode="tozero", row=2, col=1)
 	fig.update_yaxes(title="%s efficiency"%speedup_type, range=[0., 1.], row = 2, col = 2)
 
-	ply.plot(fig, filename=os.path.join(PLOTS_PATH, filename.split(".")[0]+".html"))
+	ply.plot(fig, filename=os.path.join(PLOTS_PATH, filename.split(".")[0]+"_"+group_by+".html"))
 
 
 if __name__ == "__main__":
@@ -132,4 +147,5 @@ if __name__ == "__main__":
 				print("incompatible file: %s"%filename)
 				continue
 			print("plotting %s"%filename)  
-			plot_data(path, filename)
+			plot_data(path, filename, group_by="domain")
+			plot_data(path, filename, group_by="#ranks")

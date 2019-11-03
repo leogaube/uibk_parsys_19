@@ -1,130 +1,84 @@
-Computing heat-distribution for room size Nx=256, Ny=256, Nz=256 for T=2560 timesteps
+Computing heat-distribution for room size Nx=256, Ny=256, Nz=256 for T=256 timesteps
 Step t=0:
 ########### ONLY DISPLAYING SLICE 0 of 3D room ##############
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
 
-##################################
-
-Step t=1000:
-########### ONLY DISPLAYING SLICE 0 of 3D room ##############
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-
-##################################
-
-Step t=2000:
-########### ONLY DISPLAYING SLICE 0 of 3D room ##############
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-
-##################################
+############# END OF TIMESTEP ##############
 
 Final:
 ########### ONLY DISPLAYING SLICE 0 of 3D room ##############
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
-X                         X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
+X                                X
 
-##################################
+############# END OF TIMESTEP ##############
 
 1D initial:
-X@                        X
+X@                               X
 
-##################################
+############# END OF TIMESTEP ##############
 1D final:
-X@@:                      X
+X@.                              X
 
-##################################
-The maximal deviation from the 1D theory is -57.729309K.The process took 32.554211 seconds to finish. 
+############# END OF TIMESTEP ##############
+The maximal deviation from the 1D theory is -55.139679K.The process took 4.829401 seconds to finish. 
