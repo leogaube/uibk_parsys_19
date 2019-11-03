@@ -83,7 +83,7 @@ void printTemperature(Vector m, int nx, int ny, int nz)
       printf("X\n");
     }
   }
-  printf("\n##################################\n");
+  printf("\n############# END OF TIMESTEP ##############\n");
 }
 
 

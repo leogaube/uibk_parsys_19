@@ -9,16 +9,20 @@
 int main(int argc, char **argv) {
   double start = MPI_Wtime();
 
-  // 'parsing' optional input parameter = problem size
-  int Nx = 10;
-  int Ny = 10;
-  int Nz = 10;
+  // 'parsing' optional input parameters = room size
+  int Nx = 32;
+  int Ny = 32;
+  int Nz = 32;
   if (argc == 2) {
     Nx = Ny = Nz = atoi(argv[1]);
   } else if (argc == 4) {
     Nx = atoi(argv[1]);
     Ny = atoi(argv[2]);
     Nz = atoi(argv[3]);
+  }
+  if (Nx < Ny || Ny < Nz){
+    printf("Please specify a room that meets the contition: Nx >= Ny >= Nz!");
+    return EXIT_FAILURE;
   }
   int T = MAX(MAX(Nx, Ny), Nz) * TIMESTEPS_MUL;
 
@@ -27,46 +31,50 @@ int main(int argc, char **argv) {
   MPI_Init(&argc, &argv);
   MPI_Comm_size(MPI_COMM_WORLD, &numProcs);
 
-  double cbrt_num_procs = cbrt((double)numProcs);
-  int C = ceilf(cbrt_num_procs);
-  if (C != (int)cbrt_num_procs) {
-    printf("The number von ranks cannot be split up evenly into cubic subrooms! (numProcs != 8 || numProcs != 27 || numProcs != 64)");
-    MPI_Finalize();
+  if (Nx*Ny*Nz < numProcs){
+    printf("Room is too small for %d ranks", numProcs);
     return EXIT_FAILURE;
   }
-  if (Nx % C != 0 || Ny % C != 0 || Nz % C != 0) {
-    printf("This Problem cannot be split up evenly among MPI ranks in a cubic domain! (Nx mod C != 0 || Ny mod C != 0 || Nz mod C != 0)");
-    MPI_Finalize();
-    return EXIT_FAILURE;
+
+  // find the optimal rank layout 
+  // e.g. 8 slots --> Px=2, Py=2 Pz=2
+  // e.g. 42 slots --> Px=3, Py=2 Pz=7
+  // e.g. 17 slots --> Px=1, Py=1, Pz=17
+  int Px, Py, Pz;
+  int c = floorf(cbrt(numProcs));
+  while (numProcs%c)
+    c--;
+  Px = c;
+
+  int s = floorf(sqrt(numProcs / Px));
+  while ((numProcs / Px) % s)
+    s--;
+  Py = s;
+  Pz = numProcs / (Px * Py);
+  
+  // also allow non-cubic or 1D/2D room sizes
+  if (Nz < Pz){
+    Py *= Pz;
+    Pz = 1;
   }
-  //TODO different values for Cx, Cy, Cz
-  int Cx = C;
-  int Cy = C;
-  int Cz = C;
+  if (Ny < Py){
+    Px *= Py;
+    Py = 1;
+  }
 
-  int Mx = Nx / Cx;
-  int My = Ny / Cy;
-  int Mz = Nz / Cz;
+  // subroom sizes in all dimensions
+  int Mx = Nx / Px;
+  int My = Ny / Py;
+  int Mz = Nz / Pz;
 
-
-  MPI_Request topRrequest, topSrequest, bottomRrequest, bottomSrequest;
-  MPI_Request frontRrequest, frontSrequest, backRrequest, backSrequest;
-  MPI_Request leftRrequest, leftSrequest, rightRrequest, rightSrequest;
-
+  // create new communicator
   MPI_Comm cubes;
 
-  int dims[3] = {Cx, Cy, Cz};
+  int dims[3] = {Px, Py, Pz};
   int periods[3] = {0, 0, 0};
 
   MPI_Cart_create(MPI_COMM_WORLD, 3, dims, periods, 1, &cubes);
   MPI_Comm_rank(cubes, &rank);
-
-#ifdef VERBOSE
-  if (rank == 0){
-    printf("Computing heat-distribution for room size Nx=%d, Ny=%d, Nz=%d for T=%d timesteps\n", Nx, Ny, Nz, T);
-    printf("C: %d, Mx: %d\n\n", C, Mx);
-  }
-#endif
 
   // get the adjacent slices
   int left_rank = rank;
@@ -80,7 +88,7 @@ int main(int argc, char **argv) {
   MPI_Cart_shift(cubes, 1, 1, &front_rank, &back_rank);
   MPI_Cart_shift(cubes, 2, 1, &left_rank, &right_rank);
 
-  // possibly send data to yourself
+  // possibly send data to yourself for simplicity
   if (left_rank == MPI_PROC_NULL)
     left_rank = rank;
   if (right_rank == MPI_PROC_NULL)
@@ -94,11 +102,7 @@ int main(int argc, char **argv) {
   if (bottom_rank == MPI_PROC_NULL)
     bottom_rank = rank;
 
-#ifdef DEBUG
-  printf("me: %d, l: %d, r: %d, f: %d, b: %d, u: %d, d: %d\n",
-         rank, left_rank, right_rank, front_rank, back_rank, top_rank, bottom_rank);
-#endif
-
+  // 2D subroom slices for each dimension --> useful for sending 2D ghost cell slices to neighbouring ranks
   MPI_Datatype x_slice, y_slice, z_slice;
   MPI_Type_vector(My * Mz, 1, Mx, MPI_FLOAT, &x_slice);
   MPI_Type_vector(Mz, Mx, Mx * My, MPI_FLOAT, &y_slice);
@@ -107,7 +111,7 @@ int main(int argc, char **argv) {
   MPI_Type_commit(&y_slice);
   MPI_Type_commit(&z_slice);
 
-
+  // 
   //--> start of subroom determined by displacement_array
   //--> end of subroom determined by resized_subroom datatype
   int room_sizes[3] = {Nx, Ny, Nz};
@@ -124,7 +128,7 @@ int main(int argc, char **argv) {
   for (int r=0; r<numProcs; r++){
     recv_count_array[r] = 1;
     // get the global index of every rank at its local position 0
-    displacement_array[r] = local2global(r, 0, Mx, My, Mz, Cx, Cy);
+    displacement_array[r] = local2global(r, 0, Mx, My, Mz, Px, Py);
   }
 
   // ---------- setup ----------
@@ -144,11 +148,30 @@ int main(int argc, char **argv) {
   int global_source = IDX_3D(source_x, source_y, source_z, Nx, Ny);
   int local_source = IDX_3D(source_x % Mx, source_y % My, source_z % Mz, Mx, My);
 
-  if (local2global(rank, local_source, Mx, My, Mz, Cx, Cy) == global_source) {
+  if (local2global(rank, local_source, Mx, My, Mz, Px, Py) == global_source) {
     A[local_source] = 273 + 60;
   }
 
   // ---------- compute ----------
+
+
+  // create buffer of the entire room
+  Vector AA = NULL;
+  if (rank == 0) {
+    AA = createVector(Nx * Ny * Nz);
+  }
+
+#ifdef VERBOSE
+  MPI_Gatherv(A, Mx * My * Mz, MPI_FLOAT, AA, recv_count_array, displacement_array, resized_subroom, 0, cubes);
+  if (rank == 0){
+    printf("Computing heat-distribution for room size Nx=%d, Ny=%d, Nz=%d for T=%d timesteps\n", Nx, Ny, Nz, T);
+    printf("There are %d subrooms (Px=%d, Py=%d, Pz=%d) each of size Mx=%d, My=%d, Mz=%d\n\n", numProcs, Px, Py, Pz, Mx, My, Mz);
+
+    printf("Initial:\n");
+    printTemperature(AA, Nx, Ny, Nz);
+    printf("\n");
+  }
+#endif
 
   // create a second buffer for the computation
   Vector B = createVector(Mx * My * Mz);
@@ -161,18 +184,9 @@ int main(int argc, char **argv) {
   Vector top_layer = createVector(Mx * My);
   Vector bottom_layer = createVector(Mx * My);
 
-  // create buffer of the entire room
-  Vector AA = NULL;
-  if (rank == 0) {
-    AA = createVector(Nx * Ny * Nz);
-  }
-  MPI_Gatherv(A, Mx * My * Mz, MPI_FLOAT, AA, recv_count_array, displacement_array, resized_subroom, 0, cubes);
-
-  if (rank == 0) {
-    printf("Initial:\n");
-    printTemperature(AA, Nx, Ny, Nz);
-    printf("\n");
-  }
+  MPI_Request topRrequest, topSrequest, bottomRrequest, bottomSrequest;
+  MPI_Request frontRrequest, frontSrequest, backRrequest, backSrequest;
+  MPI_Request leftRrequest, leftSrequest, rightRrequest, rightSrequest;
 
   // exchange ghost cells for the very first iteration
   MPI_Isend(A, 1, x_slice, left_rank, 0, cubes, &leftSrequest);
@@ -191,9 +205,6 @@ int main(int argc, char **argv) {
 
   // for each time step ..
   for (int t = 0; t < T; t++) {
-#ifdef DEBUG
-    printf("rank: %d, timestep: %d/%d\n", rank, t, T);
-#endif
     // .. we propagate the temperature
     for (int z = 0; z < Mz; z++) {
       // wait for ghost cell exchanges from previous iteration to finish
@@ -225,7 +236,7 @@ int main(int argc, char **argv) {
           int i = IDX_3D(x, y, z, Mx, My);
 
           // center stays constant (the heat is still on)
-          if (local2global(rank, i, Mx, My, Mz, Cx, Cy) == global_source) {
+          if (local2global(rank, i, Mx, My, Mz, Px, Py) == global_source) {
             B[i] = A[i];
             continue;
           }
@@ -259,7 +270,7 @@ int main(int argc, char **argv) {
           MPI_Isend(A, 1, y_slice, front_rank, 0, cubes, &frontSrequest);
           MPI_Irecv(front_layer, Mx * Mz, MPI_FLOAT, front_rank, 0, cubes, &frontRrequest);
         } if (y == My - 1 && z == Mz - 1 && t != T - 1) {
-          MPI_Isend(&(A[IDX_3D(0, My - 1, 1, Mx, My)]), 1, y_slice, back_rank, 0, cubes, &backSrequest);
+          MPI_Isend(&(A[IDX_3D(0, My - 1, 0, Mx, My)]), 1, y_slice, back_rank, 0, cubes, &backSrequest);
           MPI_Irecv(back_layer, Mx * Mz, MPI_FLOAT, back_rank, 0, cubes, &backRrequest);
         }
       }
@@ -279,7 +290,7 @@ int main(int argc, char **argv) {
 
 #ifdef VERBOSE
     // show intermediate step
-    if (0 && !(t % 10000)) {
+    if (!(t % 1000)) {
       MPI_Gatherv(A, Mx * My * Mz, MPI_FLOAT, AA, recv_count_array, displacement_array, resized_subroom, 0, cubes);
 
       if (rank == 0) {
@@ -291,22 +302,7 @@ int main(int argc, char **argv) {
 #endif
   }
 
-  releaseVector(B);
-  releaseVector(bottom_layer);
-  releaseVector(top_layer);
-  releaseVector(front_layer);
-  releaseVector(back_layer);
-  releaseVector(left_layer);
-  releaseVector(right_layer);
-
-#ifdef DEBUG
-  printf("hello from rank %d", rank);
-#endif
   MPI_Gatherv(A, Mx * My * Mz, MPI_FLOAT, AA, recv_count_array, displacement_array, resized_subroom, 0, cubes);
-
-  free(recv_count_array);
-  free(displacement_array);
-  releaseVector(A);
 
   if (rank == 0) {
 #ifdef VERBOSE
@@ -325,6 +321,19 @@ int main(int argc, char **argv) {
     double end = MPI_Wtime();
     printf("The process took %f seconds to finish. \n", end - start);
   }
+
+  //cleanup
+  releaseVector(A);
+  releaseVector(B);
+  releaseVector(bottom_layer);
+  releaseVector(top_layer);
+  releaseVector(front_layer);
+  releaseVector(back_layer);
+  releaseVector(left_layer);
+  releaseVector(right_layer);
+
+  free(recv_count_array);
+  free(displacement_array);
 
   MPI_Finalize();
 
