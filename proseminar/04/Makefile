@@ -98,10 +98,10 @@ ifeq ($(SGE_CELL), lcc2)
 	MPI_EXEC_COMMAND += rm job.tmp
 else
 	SEQ_EXEC_COMMAND = echo "running '$(SEQ_NAME)'";
-	SEQ_EXEC_COMMAND += ./$${sequential} $${problem_size} 1>> $(SEQ_OUTPUT_FILENAME) 2>> $(SEQ_ERROR_FILENAME)
+	SEQ_EXEC_COMMAND += ./$${sequential} $${problem_size} 1> $(SEQ_OUTPUT_FILENAME) 2> $(SEQ_ERROR_FILENAME)
 
 	MPI_EXEC_COMMAND = echo "running '$(MPI_NAME)'";
-	MPI_EXEC_COMMAND += mpiexec -n $${num_ranks} --oversubscribe ./$${parallel}$(EXECUTABLE_EXT) $${problem_size} 1>> $(MPI_OUTPUT_FILENAME) 2>> $(MPI_ERROR_FILENAME)
+	MPI_EXEC_COMMAND += mpiexec -n $${num_ranks} --oversubscribe ./$${parallel}$(EXECUTABLE_EXT) $${problem_size} 1> $(MPI_OUTPUT_FILENAME) 2> $(MPI_ERROR_FILENAME)
 endif
 
 
