@@ -1,8 +1,8 @@
 ### PROGRAMS ###
 SEQUENTIAL_ARRAY = seq_3D
-PARALLEL_ARRAY = cubes slabs slabs_blocking
+PARALLEL_ARRAY = poles cubes slabs slabs_blocking
 DEPENDENCY_ARRAY = heat_stencil
-DEFINES = -D VERBOSE -D SLICE_3D
+DEFINES = -D VERBOSE
 LANGUAGE = c
 #LANGUAGE = cpp
 
@@ -18,7 +18,7 @@ PRINT_FILES = print_files.py
 # --> use 'make run_mpi_single' for submitting a single job. 
 NUM_RUNS = 1
 
-NUM_RANKS_ARRAY = 64
+NUM_RANKS_ARRAY = 1 2 4 8 16 32 64
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
@@ -55,7 +55,7 @@ PYTHON = python
 ### Executables ###
 DEP_OBJECTS = $(addsuffix .o, $(DEPENDENCY_ARRAY))
 SEQ_EXECUTABLES = $(addsuffix $(EXECUTABLE_EXT), $(SEQUENTIAL_ARRAY))
-MPI_EXECUTABLES = $(addsuffix $(EXECUTABLE_EXT), $(PARALLEL_ARRAY))
+MPI_EXECUTABLES = $(addsuffix $(EXECUTABLE_EXT), $(filter-out poles, $(PARALLEL_ARRAY)))
 EXECUTABLE_PATTERN = %$(EXECUTABLE_EXT)
 
 ### Windows/Linux specific setup ###
@@ -101,7 +101,7 @@ else
 	SEQ_EXEC_COMMAND += ./$${sequential} $${problem_size} 1> $(SEQ_OUTPUT_FILENAME) 2> $(SEQ_ERROR_FILENAME)
 
 	MPI_EXEC_COMMAND = echo "running '$(MPI_NAME)'";
-	MPI_EXEC_COMMAND += mpiexec -n $${num_ranks} --oversubscribe ./$${parallel}$(EXECUTABLE_EXT) $${problem_size} 1> $(MPI_OUTPUT_FILENAME) 2> $(MPI_ERROR_FILENAME)
+	MPI_EXEC_COMMAND += mpiexec -n $${num_ranks} --oversubscribe ./$${parallel}$(EXECUTABLE_EXT) $${problem_size} $${problem_size} $${problem_size} 1> $(MPI_OUTPUT_FILENAME) 2> $(MPI_ERROR_FILENAME)
 endif
 
 
@@ -138,8 +138,13 @@ $(MPI_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
 	@$(LOAD_MPI)$(MPI) $(MPI_FLAGS) $(DEFINES) $^ $(LIBRARIES) -o $@
 	@echo
 
+poles$(EXECUTABLE_EXT): cubes.c $(DEP_OBJECTS)
+	@echo "compiling $@"
+	@$(LOAD_MPI)$(MPI) $(MPI_FLAGS) $(DEFINES) $^ $(LIBRARIES) -o $@
+	@echo
+
 .PHONEY: compile_all
-compile_all: $(SEQ_EXECUTABLES) $(MPI_EXECUTABLES)
+compile_all: $(SEQ_EXECUTABLES) $(MPI_EXECUTABLES) poles$(EXECUTABLE_EXT)
 
 
 ### RUN ###
@@ -238,7 +243,7 @@ clean:
 
 .PHONEY: clean_executables
 clean_executables:
-	@rm $(DEP_OBJECTS) $(SEQ_EXECUTABLES) $(MPI_EXECUTABLES) 2>/dev/null || true
+	@rm poles$(EXECUTABLE_EXT) $(DEP_OBJECTS) $(SEQ_EXECUTABLES) $(MPI_EXECUTABLES) 2>/dev/null || true
 	@echo "your directory has been cleaned of executables and dependency objects!"
 	@echo
 
