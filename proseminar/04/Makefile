@@ -18,11 +18,11 @@ PRINT_FILES = print_files.py
 # --> use 'make run_mpi_single' for submitting a single job. 
 NUM_RUNS = 1
 
-NUM_RANKS_ARRAY = 1 2 4 8 16 32 64
+NUM_RANKS_ARRAY = 8
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
-PROBLEM_SIZE_ARRAY = 64 128 256
+PROBLEM_SIZE_ARRAY = 32
 
 
 ### OUTPUT + ERRORS ###
@@ -55,7 +55,7 @@ PYTHON = python
 ### Executables ###
 DEP_OBJECTS = $(addsuffix .o, $(DEPENDENCY_ARRAY))
 SEQ_EXECUTABLES = $(addsuffix $(EXECUTABLE_EXT), $(SEQUENTIAL_ARRAY))
-MPI_EXECUTABLES = $(addsuffix $(EXECUTABLE_EXT), $(filter-out poles, $(PARALLEL_ARRAY)))
+MPI_EXECUTABLES = $(addsuffix $(EXECUTABLE_EXT), $(PARALLEL_ARRAY))
 EXECUTABLE_PATTERN = %$(EXECUTABLE_EXT)
 
 ### Windows/Linux specific setup ###
@@ -133,11 +133,12 @@ $(SEQ_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
 	@$(CC) $(CC_FLAGS) $(DEFINES) $^ $(LIBRARIES) -o $@
 	@echo
 
-$(MPI_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
+$(filter-out poles$(EXECUTABLE_EXT), $(MPI_EXECUTABLES)): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
 	@echo "compiling $@"
 	@$(LOAD_MPI)$(MPI) $(MPI_FLAGS) $(DEFINES) $^ $(LIBRARIES) -o $@
 	@echo
 
+# special target for poles --> source code is 'cubes.c'
 poles$(EXECUTABLE_EXT): cubes.c $(DEP_OBJECTS)
 	@echo "compiling $@"
 	@$(LOAD_MPI)$(MPI) $(MPI_FLAGS) $(DEFINES) $^ $(LIBRARIES) -o $@
