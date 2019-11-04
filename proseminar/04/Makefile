@@ -1,8 +1,8 @@
 ### PROGRAMS ###
 SEQUENTIAL_ARRAY = seq_3D
-PARALLEL_ARRAY = cubes_blocking #cubes slabs slabs_blocking
+PARALLEL_ARRAY = poles cubes slabs slabs_blocking
 DEPENDENCY_ARRAY = heat_stencil
-DEFINES = -D VERBOSE -D SLICE_3D
+DEFINES = -D VERBOSE
 LANGUAGE = c
 #LANGUAGE = cpp
 
@@ -18,11 +18,11 @@ PRINT_FILES = print_files.py
 # --> use 'make run_mpi_single' for submitting a single job. 
 NUM_RUNS = 1
 
-#NUM_RANKS_ARRAY = 64
-NUM_RANKS_ARRAY = 1 2 4 8 16
+NUM_RANKS_ARRAY = 8
+#NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
-PROBLEM_SIZE_ARRAY = 64 128 256
+PROBLEM_SIZE_ARRAY = 32
 
 
 ### OUTPUT + ERRORS ###
@@ -101,7 +101,7 @@ else
 	SEQ_EXEC_COMMAND += ./$${sequential} $${problem_size} 1> $(SEQ_OUTPUT_FILENAME) 2> $(SEQ_ERROR_FILENAME)
 
 	MPI_EXEC_COMMAND = echo "running '$(MPI_NAME)'";
-	MPI_EXEC_COMMAND += mpiexec -n $${num_ranks} --oversubscribe ./$${parallel}$(EXECUTABLE_EXT) $${problem_size} 1> $(MPI_OUTPUT_FILENAME) 2> $(MPI_ERROR_FILENAME)
+	MPI_EXEC_COMMAND += mpiexec -n $${num_ranks} --oversubscribe ./$${parallel}$(EXECUTABLE_EXT) $${problem_size} $${problem_size} $${problem_size} 1> $(MPI_OUTPUT_FILENAME) 2> $(MPI_ERROR_FILENAME)
 endif
 
 
@@ -133,7 +133,13 @@ $(SEQ_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
 	@$(CC) $(CC_FLAGS) $(DEFINES) $^ $(LIBRARIES) -o $@
 	@echo
 
-$(MPI_EXECUTABLES): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
+$(filter-out poles$(EXECUTABLE_EXT), $(MPI_EXECUTABLES)): $(EXECUTABLE_PATTERN): %.$(LANGUAGE) $(DEP_OBJECTS)
+	@echo "compiling $@"
+	@$(LOAD_MPI)$(MPI) $(MPI_FLAGS) $(DEFINES) $^ $(LIBRARIES) -o $@
+	@echo
+
+# special target for poles --> source code is 'cubes.c'
+poles$(EXECUTABLE_EXT): cubes.c $(DEP_OBJECTS)
 	@echo "compiling $@"
 	@$(LOAD_MPI)$(MPI) $(MPI_FLAGS) $(DEFINES) $^ $(LIBRARIES) -o $@
 	@echo
