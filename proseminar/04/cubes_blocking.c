@@ -224,23 +224,46 @@ int main(int argc, char **argv) {
   
 
   // exchange ghost cells for the very first iteration
-  
-
+int coords[3];
+MPI_Cart_coords(cubes,rank,3,coords);
+//printf("rank: %d, cord[0]: %d, cord[1]: %d, cord[2]: %d\n", rank, coords[0], coords[1], coords[2]);
+//printf("rank: %d, l: %d, r: %d, t: %d, b: %d, f: %d, b: %d\n", rank, left_rank, right_rank, top_rank, bottom_rank, front_rank, back_rank);
   // for each time step ..
   for (int t = 0; t < T; t++) {
-    MPI_Send(A, 1, x_slice, left_rank, 0, cubes);
-    MPI_Send(&(A[IDX_3D(Mx - 1, 0, 0, Mx, My)]), 1, x_slice, right_rank, 0, cubes);
-    MPI_Send(A, 1, y_slice, front_rank, 0, cubes);
-    MPI_Send(&(A[IDX_3D(0, My - 1, 0, Mx, My)]), 1, y_slice, back_rank, 0, cubes);
-    MPI_Send(A, 1, z_slice, top_rank, 0, cubes);
-    MPI_Send(&(A[IDX_3D(0, 0, Mz - 1, Mx, My)]), 1, z_slice, bottom_rank, 0, cubes);
-
-    MPI_Recv(left_layer, My * Mz, MPI_FLOAT, left_rank, 0, cubes, MPI_STATUS_IGNORE);
-    MPI_Recv(right_layer, My * Mz, MPI_FLOAT, right_rank, 0, cubes, MPI_STATUS_IGNORE);
-    MPI_Recv(front_layer, Mx * Mz, MPI_FLOAT, front_rank, 0, cubes, MPI_STATUS_IGNORE);
-    MPI_Recv(back_layer, Mx * Mz, MPI_FLOAT, back_rank, 0, cubes, MPI_STATUS_IGNORE);
-    MPI_Recv(top_layer, Mx * My, MPI_FLOAT, top_rank, 0, cubes, MPI_STATUS_IGNORE);
-    MPI_Recv(bottom_layer, Mx * My, MPI_FLOAT, bottom_rank, 0, cubes, MPI_STATUS_IGNORE);
+    if (coords[2] % 2) {
+      if (coords[2] != 0) {
+        MPI_Ssend(A, 1, x_slice, left_rank, 0, cubes);
+        MPI_Recv(left_layer, My * Mz, MPI_FLOAT, left_rank, 0, cubes, MPI_STATUS_IGNORE);
+      }
+    } else {
+      if (coords[2] != Pz - 1){
+        MPI_Recv(right_layer, My * Mz, MPI_FLOAT, right_rank, 0, cubes, MPI_STATUS_IGNORE);
+        MPI_Ssend(&(A[IDX_3D(Mx - 1, 0, 0, Mx, My)]), 1, x_slice, right_rank, 0, cubes);
+      }
+    }
+    if (coords[0] % 2) {
+      if (coords[0] != 0) {
+        MPI_Ssend(A, 1, z_slice, top_rank, 0, cubes);
+        MPI_Recv(top_layer, Mx * My, MPI_FLOAT, top_rank, 0, cubes, MPI_STATUS_IGNORE);
+       }
+    } else {
+      if (coords[0] != Px - 1){
+        MPI_Recv(bottom_layer, Mx * My, MPI_FLOAT, bottom_rank, 0, cubes, MPI_STATUS_IGNORE);
+        MPI_Ssend(&(A[IDX_3D(0, 0, Mz - 1, Mx, My)]), 1, z_slice, bottom_rank, 0, cubes);
+      }
+    }
+    if (coords[1] % 2) {
+      if (coords[1] != 0) {
+        MPI_Ssend(A, 1, y_slice, front_rank, 0, cubes);
+        MPI_Recv(front_layer, Mx * Mz, MPI_FLOAT, front_rank, 0, cubes, MPI_STATUS_IGNORE);
+       }
+    } else {
+if (coords[1] != Py - 1){
+        MPI_Recv(back_layer, Mx * Mz, MPI_FLOAT, back_rank, 0, cubes, MPI_STATUS_IGNORE);
+        MPI_Ssend(&(A[IDX_3D(0, My - 1, 0, Mx, My)]), 1, y_slice, back_rank, 0, cubes);
+      }
+    }
+    
 
     // .. we propagate the temperature
     for (int z = 0; z < Mz; z++) {
@@ -259,12 +282,12 @@ int main(int argc, char **argv) {
           value_t tc = A[i];
 
           // get temperatures of adjacent cells
-          value_t tl = (x != 0) ? A[IDX_3D(x - 1, y, z, Mx, My)] : left_layer[IDX_2D(y, z, My)];
-          value_t tr = (x != Mx - 1) ? A[IDX_3D(x + 1, y, z, Mx, My)] : right_layer[IDX_2D(y, z, My)];
-          value_t tf = (y != 0) ? A[IDX_3D(x, y - 1, z, Mx, My)] : front_layer[IDX_2D(x, z, Mx)];
-          value_t tb = (y != My - 1) ? A[IDX_3D(x, y + 1, z, Mx, My)] : back_layer[IDX_2D(x, z, Mx)];
-          value_t tu = (z != 0) ? A[IDX_3D(x, y, z - 1, Mx, My)] : top_layer[IDX_2D(x, y, Mx)];
-          value_t td = (z != Mz - 1) ? A[IDX_3D(x, y, z + 1, Mx, My)] : bottom_layer[IDX_2D(x, y, Mx)];
+          value_t tl = (rank != left_rank || x != 0) ? (x != 0) ? A[IDX_3D(x - 1, y, z, Mx, My)] : left_layer[IDX_2D(y, z, My)] : tc;
+          value_t tr = (rank != right_rank || x != Mx - 1) ? (x != Mx - 1) ? A[IDX_3D(x + 1, y, z, Mx, My)] : right_layer[IDX_2D(y, z, My)] : tc;
+          value_t tf = (rank != front_rank || y != 0) ? (y != 0) ? A[IDX_3D(x, y - 1, z, Mx, My)] : front_layer[IDX_2D(x, z, Mx)] : tc;
+          value_t tb = (rank != back_rank || y != My -1) ? (y != My - 1) ? A[IDX_3D(x, y + 1, z, Mx, My)] : back_layer[IDX_2D(x, z, Mx)] : tc;
+          value_t tu = (rank != top_rank || z != 0) ? (z != 0) ? A[IDX_3D(x, y, z - 1, Mx, My)] : top_layer[IDX_2D(x, y, Mx)] : tc;
+          value_t td = (rank != bottom_rank || z != Mz - 1) ? (z != Mz - 1) ? A[IDX_3D(x, y, z + 1, Mx, My)] : bottom_layer[IDX_2D(x, y, Mx)] : tc;
 
           // compute new temperature at current position
           B[i] = tc + 0.16666 * (tl + tr + tu + td + tf + tb + (-6 * tc));
