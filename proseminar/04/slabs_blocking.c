@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <time.h>
-
 #include "heat_stencil.h"
 
 // -- simulation code ---
@@ -26,7 +24,7 @@ int main(int argc, char **argv)
     Ny = atoi(argv[2]);
     Nz = atoi(argv[3]);
   }
-  int T = MAX(MAX(Nx, Ny), Nz) * 10;
+  int T = MAX(MAX(Nx, Ny), Nz) * TIMESTEPS_MUL;
 
   // MPI setup
   int rank, numProcs;
@@ -148,7 +146,7 @@ int main(int argc, char **argv)
           long i = IDX_3D(x, y, z, Nx, Ny);
 
           // center stays constant (the heat is still on)
-          if (i == IDX_3D(source_x, source_y, source_z-(rank*Mz), Nx, Ny))
+          if (IDX_3D(x, y, z + (rank * Mz), Nx, Ny) == IDX_3D(source_x, source_y, source_z, Nx, Ny))
           {
             B[i] = A[i];
             continue;
@@ -229,7 +227,7 @@ int main(int argc, char **argv)
     releaseVector(AA);
 
     double end = MPI_Wtime();
-    printf("The process took %g seconds to finish. \n", end - start);
+    printf("The process took %f seconds to finish. \n", end - start);
   }
 
   MPI_Finalize();

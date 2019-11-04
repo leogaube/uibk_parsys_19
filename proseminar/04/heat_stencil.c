@@ -4,8 +4,15 @@
 
 #include "heat_stencil.h"
 
+int local2global(int r, int i, int mx, int my, int mz, int cx, int cy){
+    int global_x = (r % cx)*mx + (i % mx);
+    int global_y = ((r % (cx * cy)) / cx)*my + ((i % (mx * my)) / mx);
+    int global_z = (r / (cx * cy)) * mz + (i / (mx * my));
 
-Vector createVector(int N) {
+    return IDX_3D(global_x, global_y, global_z, mx * cx, my * cy);
+}
+
+Vector createVector(int N){
   // create data and index vector
   return malloc(sizeof(value_t) * N);
 }
@@ -76,7 +83,7 @@ void printTemperature(Vector m, int nx, int ny, int nz)
       printf("X\n");
     }
   }
-  printf("\n##################################\n");
+  printf("\n############# END OF TIMESTEP ##############\n");
 }
 
 
