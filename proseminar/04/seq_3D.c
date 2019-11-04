@@ -87,7 +87,7 @@ int main(int argc, char **argv)
           value_t tb = (z != Nz - 1) ? A[IDX_3D(x, y, z + 1, Nx, Ny)] : tc;
 
           // compute new temperature at current position
-          B[i] = tc + 0.4 / 6 * (tl + tr + tu + td + tf + tb + (-6 * tc));
+          B[i] = tc + 0.16666 * (tl + tr + tu + td + tf + tb + (-6 * tc));
         }
       }
     }
