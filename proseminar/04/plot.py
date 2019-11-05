@@ -93,13 +93,21 @@ def plot_data(dirs, filename, group_by="domain"):
 	mpi_columns = [column for column in df.columns if column not in [problem_size_column, seq_column]]
 	for i, column in enumerate(sorted(mpi_columns, key=find_int_in_string)):
 		num_ranks = find_int_in_string(column)
-		domain_group = column.split("_fillup_")[0]
-		legend_group = num_ranks if group_by == "domain" else domain_group
+		domain_group = column.rsplit("_", 1)[0]
+		if group_by == "domain":
+			legend_group = domain_group
+			show_by_default = (domain_group == "cubes")
+		elif group_by == "#ranks":
+			legend_group = num_ranks
+			show_by_default = (num_ranks == max_ranks) 
+		elif group_by is None:
+			legend_group = column
+			show_by_default = False
+
 		if domain_group not in colors:
 			colors[domain_group] = COLORS[COLOR_NAMES[next_color_index % len(COLOR_NAMES)]]
 			next_color_index += 1
 		color = colors[domain_group][int(2+log2(num_ranks))]
-		show_by_default = (num_ranks == max_ranks) if group_by == "domain" else (domain_group == "cubes")
 
 		runtimes = df[column]
 		speedups = (df[comparison_column]*comparison_num_ranks) / runtimes
@@ -107,7 +115,7 @@ def plot_data(dirs, filename, group_by="domain"):
 
 		runtime_trace = go.Scatter(
 			x=df[problem_size_column], y=runtimes, 
-			legendgroup=legend_group, name=column.replace("_fillup", ""), marker=dict(color=color), visible=True if show_by_default else "legendonly")
+			legendgroup=legend_group, name=column, marker=dict(color=color), visible=True if show_by_default else "legendonly")
 
 		speedup_trace = go.Scatter(
 			x=df[problem_size_column], y=speedups, 
@@ -130,7 +138,7 @@ def plot_data(dirs, filename, group_by="domain"):
 	fig.update_yaxes(title="%s speedup"%speedup_type, rangemode="tozero", row=2, col=1)
 	fig.update_yaxes(title="%s efficiency"%speedup_type, range=[0., 1.], row = 2, col = 2)
 
-	ply.plot(fig, filename=os.path.join(PLOTS_PATH, filename.split(".")[0]+"_"+group_by+".html"))
+	ply.plot(fig, filename=os.path.join(PLOTS_PATH, "%s_grouped_%s.html" %(filename.split(".")[0], group_by if group_by is not None else "single")))
 
 
 if __name__ == "__main__":
@@ -149,3 +157,4 @@ if __name__ == "__main__":
 			print("plotting %s"%filename)  
 			plot_data(path, filename, group_by="domain")
 			plot_data(path, filename, group_by="#ranks")
+			plot_data(path, filename, group_by=None)
