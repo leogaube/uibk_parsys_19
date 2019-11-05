@@ -61,7 +61,7 @@ def plot_data(dirs, filename, group_by="domain"):
 		specs=[[{"colspan": 2}, None], [{}, {}]],
 		subplot_titles=("runtime", "speedup", "efficiency"),
 		horizontal_spacing=0.1,
-		vertical_spacing=0.15)
+		vertical_spacing=0.135)
 
 	problem_size_column = "room_size"
 	seq_column = "seq_3D"
@@ -71,10 +71,10 @@ def plot_data(dirs, filename, group_by="domain"):
 		comparison_num_ranks = 1
 		speedup_type = "absolute"
 
-		seq_color = "rgb(0,0,205)"
+		seq_color = "rgb(255,0,149)"
 		seq_runtime_trace = go.Scatter(
                     x=df[problem_size_column], y=df[seq_column],
-					legendgroup=seq_column, name=seq_column, marker=dict(color=seq_color))
+               					legendgroup=seq_column, name=seq_column, marker=dict(color=seq_color), line=dict(width=4))
 		fig.add_trace(seq_runtime_trace, row=1, col=1)
 	else:
 		comparison_column, comparison_num_ranks = get_least_ranks(df)
@@ -87,7 +87,7 @@ def plot_data(dirs, filename, group_by="domain"):
 	next_color_index = 0
 
 	COLORS = cl.scales["9"]["seq"]
-	COLOR_NAMES = ["Greens", "Purples", "Reds", "Greys", "Oranges"]
+	COLOR_NAMES = ["Blues", "Reds", "Greens", "Oranges", "Greys", "Purples"]
 	colors = {}
 
 	mpi_columns = [column for column in df.columns if column not in [problem_size_column, seq_column]]
@@ -107,7 +107,7 @@ def plot_data(dirs, filename, group_by="domain"):
 
 		runtime_trace = go.Scatter(
 			x=df[problem_size_column], y=runtimes, 
-			legendgroup=legend_group, name=column, marker=dict(color=color), visible=True if show_by_default else "legendonly")
+			legendgroup=legend_group, name=column.replace("_fillup", ""), marker=dict(color=color), visible=True if show_by_default else "legendonly")
 
 		speedup_trace = go.Scatter(
 			x=df[problem_size_column], y=speedups, 
