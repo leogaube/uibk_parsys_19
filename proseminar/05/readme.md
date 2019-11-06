@@ -17,10 +17,22 @@ For each timestep (you can assume `dt = 1`), particles must be moved by first co
 
 ### Tasks
 
-- Provide a sequential implementation of the n-body simulation in 2D. Hints on how to proceed (not mandatory to follow):
-	1. generate particles randomly, e.g. uniformly distributed
-	2. provide a function for computing forces and moving particles
-	3. move particles in a time loop for a given number of steps
+- _Provide a sequential implementation of the n-body simulation in 2D. Hints on how to proceed (not mandatory to follow):_
+    1. _generate particles randomly, e.g. uniformly distributed_
+    2. _provide a function for computing forces and moving particles_
+        * Due to Newton's third axiom, the forces between two different particles i and j are given by
+        <img src="https://latex.codecogs.com/gif.latex?\textit{\textbf{F}}_{ij} = - \textit{\textbf{F}}_{ji} = \frac{m_i \cdot m_j}{r_{ij}^2} \cdot \textit{\textbf{e}}_{\textit{\textbf{r}}_{ij}}" />
+        * Together with no particle's mass influencing itself, this means only the forces for i<j have to be calculated.
+        * All vectors have to split into their x & y components. The unit vector from above is therefore given by
+        <img src="https://latex.codecogs.com/gif.latex?\textit{\textbf{e}}_{\textit{\textbf{r}}_{ij}} = \frac{\textit{\textbf{r}}_{ij}}{r_{ij}} = \frac{\left( \left(x_i-x_j\right) \cdot \textit{\textbf{e}}_{\text{x}} + \left(y_i-y_j\right) \cdot \textit{\textbf{e}}_{\text{y}}\right)}{\sqrt{\left(x_i-x_j\right)^2+\left(y_i-y_j\right)^2}}" />
+        * The force excerted on a particle i is given with
+        <img src="https://latex.codecogs.com/gif.latex?\textit{\textbf{F}}_{i} = F_{i, \text{x}}\cdot\textit{\textbf{e}}_{\text{x}} + F_{i, \text{y}}\cdot\textit{\textbf{e}}_{\text{y}} = \sum_j{\textit{\textbf{F}}_{ij}} = \sum_j{\left(F_{ij, \text{x}}\cdot\textit{\textbf{e}}_{\text{x}} + F_{ij, \text{y}}\cdot\textit{\textbf{e}}_{\text{y}}\right)}" />
+    3. _move particles in a time loop for a given number of steps_ 
+        * The resulting velocity after a time dt=1 is
+        <img src="https://latex.codecogs.com/gif.latex?\textit{\textbf{v}}_{i} = v_{i, \text{x}}\cdot\textit{\textbf{e}}_{\text{x}} + v_{i, \text{y}}\cdot\textit{\textbf{e}}_{\text{y}} = \frac{1}{m_i}\cdot\left(F_{i, \text{x}}\cdot\textit{\textbf{e}}_{\text{x}} + F_{i, \text{y}}\cdot\textit{\textbf{e}}_{\text{y}}\right)" />
+        * The resulting position after a time dt=1 is
+        <img src="https://latex.codecogs.com/gif.latex?\textit{\textbf{r}}_{i} = x_i \cdot\textit{\textbf{e}}_{\text{x}} + y_i \cdot\textit{\textbf{e}}_{\text{y}} = \left(x_i+v_{i,\text{x}}\right) \cdot\textit{\textbf{e}}_{\text{x}} + \left(y_i+v_{i,\text{y}}\right) \cdot\textit{\textbf{e}}_{\text{y}}" />
+        
 - Measure the execution time for various problem sizes. What can you observe?
 
 ## Exercise 2
