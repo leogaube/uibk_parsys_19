@@ -23,4 +23,4 @@ for filename in files:
 			print("'%s':"%full_filename)
 			for line in f.readlines():
 				if target_string in line:
-					print("\t"+line)
+					print("\t"+line.strip("\n"))

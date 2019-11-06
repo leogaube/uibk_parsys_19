@@ -6382,3 +6382,7 @@ X@@X=.                           X
 
 ############# END OF TIMESTEP ##############
 The maximal deviation from the 1D theory is -316.093605K.The process took 1.049312 seconds to finish. 
+-------------------------------------------------------
+Primary job  terminated normally, but 1 process returned
+a non-zero exit code. Per user-direction, the job has been aborted.
+-------------------------------------------------------
