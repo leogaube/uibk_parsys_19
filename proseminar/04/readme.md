@@ -8,7 +8,7 @@ The goal of this assignment is to extend the 3D heat stencil application of Assi
 
 - *Provide implementations for the 3D heat stencil application that rely on the three domain decomposition variants presented in the lecture.*
 
-Our source code can be found in `slabs.c` and `cubes.c` each with a dependency to `heat_stencil`. Note that `cubes.c` also allows non-cubic number of ranks and it will automatically determine an appropriate layout (e.g. 16 ranks --> 2\*2\*4). `cubes.c` will also act as source code for `poles`, depending on the exebutable name (poles will set ranks in x-dimension Px=1). 
+Our source code can be found in `slabs.c` and `cubes.c` each with a dependency to `heat_stencil`. Note that `cubes.c` also allows non-cubic number of ranks and it will automatically determine an appropriate layout (e.g. 16 ranks --> 2\*2\*4). `cubes.c` will also act as source code for `poles`, depending on the executable name (poles will set ranks in x-dimension Px=1). 
 
 - *Measure their speedup and efficiency for multiple problem and machine sizes as in the previous exercise.*
 
@@ -17,7 +17,7 @@ Each figure comprises the same data, but groups them differently (by #ranks, by 
 
 - *Illustrate the data in appropriate figures and discuss them. What can you observe?*
 
-Our *slabs* algorithm outperforms *cubes/poles* in almost every test (with the exception of really small room sizes and many #ranks e.g. 64x64x64 and 64 ranks). The only explanation we could come up with was that cubes and poles have really bad cache efficiency due to accessing x- and y-slices of each subroom in every iteration for sending data to neighbouring ranks. *slabs* would probably also suffer from cache efficiency if we where to implement it by splitting the room in the x-dimension rather then the z-dimension!
+Our *slabs* algorithm outperforms *cubes/poles* in almost every test (with the exception of really small room sizes and many #ranks e.g. 64x64x64 and 64 ranks). The only explanation we could come up with was that cubes and poles have really bad cache efficiency due to accessing x- and y-slices of each subroom in every iteration for sending data to neighboring ranks. *slabs* would probably also suffer from cache efficiency if we where to implement it by splitting the room in the x-dimension rather then the z-dimension!
 
 *slabs* even achieves efficiencies of over 95% for room sizes of 256x256x256 and #ranks <= 8, however efficiency rapidly decreases for more ranks (low strong scalability), especially with small room_sizes. 
 
