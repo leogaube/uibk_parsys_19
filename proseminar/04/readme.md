@@ -35,7 +35,7 @@ Our source code can be found in `slabs_blocking.c` and `cubes_blocking.c` each w
 
 - *Illustrate the data in appropriate figures and discuss them. Can you observe any difference?*
 
-As we would expect, there does not seem to be any significent difference between blocking and non-blocking variants, because we have perfectly balanced loads and we are using the same hardware for each rank. This would probably change in favor of non-blocking communication, if we were to allow room sizes that would result in unbalanced loads!
+As we would expect, there does not seem to be any significant difference between blocking and non-blocking variants, because we have perfectly balanced loads and we are using the same hardware for each rank. This would probably change in favor of non-blocking communication, if we were to allow room sizes that would result in unbalanced loads!
 
 ## General Notes
 
