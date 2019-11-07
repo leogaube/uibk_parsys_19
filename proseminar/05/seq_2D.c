@@ -80,6 +80,9 @@ int apply_forces(double *forces_x, double *forces_y, Particle_p particles, int N
 		double force_x = 0;
 		double force_y = 0;
 		for(int j=0; j<N; j++){
+			if(i==j){ // there is no force from the particle itself
+				continue;
+			}
 			force_x += (j<i) ? forces_x[IDX_FORCES(i,j)] : -forces_x[IDX_FORCES(j,i)];
 			force_y += (j<i) ? forces_y[IDX_FORCES(i,j)] : -forces_y[IDX_FORCES(j,i)];
 		}
