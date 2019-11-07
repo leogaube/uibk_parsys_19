@@ -25,6 +25,7 @@ int main(int argc, char **argv)
 
 		// TODO apply forces
 
+		//TODO plot results
 	}
 
 	// TODO verification

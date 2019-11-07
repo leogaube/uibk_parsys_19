@@ -22,7 +22,7 @@ For each timestep (you can assume `dt = 1`), particles must be moved by first co
     2. _provide a function for computing forces and moving particles_
         * Due to Newton's third axiom, the forces between two different particles i and j are given by
         <img src="https://latex.codecogs.com/gif.latex?\textit{\textbf{F}}_{ij} = - \textit{\textbf{F}}_{ji} = \frac{m_i \cdot m_j}{r_{ij}^2} \cdot \textit{\textbf{e}}_{\textit{\textbf{r}}_{ij}}" />
-        * Together with no particle's mass influencing itself, this means only the forces for i<j have to be calculated.
+        * Together with no particle's mass influencing itself, this means only the forces for i<j or i>j have to be calculated.
         * All vectors have to split into their x & y components. The unit vector from above is therefore given by
         <img src="https://latex.codecogs.com/gif.latex?\textit{\textbf{e}}_{\textit{\textbf{r}}_{ij}} = \frac{\textit{\textbf{r}}_{ij}}{r_{ij}} = \frac{\left( \left(x_i-x_j\right) \cdot \textit{\textbf{e}}_{\text{x}} + \left(y_i-y_j\right) \cdot \textit{\textbf{e}}_{\text{y}}\right)}{\sqrt{\left(x_i-x_j\right)^2+\left(y_i-y_j\right)^2}}" />
         * The force excerted on a particle i is given with

@@ -1,7 +1,8 @@
 #ifndef GRAVITY_H_
 #define GRAVITY_H_
 
-#define IDX_2D(x, y, nx) (x)+(y)*(nx)
+// using the upper triangular matrix the index of i has to be larger than j
+#define IDX_FORCES(i, j) (j)+(i)*(i-1)/2
 
 typedef struct{
 	double x;
