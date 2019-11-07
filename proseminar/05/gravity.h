@@ -17,6 +17,4 @@ typedef struct{
 
 typedef Particle *Particle_p;
 
-int get_forces(double *forces, Particle_p particles, int N);
-
 #endif /* GRAVITY_H_ */
