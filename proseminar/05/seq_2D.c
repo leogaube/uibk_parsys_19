@@ -19,9 +19,10 @@ int print_particles(Particle_p Particles, int N, int room_size);
 int main(int argc, char **argv)
 {
 	int N = 10;
-	int room_size = 20;
+	int room_size = 10;
 	if (argc == 2){
 	    N = atoi(argv[1]);
+		room_size = N*10;
 	}
 	if (argc == 3) {
 		N = atoi(argv[1]);
@@ -29,7 +30,7 @@ int main(int argc, char **argv)
 	}
 	int T = N*10;
 
-	// TODO init particles with random values
+	// init particles with random values
 	Particle_p particles = malloc(N*sizeof(Particle));
 	init_particles(particles, N);
 	
@@ -46,9 +47,9 @@ int main(int argc, char **argv)
 
 		apply_forces(forces_x, forces_y, particles, N);
 
-		//TODO plot results
+		// plot results
 		#ifdef VERBOSE
-		if (t % 10 == 0) {
+		if (t % 1 == 0) {
 			printf("time t: %d\n", t);
 			print_particles(particles, N, room_size);
 		}
@@ -125,10 +126,10 @@ int init_particles(Particle_p particles, int N) {
 
 	for (int i = 0; i < N; i++) {
 		// TODO what random values for mass should be generated?
-		particles[i].mass = rand() / (double) RAND_MAX * 10;
+		particles[i].mass = /*(rand() / (double) RAND_MAX * 0.9 + 0.1) **/ 1e-2/N;
 		// exclusion of 1.0
-		particles[i].position.x = rand() / (double) ((unsigned)RAND_MAX + 1);
-		particles[i].position.y = rand() / (double) ((unsigned)RAND_MAX + 1);
+		particles[i].position.x = (rand() / (double) ((unsigned)RAND_MAX + 1) - 0.5);
+		particles[i].position.y = (rand() / (double) ((unsigned)RAND_MAX + 1) - 0.5);
 		particles[i].velocity.x = 0;
 		particles[i].velocity.y = 0;
 	}
@@ -139,13 +140,15 @@ int init_particles(Particle_p particles, int N) {
 /**
  * function for checking of a particle is inside a specified index in relation to the room size
  */
-bool index_contains_particle(Particle_p particles, int N, int i, int j, int room_size) {
+double get_mass_in_index(Particle_p particles, int N, int i, int j, int room_size) {
+	double m = 0;
 	for (int k = 0; k < N; k++) {
 		if ((int) (particles[k].position.x * room_size) == j && (int) (particles[k].position.y * room_size) == i) {
-			return true;
+			m += particles[k].mass;
+			printf("juhu %d %f\n", k, m);
 		}
 	}
-	return false;
+	return m;
 }
 
 /**
@@ -153,22 +156,22 @@ bool index_contains_particle(Particle_p particles, int N, int i, int j, int room
  * the movement of the particles is in relation to the room size.
  */
 int print_particles(Particle_p particles, int N, int room_size) {
-	char room_printed[room_size][room_size];
+	double room_printed[room_size][room_size];
+	const char *colors = " .-:=+*^X#%@";
+	const int numColors = 12;
 
 	for (int i = 0; i < room_size; i++) {
 		for (int j = 0; j < room_size; j++) {
-			if (index_contains_particle(particles, N, i, j, room_size)) {
-				room_printed[i][j] = 'O';
-			} else {
-				room_printed[i][j] = ' ';
-			}
+			room_printed[i][j] = get_mass_in_index(particles, N, i, j, room_size);
 		}
 	}
 
 	for (int i = 0; i < room_size; i++) {
 		printf("X");
 		for (int j = 0; j < room_size; j++) {
-			printf("%c", room_printed[i][j]);
+			int c = (room_printed[i][j] / 0.01) * numColors;
+			c = (c >= numColors) ? numColors - 1 : ((c < 0) ? 0 : c);
+			printf("%2.4f ", room_printed[i][j]);//colors[c]);
 		}
 		printf("X\n");
 	}
