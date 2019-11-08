@@ -10,6 +10,9 @@
 
 #include "gravity.h"
 
+// Do not change this, because then the initialization will be fucked up ;)
+#define MAX_POSITION 0.5
+
 int get_forces(double *forces_x, double *forces_y, Particle_p particles, int N);
 int apply_forces(double *forces_x, double *forces_y, Particle_p particles, int N);
 int init_particles(Particle_p particles, int N);
@@ -113,6 +116,19 @@ int apply_forces(double *forces_x, double *forces_y, Particle_p particles, int N
 		particles[i].velocity.y += force_y/m;
 		particles[i].position.x += particles[i].velocity.x;
 		particles[i].position.y += particles[i].velocity.y;
+		if (particles[i].position.x > MAX_POSITION) {
+			particles[i].position.x = -0.5 + fmod(particles[i].position.x, MAX_POSITION);
+		}
+		if (particles[i].position.x < -MAX_POSITION) {
+			particles[i].position.x = 0.5 + fmod(particles[i].position.x, MAX_POSITION);
+		}
+		if (particles[i].position.y > MAX_POSITION) {
+
+			particles[i].position.y = -0.5 + fmod(particles[i].position.y, MAX_POSITION);
+		}
+		if (particles[i].position.y < -MAX_POSITION) {
+			particles[i].position.y = 0.5 + fmod(particles[i].position.y, MAX_POSITION);
+		}
 	}
 
 	return EXIT_SUCCESS;
@@ -127,9 +143,8 @@ int init_particles(Particle_p particles, int N) {
 	for (int i = 0; i < N; i++) {
 		// TODO what random values for mass should be generated?
 		particles[i].mass = /*(rand() / (double) RAND_MAX * 0.9 + 0.1) **/ 1e-2/N;
-		// exclusion of 1.0
-		particles[i].position.x = (rand() / (double) ((unsigned)RAND_MAX + 1) - 0.5);
-		particles[i].position.y = (rand() / (double) ((unsigned)RAND_MAX + 1) - 0.5);
+		particles[i].position.x = (rand() / (double) ((unsigned)RAND_MAX + 1) - MAX_POSITION);
+		particles[i].position.y = (rand() / (double) ((unsigned)RAND_MAX + 1) - MAX_POSITION);
 		particles[i].velocity.x = 0;
 		particles[i].velocity.y = 0;
 	}
@@ -141,11 +156,10 @@ int init_particles(Particle_p particles, int N) {
  * function for checking of a particle is inside a specified index in relation to the room size
  */
 double get_mass_in_index(Particle_p particles, int N, int i, int j, int room_size) {
-	double m = 0;
+	double m = 0.0;
 	for (int k = 0; k < N; k++) {
-		if ((int) (particles[k].position.x * room_size) == j && (int) (particles[k].position.y * room_size) == i) {
+		if ((int) ((particles[k].position.x + MAX_POSITION) * room_size) == j && (int) ((particles[k].position.y + MAX_POSITION) * room_size) == i) {
 			m += particles[k].mass;
-			printf("juhu %d %f\n", k, m);
 		}
 	}
 	return m;
@@ -171,7 +185,8 @@ int print_particles(Particle_p particles, int N, int room_size) {
 		for (int j = 0; j < room_size; j++) {
 			int c = (room_printed[i][j] / 0.01) * numColors;
 			c = (c >= numColors) ? numColors - 1 : ((c < 0) ? 0 : c);
-			printf("%2.4f ", room_printed[i][j]);//colors[c]);
+			printf("%c", colors[c]);
+			//printf("%2.4f ", room_printed[i][j]);//colors[c]);
 		}
 		printf("X\n");
 	}
