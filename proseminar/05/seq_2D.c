@@ -18,6 +18,7 @@ int apply_forces(double *forces_x, double *forces_y, Particle_p particles, int N
 int init_particles(Particle_p particles, int N);
 int print_particles(Particle_p particles, int N, int room_size);
 double let_particles_fly(double position);
+int get_com_coords(double* com_coords, Particle_p particles, int N);
 
 
 int main(int argc, char **argv)
@@ -26,7 +27,7 @@ int main(int argc, char **argv)
 	int room_size = 10;
 	if (argc == 2){
 	    N = atoi(argv[1]);
-		room_size = N*10;
+		room_size = (N>8) ? 80 : N*10;
 	}
 	if (argc == 3) {
 		N = atoi(argv[1]);
@@ -37,7 +38,11 @@ int main(int argc, char **argv)
 	// init particles with random values
 	Particle_p particles = malloc(N*sizeof(Particle));
 	init_particles(particles, N);
-	
+
+	// get the center of mass coordinates
+	double com_coords[2];
+	get_com_coords(com_coords, particles, N);
+
 	#ifdef VERBOSE
 	printf("Init:\n");
 	print_particles(particles, N, room_size);
@@ -53,18 +58,41 @@ int main(int argc, char **argv)
 
 		// plot results
 		#ifdef VERBOSE
-		if (t % 1 == 0) {
+		if (t % (int) ceil(T/10) == 0 || t == T-1) {
 			printf("time t: %d\n", t);
 			print_particles(particles, N, room_size);
 		}
 		#endif
 	}
 
-	// TODO verification
+	// verification
+	double com_coords_T[2];
+	get_com_coords(com_coords_T, particles, N);
+	printf("The COM moved by (%f,%f) units\n", com_coords_T[0]-com_coords[0], com_coords_T[1]-com_coords[1]);
 
 	free(forces_x);
 	free(forces_y);
 	free(particles);
+
+	return EXIT_SUCCESS;
+}
+
+/**
+ * calculates the center of mass for verification purposes
+ */
+int get_com_coords(double* com_coords, Particle_p particles, int N){
+	double M = 0;
+
+	for(int i=0; i<N; i++){
+		Particle pi = particles[i];
+		com_coords[0] += pi.mass*pi.position.x;
+		com_coords[1] += pi.mass*pi.position.y;
+		M += pi.mass;
+	}
+	com_coords[0] /= M;
+	com_coords[1] /= M;
+
+	return EXIT_SUCCESS;
 }
 
 /**
@@ -117,18 +145,12 @@ int apply_forces(double *forces_x, double *forces_y, Particle_p particles, int N
 		particles[i].velocity.y += force_y/m;
 		particles[i].position.x += particles[i].velocity.x;
 		particles[i].position.y += particles[i].velocity.y;
-		#ifdef DEBUG
-		printf("before\nparticle: %d, x: %f, y: %f\n", i, particles[i].position.x, particles[i].position.y);
-		#endif
 		if (particles[i].position.x > MAX_POSITION || particles[i].position.x < -MAX_POSITION) {
 			particles[i].position.x = let_particles_fly(particles[i].position.x);
 		}
 		if (particles[i].position.y > MAX_POSITION || particles[i].position.y < -MAX_POSITION) {
 			particles[i].position.y = let_particles_fly(particles[i].position.y);
 		}
-		#ifdef DEBUG
-		printf("after\nparticle: %d, x: %f, y: %f\n\n\n", i, particles[i].position.x, particles[i].position.y);
-		#endif
 	}
 
 	return EXIT_SUCCESS;
@@ -141,8 +163,7 @@ int init_particles(Particle_p particles, int N) {
 	srand(time(NULL));
 
 	for (int i = 0; i < N; i++) {
-		// TODO what random values for mass should be generated?
-		particles[i].mass = /*(rand() / (double) RAND_MAX * 0.9 + 0.1) **/ 1e-2/N;
+		particles[i].mass = (rand() / (double) RAND_MAX * 0.9 + 0.1) * 1e-2/N;
 		particles[i].position.x = (rand() / (double) ((unsigned)RAND_MAX + 1) - MAX_POSITION);
 		particles[i].position.y = (rand() / (double) ((unsigned)RAND_MAX + 1) - MAX_POSITION);
 		particles[i].velocity.x = 0;
@@ -183,10 +204,10 @@ int print_particles(Particle_p particles, int N, int room_size) {
 	for (int i = 0; i < room_size; i++) {
 		printf("X");
 		for (int j = 0; j < room_size; j++) {
-			int c = (room_printed[i][j] / 0.01) * numColors;
+			// c gives how many mean particle masses are within a cell rounded up
+			int c = (int) ceil((room_printed[i][j] / 0.005 * N ));
 			c = (c >= numColors) ? numColors - 1 : ((c < 0) ? 0 : c);
 			printf("%c", colors[c]);
-			//printf("%2.4f ", room_printed[i][j]);//colors[c]);
 		}
 		printf("X\n");
 	}
