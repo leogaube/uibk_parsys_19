@@ -10,13 +10,14 @@
 
 #include "gravity.h"
 
-// Do not change this, because then the initialization will be fucked up ;)
+// Do not change this, because then the initialization will be fucked up; or change the initialization to ensure the max position is not above or below MAX_POSITION and - MAX_POSITION
 #define MAX_POSITION 0.5
 
 int get_forces(double *forces_x, double *forces_y, Particle_p particles, int N);
 int apply_forces(double *forces_x, double *forces_y, Particle_p particles, int N);
 int init_particles(Particle_p particles, int N);
-int print_particles(Particle_p Particles, int N, int room_size);
+int print_particles(Particle_p particles, int N, int room_size);
+double let_particles_fly(double position);
 
 
 int main(int argc, char **argv)
@@ -116,19 +117,18 @@ int apply_forces(double *forces_x, double *forces_y, Particle_p particles, int N
 		particles[i].velocity.y += force_y/m;
 		particles[i].position.x += particles[i].velocity.x;
 		particles[i].position.y += particles[i].velocity.y;
-		if (particles[i].position.x > MAX_POSITION) {
-			particles[i].position.x = -0.5 + fmod(particles[i].position.x, MAX_POSITION);
+		#ifdef DEBUG
+		printf("before\nparticle: %d, x: %f, y: %f\n", i, particles[i].position.x, particles[i].position.y);
+		#endif
+		if (particles[i].position.x > MAX_POSITION || particles[i].position.x < -MAX_POSITION) {
+			particles[i].position.x = let_particles_fly(particles[i].position.x);
 		}
-		if (particles[i].position.x < -MAX_POSITION) {
-			particles[i].position.x = 0.5 + fmod(particles[i].position.x, MAX_POSITION);
+		if (particles[i].position.y > MAX_POSITION || particles[i].position.y < -MAX_POSITION) {
+			particles[i].position.y = let_particles_fly(particles[i].position.y);
 		}
-		if (particles[i].position.y > MAX_POSITION) {
-
-			particles[i].position.y = -0.5 + fmod(particles[i].position.y, MAX_POSITION);
-		}
-		if (particles[i].position.y < -MAX_POSITION) {
-			particles[i].position.y = 0.5 + fmod(particles[i].position.y, MAX_POSITION);
-		}
+		#ifdef DEBUG
+		printf("after\nparticle: %d, x: %f, y: %f\n\n\n", i, particles[i].position.x, particles[i].position.y);
+		#endif
 	}
 
 	return EXIT_SUCCESS;
@@ -192,4 +192,19 @@ int print_particles(Particle_p particles, int N, int room_size) {
 	}
 
 	return EXIT_SUCCESS;
+}
+
+double let_particles_fly(double position) {
+	if (position < -MAX_POSITION) {
+		while (position < -MAX_POSITION) {
+			position += MAX_POSITION*2;
+		}
+		return position;
+	} else if (position > MAX_POSITION) {
+		while (position > MAX_POSITION) {
+			position -= MAX_POSITION*2;
+		}
+		return position;
+	}
+	return position;
 }
