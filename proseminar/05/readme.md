@@ -41,9 +41,19 @@ This exercise consists in investigating and planning optimization and paralleliz
 
 ### Tasks
 
-- Study the nature of the problem in Exercise 1, focusing on its characteristics with regard to optimization and parallelization.
-- What optimization methods can you come up with in order to improve the performance of Exercise 1?
-- What parallelization strategies would you consider for Exercise 1 and why?
+- *Study the nature of the problem in Exercise 1, focusing on its characteristics with regard to optimization and parallelization.*
+- *What optimization methods can you come up with in order to improve the performance of Exercise 1?*
+
+As mentioned in Exercise 1, we only need to calculate a triangular matrix for all the forces between two particles due to Newton's third axiom symmetry.
+
+- *What parallelization strategies would you consider for Exercise 1 and why?*
+
+Unfortunately, this optimisation makes it hard to implement an efficient parallel program, because of too many data dependencies. A cannonical implementation of splitting the triangular matrix evenly among ranks would require that during every step each rank would have to communicate with every other rank in order to calculate the forces between particles.
+
+After some search online we came across an article from the university of Saskatchewan focusing on the very same problem in detail: https://www.cs.usask.ca/~spiteri/CMPT851/notes/nBody.pdf
+The interesting part about how to take adventage of symmetry with little communication overhead in MPI starts at page 41:
+
+The basic idea is to create a communicatiator in a *ring*-like structure, assign each rank the same number of particles, calculate the forces between those partibles and send the particles locations + force-subset on to the next rank in the ring structure using *point-to-point-communication*. After each communication, each rank can calculate a different force-subset between the particles it *owns* and it *receives*, add those forces to the corresponding already-computed forces and pass its data on to the next rank. After (#ranks - 1) communications each rank ends up with all interpartical forces for its *owned* particles and therefore the new positions can be calculated. 
 
 ## General Notes
 
