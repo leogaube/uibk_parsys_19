@@ -1,0 +1,974 @@
+Init:
+X        .                        .                                              X
+X        -                                               .                     - X
+X                                          -           -                         X
+X     .                           .      .                    .         -        X
+X                                               .           -               -    X
+X                                                        -                       X
+X            -               -                                         -         X
+X                                 - -                 -    -                     X
+X                                            -                  -               -X
+X                                                                  -             X
+X.                                               .                               X
+X        - -                    --     .                                         X
+X                                  -                             -    .          X
+X                -                                        -            .    -    X
+X                                                                                X
+X    -                           .                                               X
+X                                -            .      .-    .    -          --    X
+X                                                       -                    -   X
+X                                                                                X
+X      -                                               - .      - -              X
+X   -.                                            -    -                 .       X
+X                                                -                              -X
+X                                                                                X
+X        .       .                                .         -   .                X
+X   .          .        .         -                -               .             X
+X                                                                      -   -     X
+X -              .                                              ..         -     X
+X                      -                                                         X
+X              -                              -                   .              X
+X               -                                                                X
+X                 -            --                                       -        X
+X-                           .   -     .       .                  .              X
+X      -      .                           -          .               -           X
+X                  -                                     .        -   .          X
+X             -     -                                            -               X
+X                                 -                -                             X
+X            .                .     :                            -     -         X
+X                  .                                                             X
+X  .                                .                       .           .        X
+X                                              .                                 X
+X                                .  -                                            X
+X                                   -                             -              X
+X                       -           .   -              -  .                    --X
+X              -                                    .                            X
+X                  .      .                                             .        X
+X                                  .           .                                 X
+X                                       .       .      -                         X
+X                                -                    -      .   -   -       .   X
+X.                                                                               X
+X                                                               -                X
+X                  -          .-           -                                     X
+X-      - -.                         .                                           X
+X                                -   :         -                                 X
+X                                                                       -        X
+X     -            .                                            -                X
+X                               .                                                X
+X                 -                                                    -         X
+X    -                                 .-                      -     -      .    X
+X                                                                  .          .  X
+X                       -       .  -          -          .                       X
+X                           -                                         -          X
+X  .        .    -                                      -   -    .     -         X
+X                          .                     .      --  -        -  -        X
+X                   -                                       -                -   X
+X                      .                                             .           X
+X.                        .                   -            -     -          -    X
+X.                    .                                   .           .          X
+X                  .                                                             X
+X       -             -     -                                   .                X
+X                                                    -                           X
+X                -          -                    - -                             X
+X                -           -      -                                           -X
+X          -                                                .             -      X
+X               .                                        ..                      X
+X  -                        .               .                                    X
+X         -                                                                      X
+X                      .                                  . ..                   X
+X  -                             -             .                -                X
+X         -          .                  .                     .                  X
+X                                    -                         -                 X
+time t: 0
+X                                                                                X
+X         -                                                          -           X
+X                                                                                X
+X                                 .                                          -   X
+X       ..                                 -                                     X
+X                                                        -                 -     X
+X                                  .             .      --             -         X
+X                                                      .- =            -         X
+X            -                 -                           .         -        -  X
+X                                             -                                  X
+X                               -    -                                           X
+X  .          .      .   -        -               .             --         -     X
+X          -                     -    .                              .           X
+X           -                                                                    X
+X                -                                              -                X
+X                                                  -                 .           X
+X                                                       .                        X
+X      -                                       .          -                      X
+X                                               .              - :        -      X
+X           -                    .                            -          .       X
+X    -                                             . -                       -   X
+X           -                                     -  - -                   .     X
+X                                                           -                    X
+X        .                                     -              .                  X
+X                                                       .         .              X
+X    .                   -                                                       X
+X   -                   .         -                         .          -         X
+X                 .                                    -                         X
+X               .      -           -                                             X
+X                                             -                  .        .      X
+X              -                    .         .                 .  - -           X
+X  -            .                                                                X
+X        -        - -                  .                                         X
+X               :                         -          .           .     -         X
+X                                                  -     .                       X
+X                .-                .                               -             X
+X                  .              .        -     -                  .            X
+X      -               -            -                        -       -           X
+X    .                                -                                          X
+X                                -    .        .            .                    X
+X   .          -                                                                 X
+X                      ..          .       .                     -     -         X
+X-                                    -                  .                       X
+X               -          -                     .     - -                       X
+X                   .              .                  .               .          X
+X                       .                                                        X
+X                                                                          .     X
+X                                       .           -        .     -             X
+X                                  -             .              -                X
+X    .                                    -                     =                X
+X                 -              -                                               X
+X  :                -                         -                                  X
+X        -  -                                                          -         X
+X                                . -                                             X
+X      -                      -                                                  X
+X                                                               -    -      -    X
+X      -           :                                     -      -       .        X
+X                                  -                                             X
+X                               .             -           =    .         ..      X
+X                                                                 -   -   -      X
+X    .             -     - -     -                              .                X
+X             .            .                   . -                               X
+X                                                 .                  .    -      X
+X  .                                                            .                X
+X                      -                        -               -          .     X
+X                     .                                   .                      X
+X  .                      .                                                      X
+X                .  .                            -      -               --       X
+X         -             .                            -                           X
+X                                                    -                       -   X
+X                           -      -                                    .-       X
+X                                                         .  .                   X
+X           -                               .                                    X
+X           -                                                                    X
+X    -                 .                        -                                X
+X    -    -            .         -             .                -                X
+X                                                     .                          X
+X                                    -.        .           -                     X
+X                                                                                X
+X   -                              -                                             X
+time t: 256
+X            .                 -             -                                   X
+X               .         - -                                     . .    .       X
+X        -                         .    .  -              -                      X
+X                                            -       -              .          . X
+X                                    -                                           X
+X                      .                 .                  -                    X
+X                                    .                   -                       X
+X                                                                  -             X
+X  :        .                 - -                                                X
+X                    .           .          -         -             -          - X
+X          . .             .                   -                                 X
+X                  --                                                            X
+X                -         .                      .                .             X
+X                           .              ..                           -        X
+X              .              -                -                                 X
+X               - .              -                                               X
+X                 .  -                                               -   .       X
+X        .      .         -                 -               .                    X
+X                             .    .      -                                      X
+X                                    .                                           X
+X                           -                                                    X
+X    -                                -     .    -                               X
+X       -                                                     .                  X
+X     -             -                                         -                  X
+X             .-                    -                                            X
+X          - :                                  .      .        .                X
+X                        -   -                 .                                 X
+X                              -                           -  -              -   X
+X        .                                  -                                    X
+X                                  .         -                                   X
+X.                                                                 -             X
+X   -                   -                               -          . .   .       X
+X                                 -  -      .                       -            X
+X                -                -        -                                 -  .X
+X               -                                                -               X
+X                                                .                               X
+X               -                   -                -   -                       X
+X                                     -        -   .          . -                X
+X                                                        .                       X
+X                                      -           -                           - X
+X           -                               -                                    X
+X                      -  -   -                                                  X
+X            .       -         -              -        .      .                  X
+X    -                                    -                                 -    X
+X   -           -                                              .                 X
+X                                           -                                    X
+X                            .                                               .   X
+X            .                                 .                                 X
+X                                       -           .   -      -      .          X
+X           .            -          -         .          .         .             X
+X                .                               -                        .    - X
+X .   -                                         -       .              . .     - X
+X                                                             .    -             X
+X      .                  .                                                 .    X
+X                                                   .           .                X
+X                       -                          -                             X
+X                      -                                                         X
+X -             -                          .                                     X
+X        -                                             .   -             - -     X
+X                                                                          -     X
+X                        -       -         -         -  -               .        X
+X                               .                     -                          X
+X -         -                                                                    X
+X                    -                     :                                  -  X
+X  .               .                         -                         -      .  X
+X                          -          .                              -   -       X
+X                  -                                                           - X
+X                                              -                                 X
+X                                                                     .          X
+X                -                                                  .  -         X
+X                                                    -             .             X
+X          .       -     -                                                       X
+X                      -             -                            ..             X
+X                                                                                X
+X              -            --                                      -  .         X
+X     .      -                             -                                     X
+X                       ..              -                                        X
+X                                                                                X
+X  -                            -                                   .            X
+X                           .                               .  -         .     - X
+time t: 512
+X                                            -                    -              X
+X                 -                                                     -        X
+X  -                        .                                               .    X
+X    .           .                          -  .                          -      X
+X                 -.          -     -                   -                        X
+X              -              -                                                  X
+X          -                                        .     .                      X
+X                                        .             -                         X
+X       .      -                                 -      .          .       ..    X
+X                 .     .                     .                           -      X
+X   .       .                                           .   -                    X
+X                      .     -           -         .                            -X
+X           -          .                                 -                       X
+X                     -                  -                                       X
+X   .               .--     -         .                                          X
+X           .                      - -                                           X
+X                                                        .                      -X
+X              .                          -               -                      X
+X         -                                                                      X
+X   --                                                    -                      X
+X                                                          .                     X
+X     -                                                           .              X
+X -                                                                              X
+X  .                  .    -                      -                              X
+X               -                                 .                              X
+X                                                                                X
+X                                                   -    -                       X
+X                         -                       -                     -        X
+X  - -                             :   .                                         X
+X             -             -     -    -            .                            X
+X              ..                               -                                X
+X   .                                        -                          -        X
+X  . -    .                                                             -    .   X
+X               -  -                                                             X
+X                                                                                X
+X                           -              .        -         .                  X
+X                  .                                                 .           X
+X   .-                         -   ..     -                                      X
+X            .                           -     .     -       .            -    - X
+X             .                      -             -                        -    X
+X             .          -               -    -                .        -    -   X
+X          .                                                       .    .        X
+X    =                                   -                   -  -.               X
+X      -  -                                                   .                  X
+X             -      .               .                                           X
+X                      .                                                         X
+X               -        -                -    .                           -     X
+X             - -                          .                              -    - X
+X          -           .                     .                              .    X
+X                         -                     -                                X
+X    -                                -                    -                     X
+X      -                                       .                           -     X
+X                                            -            -                      X
+X        .   .                     -            -         -                      X
+X                                                                  .            -X
+X.         -                                       .  .                     .    X
+X                                                                      -        .X
+X                                           .                                    X
+X -            .                                 .                               X
+X   .         .      -  - -                                                      X
+X                   .-                                                           X
+X           -     .  .                               .                           X
+X         -                           .           -                              X
+X                                            -             -    -                X
+X         .                                                                      X
+X. -            -                      .                                         X
+X               -             -        -                                         X
+X     .                                 .                                        X
+X                 - -                                                       .    X
+X      .   .                                     -     -                    .    X
+X                                                   -    -     -                 X
+X                       . -            .          -           .               .  X
+X                                                            .                   X
+X                                                          --                    X
+X    -                                      .                                   -X
+X                                                                                X
+X       -  -                                    -                       -      - X
+X                 -                -                                             X
+X                                                      -           .             X
+X                          . .      -                       .                    X
+time t: 768
+X                          -                                             .    .  X
+X            -                                       .                    .   -  X
+X                 .                 -                                       .    X
+X                                                                                X
+X                      -                                                   .     X
+X                 .                     .                                        X
+X   .         .                   .                                              X
+X                   -                                      .                .    X
+X                  -                    -  .                  .                  X
+X           -   .                                                               -X
+X        .  -                                           -    -        .       -  X
+X            -                     .                                    -        X
+X      -  .                    =                                                 X
+X              -                           -                                     X
+X                   -                   .                     .-  .              X
+X          -                       -       .                                     X
+X-                                         -   .        .                        X
+X                       -                                                        X
+X            -  .                 -                .                             X
+X                        -                   -             .           -         X
+X                      .                                      -                  X
+X                    -                                                           X
+X         .                          .                            -              X
+X                 .  .                                         -                 X
+X -                -                                               -             X
+X                                                    -                           X
+X              -                                            -              -     X
+X             -                 -  -                                             X
+X         .                                   .                 .                X
+X  .          -                                            .     -               X
+X   -                     -                   -            -                     X
+X                          .     .                                               X
+X    .                                                                     -   . X
+X                                      -          .                     -        X
+X.                                                                              -X
+X .           .          -                                                       X
+X                                                  -                             X
+X    .                 -    .-              -        -                       -   X
+X                                -         .            .                        X
+X                            -    .                                    .         X
+X                             .                -                      -          X
+X    .-        -                               -                                 X
+X      -                                                           -             X
+X                  -                             .                               X
+X                   -      -     -                                             . X
+X                  -                                   -         -               X
+X   -         -   .         .         .                    - - -                 X
+X   .   -                                                                        X
+X    -.-        .                              -                            .    X
+X-             .         .                                    .    .  -          X
+X     .              .                                  -                        X
+X              .                                                                 X
+X -                            . -                                               X
+X                                                 -                              X
+X               - -    .   -                                                     X
+X                      .            -                         -                  X
+X                                             -             -     .          .   X
+X                                                                   -            X
+X     .                         -                                                X
+X      .      . .                -     .                       -  -              X
+X                       .               .                                 -      X
+X         -         .    -                                                  -    X
+X                        .                                                  .-   X
+X-       -  -                                                   .               .X
+X       -                                                                        X
+X         =                             -                 -                      X
+X  .                                                                             X
+X                    .            -         .       .                            X
+X                                                            .                   X
+X   .              .        -                   .                                X
+X                                                                                X
+X                                        -                       -               X
+X =     .-                             -                                         X
+X                 -                                             -              - X
+X                                                                 -             -X
+X                                                -     -     - -.         -   .  X
+X                 -   .                                                          X
+X                -                                 -                   -        -X
+X          -.                         -                                          X
+X    -                                   -   -                 - -    -          X
+time t: 1024
+X                            -                        -                          X
+X       -                                   .                                    X
+X            . -                                     .                           X
+X                                 .         .                     -              X
+X                        .                  -                                  - X
+X                                 -             .                         -      X
+X                                                               -                X
+X            -      -                                                  .         X
+X                   .                    -                                       X
+X        .                        -   -               - -                        X
+X                        -                 -                         -           X
+X  -                                                                     -       X
+X                   .                   -                    .                   X
+X                                    -     .                        -  -         X
+X  -                                   -     -                 -                 X
+X   -                                                .  .    -                   X
+X                   -    -                                                    -  X
+X                                      .                               .        .X
+X                                      -                          -              X
+X                         .                                                      X
+X      .   .                                                  .  -  .-           X
+X                      .         .                             .                .X
+X          .            -     -               -            .        -   -        X
+X                                                                   -    .       X
+X                                                       :         .        -     X
+X                 -                                             .     .          X
+X                                             -        -   .                     X
+X   -                                  -                                      :  X
+X       ..                                                      .       .        X
+X             .                                -                .                X
+X                    -                          -       -                 .-     X
+X                            -                 -                                 X
+X                           -                         -   .      -              .X
+X                                             -     .                            X
+X                                 -             .  -                             X
+X                    .                         .                                 X
+X                                    -                             -             X
+X                                .      -        .       -                       X
+X                                       -.      -                  -   .   .     X
+X                               .    .                  .      .                 X
+X                                                           .          .     .   X
+X  .     -                          .                    .   -  -                X
+X                  .                       -  -                                  X
+X-               -     .                         --                              X
+X            -                           -    -        -                         X
+X             -                                            -      -            - X
+X                               -                    -                     -     X
+X                                                                       -        X
+X                           -     -                   -                     .    X
+X    -   .                 .           .         -                    -          X
+X                               .                   -                            X
+X    .         .                               -                                 X
+X                                      .           -                        -    X
+X                          .         -                     .                     X
+X  .        .                  -    .                                            X
+X                                             -                                  X
+X                                                            -                   X
+X        . -          .        -                                          .      X
+X                    :     -            .                                        X
+X      -                               .                                         X
+X                                                  -                            -X
+X       -      -                                                .                X
+X                                                                      -         X
+X                      .                    .                                    X
+X            -                .                                                  X
+X                                                -         -                     X
+X                 -          -                        .        -                 X
+X      -                     .  .                                               -X
+X                        -                                              -        X
+X                         -                                                      X
+X      -               .       -                                  -              X
+X                 -                .                                  .          X
+X                                                                            -   X
+X                                                                                X
+X           -        -                        .       -               .          X
+X    .                        .           -                          -       .   X
+X                                             -             -         -          X
+X    .              .               -             .                              X
+X                       -   -                      -              -              X
+X                        -                         .                    -    -   X
+time t: 1280
+X                                 -                   -    .   -  .              X
+X                    ..    -                            .              -   -     X
+X                                  .                                          -  X
+X                                       .                                 .      X
+X                                                 --                            -X
+X.                                                                               X
+X                          -                        -                            X
+X              -                                      .          -.              X
+X   .                           -                                                X
+X                     -                                                  -       X
+X                -                                                               X
+X                                                                 -              X
+X                                      -   -           .            .       -    X
+X   .                                                             -  -           X
+X   . .                                   -                  -                   X
+X                                                         . -                    X
+X    -                                     -  .                     .            X
+X    -      -         .                                              -           X
+X                    .           -          .                         -       .  X
+X                                                                 -             .X
+X  -                                                                             X
+X.                  -           .                         .                      X
+X           -          -               -      - -                                X
+X .                                                                    .         X
+X   .                    -                    -          -                       X
+X                           .     -                                              X
+X                                             -                                  X
+X                                .                                     -         X
+X                                -  .   .     .        .            -            X
+X  .                                          -             -                   -X
+X               .    -            -                 -                    -       X
+X                    .              . -                                          X
+X                  .         -      -  .   - . -                 .               X
+X                           -    : .                     -     -      -          X
+X                                                                                X
+X                      .           -  -                     .      .             X
+X                 .             -             -                             -    X
+X   -.      .                                                                    X
+X-           .       -                                   -                       X
+X             -          - -                                        .            X
+X    .                                      -       -                            X
+X     -            .        -                                                 .  X
+X    .       -                              -                                    X
+X                  -     -    .                                                  X
+X  -                         .          -                                   -    X
+X                  .               -                              -              X
+X            -        -                  -                                       X
+X                 -           .                   -                -             X
+X         .                                                                      X
+X-          .                       -           -                             .  X
+X                            -                                                   X
+X    -                                                   .                       X
+X                                                                                X
+X                                           -     .                    .         X
+X             -                          .                .             -        X
+X                       .-       .               -      -                        X
+X                  .-                                                            X
+X     .                             .  -        -.                               X
+X     -             .   .                                                   .    X
+X                -          .                              -                     X
+X  .                           -                                         .       X
+X                     .        -                          -                 -    X
+X                    -.                      -              .       -            X
+X -                     -                       .                                X
+X                                                                                X
+X                                                          -  -                  X
+X                              .     .   -                                       X
+X                                .                                               X
+X                                                                         .      X
+X    -  .     .                            -                                . .  X
+X                                    -      -   -                  -             X
+X                            -                     .                             X
+X                    .                       -           -   -  .                X
+X                         -                                                     -X
+X             .-                                                                 X
+X                                                     -                -         X
+X    .         -                                           -            --       X
+X  -                                       .                                     X
+X               .               .   .                                            X
+X -                               -                            -                 X
+time t: 1536
+X     .                                         .                                X
+X                           -        -      -          -             -    .    - X
+X.    .           .                   -         -      . -- .                  . X
+X                                                                   -            X
+X       -                                             .                          X
+X      -  -                                  -    -     .                -  .    X
+X                                                               .                X
+X                     -                                         .                X
+X=        .     .                                      -                         X
+X  .                      -                                            -         X
+X               -       .   -.                                      -            X
+X    -                  .              -               -                         X
+X .          -                                                           .       X
+X                                    -                       -  -                X
+X   -.             -                         -   .            .                  X
+X                                     .                                -         X
+X                                                      -                         X
+X     .                                                                  .      .X
+X   .                                        -                                   X
+X                                                                     .          X
+X                                              -                                 X
+X                                  -   .                                       . X
+X                                    - .                                         X
+X                 --                        -                       .            X
+X    . -            .                         .      -                           X
+X                    -                                                           X
+X                -                          -                               -    X
+X  -                       -                     -                               X
+X  -             -                                              -       :        X
+X      -                                      - -                 -            . X
+X           . -           -                   .                 -                X
+X    .     ..                                                    -             . X
+X                                                                 -              X
+X                                  -                                .            X
+X                  -        -               -                                    X
+X-                -       -                                       -             .X
+X                                        .      -                  -      .-     X
+X      . -                                                                       X
+X                                                    -              .      -     X
+X                                                      .                         X
+X                                                             -     -            X
+X.                                                        .        .          .  X
+X                                                                                X
+X                                                                                X
+X                                    .     -                                     X
+X                     -                       .                                  X
+X                                       -                                        X
+X                                                                              - X
+X            .                               -                                  -X
+X      -                    -               ..            .            -         X
+X         .                        .  .                                      --  X
+X                               -        -   .            ---      -             X
+X                                                               .                X
+X         - -           -                                          -             X
+X       -                                                    .                   X
+X            -                                                  -                X
+X                                 -   .                                          X
+X       -          -    -                                                 .      X
+X                                                                               -X
+X   .            - .   -                                       .          -      X
+X                                    .-                 -   -              .     X
+X                    .    -           -      -          .  . .                   X
+X             .                    -                -                   .   -    X
+X      -                 -                                              .   .    X
+X                                                     .                          X
+X                                              .             -                 . X
+X                                             .                                  X
+X           -            -        .                                             .X
+X                                                                                X
+X                                                       -                        X
+X   -                                                  .      .                  X
+X                                                          -               .     X
+X                                                                                X
+X         .                                            .           -      . -  - X
+X          .                                        -                            X
+X             -   -                                              -               X
+X                                                                                X
+X                                 - -                      .                   - X
+X   -     -            -                                                        .X
+X-       -        - -   .                -                   .     .        .    X
+time t: 1792
+X -             -                                                                X
+X      .  - -    -   -                    . -                 -                  X
+X      .     -                                                        -          X
+X               .     .         -                                 .              X
+X           .                                 -                                  X
+X                                                              .-    .    -      X
+X                         .                            -                         X
+X                  -                        .  . -              .              - X
+X              .                          .    .     -.                     -    X
+X       .                          .                     -                       X
+X                                                            -  -             -. X
+X                                                                                X
+X      -             .                             -                  .          X
+X                                              .                    -            X
+X    .                   -                                                       X
+X                      -                            .                        -   X
+X                 -                                                              X
+X                 -              -                -                    -         X
+X     =  .            .                                             -            X
+X-              - .                                                -             X
+X                                      .  -                                      X
+X          .                                    -           -                    X
+X                    .       .                   .                    -          X
+X     .                                                                .         X
+X                 -                                          .                   X
+X             -              .                                   -               X
+X          .                                                                  . -X
+X                                         -                             -        X
+X                    -                                    - .                    X
+X        -                  .          .                       .                 X
+X                                 -                                   - .        X
+X  ..    .                    .                          -        .              X
+X   -              .          -                                       -          X
+X                -  -     .                         -                -           X
+X                             .                  -                   .           X
+X       .                                           -                   .        X
+X                     .                                               -.         X
+X                                                                                X
+X                                                                                X
+X            -                             -                                     X
+X          .           .                        . -                              X
+X                 -                    -                                         X
+X                                                                                X
+X        -.          .                                                           X
+X         -       -                                                              X
+X                  .                     -    .                                  X
+X                             .                             -       -            X
+X                                                                        -      .X
+X          -                          -                 .                        X
+X               -           - .                                       -   .      X
+X                                          -   .                                -X
+X                          -                                    .                X
+X                       -                                                        X
+X                               -        .            -                          X
+X           -       -                                  -                         X
+X   .-          .                                                                X
+X        -           --          -                           .                   X
+X  :    -                     .                               -                  X
+X    -                        -                 .                   .          - X
+X                 --                                                  -          X
+X                                                                          -    -X
+X                    -                                                           X
+X                                           -.                           .       X
+X -           -                          -                                       X
+X                                                -                      .        X
+X            -                   .               .                  ---          X
+X           -                                     .        -                 -   X
+X-             .                   -                                      .      X
+X                                                                                X
+X               -              .                                                 X
+X          -                                      -                              X
+X                            .                     -                      -    . X
+X    ..                                        .           .      -          -   X
+X     -         .        .        - -                                            X
+X         .             -                       -                                X
+X  .             -                           --            -      -        .     X
+X                  .  .           -       .            .                         X
+X                                                                 -     -        X
+X            -           -         .                                             X
+X         -                .                                     -          -  - X
+time t: 2048
+X       -                 .              .                       .-              X
+X                                          -    -                .         .     X
+X           -                   -                              .                -X
+X                         -                -                                     X
+X                    .          -                             -  .-              X
+X        -            .                  .              -                        X
+X            -                   .                         -    -  -             X
+X                       -    - .                                              .  X
+X       -                 -                     -   -       -      .    .        X
+X                                                                                X
+X                         .                .                  .                . X
+X        -                -                                                      X
+X                                                                 .              X
+X                        -  -           . -              .                       X
+X                               -                                                X
+X                                                                    -    -     -X
+X          .                         .                                       -  .X
+X       .                     .                   .-        -               .    X
+X                                                                                X
+X                -                                                               X
+X                     -   -   -           .                                   -  X
+X   -                               .                -                 .         X
+X                                            .  -                                X
+X                  -        .                                      .     -       X
+X                                                   .                           -X
+X                                   .    -             .-                        X
+X    -        .                      .                                   .    -  X
+X                                                          -                   - X
+X    .   -                 -                                                     X
+X                                               -        -                -      X
+X                 -                   -                                          X
+X      -                           -      -                                      X
+X                   .                                 -          .        .     .X
+X .        .                        -      -    .                -               X
+X                                           -                      -             X
+X      -                                                                  .      X
+X                                                                               -X
+X                   .                                              -             X
+X                   .                   -                                        X
+X.        . -                                 -        :                         X
+X                               -                                                X
+X                                                            -                   X
+X   .      -                       -                                             X
+X                                               -                -               X
+X                            .                                                   X
+X                                                                                X
+X                                        -                     ..                X
+X                           -                                                    X
+X                       -      -                        -                        X
+X                                        -         -                           . X
+X                       -                      -                .                X
+X .                          -                                                   X
+X                    -                                             .             X
+X     . .                            .                                         . X
+X   -   -        -                              .                                X
+X  -                                                  -                          X
+X                                                                       .        X
+X                                                                            .   X
+X           -          -           . -          -                                X
+X                                   .                               .     .      X
+X                        - ..    -                                               X
+X                                              -   .              . -            X
+X.                    -                  -            .  -     - .    .          X
+X              -          -      -      .     -.  .                     -        X
+X -                                               .         -                    X
+X                                   -                  .     -                   X
+X     - . -            -        -                           -      .      .      X
+X     .            .          .                                                  X
+X         .                     .     -   .            -.         -              X
+X.             .                                          -                      X
+X -                                                               -              X
+X                 -                    -              -.             - -         X
+X                                                                        -       X
+X                                                                        -       X
+X        -                                      --                            -  X
+X                 .           .                                                  X
+X                 -          .           .          -                 -          X
+X                            .                                                   X
+X               .      -                  -                 -                    X
+X                                                     -   .                      X
+time t: 2304
+X     -                                 .                                        X
+X                 -           -                                                  X
+X               .      -                --                  .                    X
+X                      .     .                                    -             .X
+X    .                                                   .             -         X
+X    -                                                                           X
+X -                                                  - .             -      -    X
+X         .       .-           .   -      .      -                               X
+X                   .                           .                                X
+X                          -                        .--    -         -           X
+X ---                                                               .       .    X
+X            -              -     -                    =     .     .       -     X
+X                       -                                    .              -    X
+X                        .                          .                   . .      X
+X                        -       -                           -                   X
+X  .  -      .                                                                   X
+X      -                 .                           -                     -     X
+X                                  -                                    -        X
+X-                                                           .                   X
+X                                                                             -  X
+X                                                                                X
+X                                                                                X
+X                      -                                             .           X
+X                                                           - - --           - - X
+X                       -       -                    .                           X
+X                    -        .                                               -  X
+X                                   ..                                        -  X
+X      -             -                                                    -      X
+X              -                                 -             -     -           X
+X              -                                                                 X
+X                            .                             .    .     -          X
+X             .   .              -                .             -                X
+X    .                           -      -                                   - .  X
+X      - .          .               -          --                      -         X
+X      -                                 .             -                         X
+X                   -            .           -   -     -        .                X
+X                             .                                   -              X
+X       -        -.  .            -        -                   .                 X
+X       -                                             .      .                   X
+X                                    -                                           X
+X       -      -                                         .            .          X
+X           .                       .                                            X
+X                                     .                  - -             -      .X
+X                          - -                  -                                X
+X .                                                                   .    -     X
+X                                                      .                         X
+X              -                                                           -     X
+X                           .     -                                             -X
+X        .                                    .    -             .               X
+X.                                                    .        -                 X
+X .   .                                                    .                     X
+X                                          .   .-                                X
+X       -                      -                                     .           X
+X       .           -                                  -                         X
+X                                                                  -       -     X
+X                                    -                                           X
+X                                      -              .       .                  X
+X                                    -                                           X
+X                .                                                 -             X
+X                  -             -                 -                             X
+X                                               -             -                  X
+X                                                      -                         X
+X                     .  -                                        -              X
+X                             - .                      .     .                   X
+X                                          -.                .                   X
+X  -                            -                     .                          X
+X                                                                                X
+X   .                      . .    .                         :          .         X
+X          -        -                    .                            .          X
+X          .                            -                    -                   X
+X                -  -                     . .    -      .                        X
+X-  .                                    -             -.   -                    X
+X                                                      -                         X
+X                       -                              .   - -                   X
+X                      -               -                          -              X
+X                                -                             -                 X
+X                                                             -           -      X
+X               -                                                .               X
+X               .                                                                X
+X.                                                            .                  X
+time t: 2559
+X-    .                    .          -                                -    .    X
+X                     -.                                                         X
+X                                            -   -                               X
+X        -                                                            -          X
+X    .-                           .                       .                      X
+X          .                                                                     X
+X             -                      .                       .                   X
+X .          -  -         --                 .                             - -   X
+X     -                          .                     -                         X
+X     -                                 -                   .  -                 X
+X   .                              .          .                                  X
+X     .                                  -                  -                   -X
+X             -            .           -                                       . X
+X              .                                                                 X
+X         -                                  -         .     -                   X
+X                           .                                                    X
+X                                                                                X
+X -.                                                                            -X
+X                               -      -                  -                    . X
+X  .                                                  .                     -  . X
+X                            -                                           .       X
+X      -                                                                         X
+X                .       -   -                                                   X
+X         .                                         -                            X
+X            .                               -                                   X
+X             -                .                 .             -             -   X
+X .    -    .                                        -                    -  .   X
+X                                          -                                     X
+X.    -                               .       -     .       .                    X
+X               .          -   .  .                                              X
+X     -                           -                           -           -      X
+X -                                             -                                X
+X           .                                       .      -     .               X
+X                                                               -                X
+X  .     -                                   .                                  -X
+X  -           -                                    -       -                    X
+X               -          -                     -                               X
+X                  .         --                                                  X
+X                                             -                                  X
+X                                     -                                     -    X
+X              -                       -             -                -          X
+X                                                                                X
+X   -  -              - .           ..                                           X
+X                            -                            -     -                X
+X                                 -            -              .      .           X
+X                                     -          .                               X
+X-               - -                                                       -   . X
+X             -                     . -                             -            X
+X                                                         .                  ..  X
+X                          .            .                                        X
+X    -   .    -             -                  .                        .        X
+X -       -       -                        ..                                    X
+X -                      .      .                            .                 - X
+X                   -                   -                                        X
+X             .                                                       -    .     X
+X  .                      -                      -        -                   .  X
+X                        .  -                                                    X
+X                 -                                                  -           X
+X            -                                          .                        X
+X  .                                                                     -       X
+X .                             -                  -                             X
+X                                   -                 .      -                 . X
+X                          :     -  --      .                                    X
+X        -     .                                                                 X
+X                     -                    - ..              .                   X
+X                                                 -   .          -             - X
+X -                                                                          -   X
+X                        .                                                       X
+X    -                                                                           X
+X        -                                                       .               X
+X  .-  -            -    -.                                                      X
+X .                                   -                                 .        X
+X                                .                                --             X
+X                                                                                X
+X  -           -                   -  .                 -             .          X
+X    -                          .                                                X
+X           -                                                    -        .    - X
+X     .                         .   -  -                .                        X
+X                                                                   .       -    X
+X                     -             .   -         .                              X
+The COM moved by (-0.072995,0.000582) units
+The process took 5.234000 seconds to finish. 

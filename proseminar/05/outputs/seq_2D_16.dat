@@ -1,0 +1,974 @@
+Init:
+X   .                                                                            X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                     .          X
+X                                                                                X
+X                                                                                X
+X                                   .                                            X
+X                                                                                X
+X                                                                                X
+X                   -                                                            X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                    .                                           X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                          -                                     X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                      .                                                         X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                         -      X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X   .                                                                            X
+X                                                                                X
+X                 .                                                              X
+X                                                                                X
+X                                                                                X
+X                        .                                                       X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                     -          X
+X                                                                                X
+X    -        .                                                                  X
+X                                               .                                X
+X                                                                                X
+X                                                                                X
+X                                             -                                  X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+time t: 0
+X    .                                                                           X
+X                                        .                                       X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                    .           X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                  .                                             X
+X                                                                                X
+X                    -                                                           X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                   .                                            X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                          -                                     X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                      .                                                         X
+X                                                                                X
+X                                                                                X
+X                                                                        -       X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X     .                                                                          X
+X                 .                                                              X
+X                                                                                X
+X                      .                                                         X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                 -                  -           X
+X       -  .                                                                     X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+time t: 16
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                              .                                 X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                               -                                X
+X                                                                                X
+X                                                                   .            X
+X                                                                                X
+X                                        .                                       X
+X         .                                                                      X
+X                                                                                X
+X                                                                                X
+X                                                                       -        X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                     .                          X
+X                                                                                X
+X                                                                                X
+X                                                   .                            X
+X                                                                                X
+X                                                  -                             X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                        .                       X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                 -                                                              X
+X                                                                                X
+X                                                         -                      X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                      -         X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X             .                                   .                              X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                         .                                      X
+X                                                                                X
+X                                                                                X
+time t: 32
+X         .                                                                      X
+X                                                                                X
+X                                                                                X
+X                             -                                                  X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                       -                                                        X
+X                                                         -                      X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                           .                    X
+X                                                                                X
+X                                                                                X
+X                                                                       .        X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                            .                                                   X
+X                                                                                X
+X                                                    -                           X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X           .                                               .                    X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X             -                                                .                 X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                     .                                                          X
+X                                                                                X
+X                                                                                X
+X                                         .                                      X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                           -                    X
+X                                                                                X
+X                                      .                                         X
+X                                                                                X
+X                                                                                X
+time t: 48
+X                                                                                X
+X                                                                                X
+X -                                                                              X
+X                                                                                X
+X                                                                   -            X
+X                                                         .                      X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X .                                                                              X
+X                 .                                                              X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                              . X
+X                                                                         .      X
+X                                                                                X
+X                                                                              - X
+X    .                                                                           X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                  .                                             X
+X                                                                                X
+X                          -                                                     X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                       .                        X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                   -                                                            X
+X                                                                                X
+X                                     -                                          X
+X                                                                                X
+X                                         .              .                       X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+time t: 64
+X                                                                                X
+X                                                               .                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                 .              X
+X                                                                                X
+X  -                       .                                                     X
+X                                                                                X
+X                                          .                                     X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X        .                                                                       X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                        -                                                       X
+X                                                                               .X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X              -   .                                                             X
+X                                                                -               X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X   -                                                                            X
+X                                                           .                    X
+X                                                                                X
+X                                                                                X
+X                                        -                                       X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X             .                                                                  X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                      .         X
+X                                                                                X
+X                                                                                X
+time t: 80
+X             -                                                                  X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                   .                                            X
+X          -                                                                     X
+X                                                                         .      X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                -                                               X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                         .            -         X
+X                                                                                X
+X                                                                                X
+X                                                                               .X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                  .                                                             X
+X                                                                                X
+X  .                                                                             X
+X                                                                                X
+X           .                                                                    X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X         .                                                                      X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X        -                                                                       X
+X                                                                                X
+X                                                                                X
+X                                          .                                     X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                     .                -                         X
+X                                                                                X
+X                                                                                X
+time t: 96
+X                                                                                X
+X                                                   -                            X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                            .                                   X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X         .                                                                      X
+X                                                                                X
+X                                                                            .   X
+X                                                       .                        X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                          -                     X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                              .                                                 X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X     .                                       .                                  X
+X                                                                                X
+X               .                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                  -             X
+X                                                                                X
+X                                                                                X
+X         -                                                                      X
+X                                                                                X
+X                                                                                X
+X                                                                          .     X
+X                                                                              - X
+X                                                                                X
+X                                                                                X
+X          -                                                                     X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X .                                                                              X
+X                                                                                X
+time t: 112
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X         .                                      -                               X
+X           .                                                                    X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                       -                                                        X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                           .                                    X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                     .        .                                                 X
+X                   -                                                            X
+X                                                                                X
+X                                                                                X
+X                                                   .                            X
+X                                                      -                         X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X         .                                                                      X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                            .   X
+X                                                                                X
+X                                                                   -            X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                               .                X
+X                        .                                                       X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                         -                                                      X
+X                                                                                X
+time t: 128
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                .                                               X
+X                                                                                X
+X                                                                            -   X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X               .                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                      -         X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X    .                                               .                           X
+X                                                                          .     X
+X        .                                                                       X
+X                                                                                X
+X                                                                     -          X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                       .        X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X              -                                                                 X
+X                                                                                X
+X                                                  .                             X
+X                               -                                                X
+X                                                                                X
+X                                                                                X
+X                                                                  -             X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                  .             X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                             .                  X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+time t: 144
+X                                                                            .   X
+X                                                -                               X
+X                                                                                X
+X                      -                                                         X
+X                                      -                                         X
+X                                                                                X
+X                                                                            .   X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                      -                         X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                   -                                                            X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                    .                           X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                     .                                          X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                      .         X
+X                                                                                X
+X                                                                            .   X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                             -                  X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                              .                                                 X
+X                                                                                X
+X                                           .                                    X
+X                                .                                               X
+X                              .                                                 X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+time t: 159
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                .                               X
+X                                                                                X
+X                                                                                X
+X                        -                                                       X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                      .                                                         X
+X -                                                   .                          X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                          .                     X
+X     .                                                                          X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                  .                                                             X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X           -                                                      -             X
+X                            -                                                   X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X       .                                                                        X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                                                                X
+X                                           .                                    X
+X                                                                                X
+X                 .                                                              X
+X-                                                                               X
+X                .                                                               X
+X                                                                                X
+The COM moved by (-0.133393,0.043863) units
+The process took 0.000000 seconds to finish. 

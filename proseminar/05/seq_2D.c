@@ -23,6 +23,7 @@ int get_com_coords(double* com_coords, Particle_p particles, int N);
 
 int main(int argc, char **argv)
 {
+	clock_t start = clock();
 	int N = 10;
 	int room_size = 10;
 	if (argc == 2){
@@ -73,6 +74,8 @@ int main(int argc, char **argv)
 	free(forces_x);
 	free(forces_y);
 	free(particles);
+	clock_t end = clock();
+	printf("The process took %f seconds to finish. \n", ((double)(end - start)) / CLOCKS_PER_SEC);
 
 	return EXIT_SUCCESS;
 }
