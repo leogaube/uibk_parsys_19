@@ -33,7 +33,11 @@ For each timestep (you can assume `dt = 1`), particles must be moved by first co
         * The resulting position after a time dt=1 is                                   
           <a href="https://www.codecogs.com/eqnedit.php?latex=\textit{\textbf{r}}_{i}&space;=&space;x_i&space;\cdot\textit{\textbf{e}}_{\text{x}}&space;&plus;&space;y_i&space;\cdot\textit{\textbf{e}}_{\text{y}}&space;=&space;\left(x_i&plus;v_{i,\text{x}}\right)&space;\cdot\textit{\textbf{e}}_{\text{x}}&space;&plus;&space;\left(y_i&plus;v_{i,\text{y}}\right)&space;\cdot\textit{\textbf{e}}_{\text{y}}" target="_blank"><img src="https://latex.codecogs.com/gif.latex?\textit{\textbf{r}}_{i}&space;=&space;x_i&space;\cdot\textit{\textbf{e}}_{\text{x}}&space;&plus;&space;y_i&space;\cdot\textit{\textbf{e}}_{\text{y}}&space;=&space;\left(x_i&plus;v_{i,\text{x}}\right)&space;\cdot\textit{\textbf{e}}_{\text{x}}&space;&plus;&space;\left(y_i&plus;v_{i,\text{y}}\right)&space;\cdot\textit{\textbf{e}}_{\text{y}}" title="\textit{\textbf{r}}_{i} = x_i \cdot\textit{\textbf{e}}_{\text{x}} + y_i \cdot\textit{\textbf{e}}_{\text{y}} = \left(x_i+v_{i,\text{x}}\right) \cdot\textit{\textbf{e}}_{\text{x}} + \left(y_i+v_{i,\text{y}}\right) \cdot\textit{\textbf{e}}_{\text{y}}" /></a>
  
-- Measure the execution time for various problem sizes. What can you observe?
+- *Measure the execution time for various problem sizes. What can you observe?*
+
+Execution time measurements/plot can be found in `./outputs` and `./results` directory respectively. 
+Unsurprisingly, a doubleing in particles results in a roughly quadrupled execution time, e.g. 256 particles take 1.89 seconds to compute and and 512 particles take about 7.47 seconds. 
+Runtime complexity is O(n^2).
 
 ## Exercise 2
 
