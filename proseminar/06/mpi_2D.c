@@ -15,7 +15,7 @@
 #define MAX_POSITION 0.5
 
 int get_forces(double *forces_x, double *forces_y, Particle_p particles, int N);
-int apply_forces(double *forces_x, double *forces_y, Particle_p particles, int N);
+int apply_forces(double *forces_x, double *forces_y, Particle_p particles, Particle_p local_particles, int N, int M);
 int init_particles(Particle_p particles, int N, int rank);
 int print_particles(Particle_p particles, int N, int room_size);
 double let_particles_fly(double position);
@@ -35,7 +35,7 @@ int main(int argc, char **argv)
 		N = atoi(argv[1]);
 		room_size = atoi(argv[2]);
 	}
-	int T = 1000;
+	int T = 10;
 
     // MPI setup
     int rank, numProcs;
@@ -78,7 +78,7 @@ int main(int argc, char **argv)
 	
 
     MPI_Gather(local_particles, M, particles_type, particles, M, particles_type, 0, MPI_COMM_WORLD);
-    MPI_Scatter(particles, M, particles_type, local_particles, M, particles_type, 0, MPI_COMM_WORLD);
+    MPI_Bcast(particles, N, particles_type, 0, MPI_COMM_WORLD);
 
 	#ifdef VERBOSE
     //printf("local; rank %d, x: %f, y: %f, m: %f\n", rank, local_particles[0].position.x, local_particles[0].position.y, local_particles[0].mass);
@@ -94,11 +94,11 @@ int main(int argc, char **argv)
 	for(int t=0; t<T; t++){
 		get_forces(forces_x, forces_y, particles, N);
 
-		apply_forces(forces_x, forces_y, particles, N);
+		apply_forces(forces_x, forces_y, particles, local_particles, N, M);
 
 
-        //MPI_Gather(local_particles, M, particles_type, particles, M, particles_type, 0, MPI_COMM_WORLD);
-        //MPI_Scatter(particles, M, particles_type, local_particles, M, particles_type, 0, MPI_COMM_WORLD);
+        MPI_Gather(local_particles, M, particles_type, particles, M, particles_type, 0, MPI_COMM_WORLD);
+    	MPI_Bcast(particles, N, particles_type, 0, MPI_COMM_WORLD);
 
 		// plot results
 		#ifdef VERBOSE
@@ -128,6 +128,7 @@ int main(int argc, char **argv)
 	    printf("The process took %f seconds to finish. \n", ((double)(end - start)) / CLOCKS_PER_SEC);
     }
 	
+  	MPI_Finalize();
 
 	return EXIT_SUCCESS;
 }
@@ -183,28 +184,29 @@ int get_forces(double *forces_x, double *forces_y, Particle_p particles, int N){
  * the total force on each particle is the superposition of all forces
  * calculate this sum and apply it to the position and velocity of the particles
  */
-int apply_forces(double *forces_x, double *forces_y, Particle_p particles, int N){
-	for(int i=0; i<N; i++){
+int apply_forces(double *forces_x, double *forces_y, Particle_p particles, Particle_p local_particles, int N, int M){
+	for(int i=0; i<M; i++){
 		// get total forces
 		double force_x = 0;
 		double force_y = 0;
+
 		for(int j=0; j<N; j++){
-			if(i==j){ // there is no force from the particle itself
+			if(fabs(particles[j].position.x - local_particles[i].position.x) < 0.00001 &&  fabs(particles[j].position.y - local_particles[i].position.y) < 0.00001){ // there is no force from the particle itself
 				continue;
 			}
-			force_x += (j<i) ? forces_x[IDX_FORCES(i,j)] : -forces_x[IDX_FORCES(j,i)];
-			force_y += (j<i) ? forces_y[IDX_FORCES(i,j)] : -forces_y[IDX_FORCES(j,i)];
+			force_x += (particles[j].position.x < local_particles[i].position.x) ? forces_x[IDX_FORCES(i,j)] : -forces_x[IDX_FORCES(j,i)];
+			force_y += (particles[j].position.y < local_particles[i].position.y) ? forces_y[IDX_FORCES(i,j)] : -forces_y[IDX_FORCES(j,i)];
 		}
-		double m = particles[i].mass;
-		particles[i].velocity.x += force_x/m;
-		particles[i].velocity.y += force_y/m;
-		particles[i].position.x += particles[i].velocity.x;
-		particles[i].position.y += particles[i].velocity.y;
-		if (particles[i].position.x > MAX_POSITION || particles[i].position.x < -MAX_POSITION) {
-			particles[i].position.x = let_particles_fly(particles[i].position.x);
+		double m = local_particles[i].mass;
+		local_particles[i].velocity.x += force_x/m;
+		local_particles[i].velocity.y += force_y/m;
+		local_particles[i].position.x += local_particles[i].velocity.x;
+		local_particles[i].position.y += local_particles[i].velocity.y;
+		if (local_particles[i].position.x > MAX_POSITION || local_particles[i].position.x < -MAX_POSITION) {
+			local_particles[i].position.x = let_particles_fly(local_particles[i].position.x);
 		}
-		if (particles[i].position.y > MAX_POSITION || particles[i].position.y < -MAX_POSITION) {
-			particles[i].position.y = let_particles_fly(particles[i].position.y);
+		if (local_particles[i].position.y > MAX_POSITION || local_particles[i].position.y < -MAX_POSITION) {
+			local_particles[i].position.y = let_particles_fly(local_particles[i].position.y);
 		}
 	}
 
