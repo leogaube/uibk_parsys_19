@@ -27,18 +27,18 @@ int main(int argc, char **argv)
 	clock_t start = clock();
 	int N = 10;
 #ifdef VERBOSE
-//	int room_size = 10;
+	int room_size = 10;
 #endif
 	if (argc == 2){
 	    N = atoi(argv[1]);
 #ifdef VERBOSE
-//		room_size = (N>8) ? 80 : N*10;
+		room_size = (N>8) ? 80 : N*10;
 #endif
 	}
 	if (argc == 3) {
 		N = atoi(argv[1]);
 #ifdef VERBOSE
-//		room_size = atoi(argv[2]);
+		room_size = atoi(argv[2]);
 #endif
 	}
 	int T = 10;
@@ -109,11 +109,16 @@ int main(int argc, char **argv)
 	free(forces_y);
 	free(local_particles);
 	free(tmp_particles);
-    if(rank == 0) {
 #ifdef VERBOSE
-//    	TODO gather all particles for plotting
-//		print_particles(particles, N, room_size);
+	// gather all particles for plotting
+	Particle_p particles = malloc(N*sizeof(Particle));
+	MPI_Gather(local_particles, M, particles_type, particles, N, particles_type, 0, MPI_COMM_WORLD);
+    if(rank == 0) {
+    	print_particles(particles, N, room_size);
+    }
+    free(particles);
 #endif
+	if(rank == 0){
         clock_t end = clock();
 	    printf("The process took %f seconds to finish. \n", ((double)(end - start)) / CLOCKS_PER_SEC);
     }
