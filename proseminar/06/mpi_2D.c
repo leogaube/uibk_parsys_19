@@ -24,7 +24,7 @@ int get_com_coords(double* com_coords, Particle_p particles, int N);
 
 int main(int argc, char **argv)
 {
-	clock_t start = clock();
+	clock_t start = MPI_Wtime();
 	int N = 10;
 #ifdef VERBOSE
 	int room_size = 10;
@@ -50,7 +50,7 @@ int main(int argc, char **argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
     if (N % numProcs != 0){
-        printf("This Problem cannot be split up evenly among MPI ranks! (N mod numProcs != 0)");
+        printf("This Problem cannot be split up evenly among MPI ranks! (N(%d) mod numProcs(%d) != 0)\n",N, numProcs);
         MPI_Finalize();
         return EXIT_FAILURE;
     }
@@ -90,13 +90,13 @@ int main(int argc, char **argv)
 
 			// send/recveive the local particles around
 			if(i<numProcs-1){
-				tmp_particles_rank = (rank+i+1)%numProcs;
-				if(rank%2==0){
-					MPI_Ssend(local_particles, M, particles_type, (rank-(i+1))%numProcs, 0, MPI_COMM_WORLD);
+				tmp_particles_rank = (rank+i+1+numProcs)%numProcs;
+				if(rank==0){
+					MPI_Ssend(local_particles, M, particles_type, (rank-(i+1)+numProcs)%numProcs, 0, MPI_COMM_WORLD);
 					MPI_Recv(tmp_particles, M, particles_type, tmp_particles_rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 				} else {
 					MPI_Recv(tmp_particles, M, particles_type, tmp_particles_rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-					MPI_Ssend(local_particles, M, particles_type, (rank-(i+1))%numProcs, 0, MPI_COMM_WORLD);
+					MPI_Ssend(local_particles, M, particles_type, (rank-(i+1)+numProcs)%numProcs, 0, MPI_COMM_WORLD);
 				}
 			}
 
@@ -105,24 +105,27 @@ int main(int argc, char **argv)
 		apply_forces(forces_x, forces_y, local_particles, rank, N, M);
 	}
 
+#ifdef VERBOSE
+	// gather all particles for plotting
+	Particle_p particles = NULL;
+	if(rank == 0){
+		particles = malloc(N*sizeof(Particle));
+	}
+	MPI_Gather(local_particles, M, particles_type, particles, M, particles_type, 0, MPI_COMM_WORLD);
+    if(rank == 0) {
+    	print_particles(particles, N, room_size);
+		free(particles);
+    }
+#endif
+
 	free(forces_x);
 	free(forces_y);
 	free(local_particles);
 	free(tmp_particles);
-#ifdef VERBOSE
-	// gather all particles for plotting
-	Particle_p particles = malloc(N*sizeof(Particle));
-	MPI_Gather(local_particles, M, particles_type, particles, N, particles_type, 0, MPI_COMM_WORLD);
-    if(rank == 0) {
-    	print_particles(particles, N, room_size);
-    }
-    free(particles);
-#endif
 	if(rank == 0){
-        clock_t end = clock();
+        clock_t end = MPI_Wtime();
 	    printf("The process took %f seconds to finish. \n", ((double)(end - start)) / CLOCKS_PER_SEC);
     }
-	
   	MPI_Finalize();
 
 	return EXIT_SUCCESS;
