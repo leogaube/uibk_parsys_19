@@ -14,8 +14,8 @@
 // Do not change this, because then the initialization will be fucked up; or change the initialization to ensure the max position is not above or below MAX_POSITION and - MAX_POSITION
 #define MAX_POSITION 0.5
 
-int get_forces(double *forces_x, double *forces_y, Particle_p particles, int N);
-int apply_forces(double *forces_x, double *forces_y, Particle_p particles, Particle_p local_particles, int N, int M);
+int get_forces(double *forces_x, double *forces_y, Particle_p local_particles, int local_rank, Particle_p tmp_particles, int tmp_rank, int M);
+int apply_forces(double *forces_x, double *forces_y, Particle_p local_particles, int local_rank, int N, int M);
 int init_particles(Particle_p particles, int N, int rank);
 int print_particles(Particle_p particles, int N, int room_size);
 double let_particles_fly(double position);
@@ -26,14 +26,20 @@ int main(int argc, char **argv)
 {
 	clock_t start = clock();
 	int N = 10;
-	int room_size = 10;
+#ifdef VERBOSE
+//	int room_size = 10;
+#endif
 	if (argc == 2){
 	    N = atoi(argv[1]);
-		room_size = (N>8) ? 80 : N*10;
+#ifdef VERBOSE
+//		room_size = (N>8) ? 80 : N*10;
+#endif
 	}
 	if (argc == 3) {
 		N = atoi(argv[1]);
-		room_size = atoi(argv[2]);
+#ifdef VERBOSE
+//		room_size = atoi(argv[2]);
+#endif
 	}
 	int T = 10;
 
@@ -67,63 +73,47 @@ int main(int argc, char **argv)
     // init particles with random values
 	Particle_p local_particles = malloc(M*sizeof(Particle));
 	init_particles(local_particles, M, rank);
-
-    Particle_p particles = malloc(N*sizeof(Particle));
-    
-	// get the center of mass coordinates
-    double com_coords[2];
-    if (rank == 0) {
-	    get_com_coords(com_coords, local_particles, N); 
-    }
 	
+	// this particle buffer will be loaded with the particles from the other ranks
+	Particle_p tmp_particles = malloc(M*sizeof(Particle));
 
-    MPI_Gather(local_particles, M, particles_type, particles, M, particles_type, 0, MPI_COMM_WORLD);
-    MPI_Bcast(particles, N, particles_type, 0, MPI_COMM_WORLD);
-
-	#ifdef VERBOSE
-    //printf("local; rank %d, x: %f, y: %f, m: %f\n", rank, local_particles[0].position.x, local_particles[0].position.y, local_particles[0].mass);
-    if (rank == 0) {
-        printf("Init:\n");
-        print_particles(particles, N, room_size);
-    }
-	#endif
+	// where are the tmp_particles from (in the first step there has not been any communication)
+	int tmp_particles_rank = rank;
 
 	// only upper triangular matrix (without diagonal) is needed
 	double *forces_x = malloc(((int)(N*(N-1)/2))*sizeof(double));
 	double *forces_y = malloc(((int)(N*(N-1)/2))*sizeof(double));
 	for(int t=0; t<T; t++){
-		get_forces(forces_x, forces_y, particles, N);
+		for(int i=0; i<numProcs; i++){
+			// calculate the forces between the local_particles and the tmp_particles
+			get_forces(forces_x, forces_y, local_particles, rank, tmp_particles, tmp_particles_rank, M);
 
-		apply_forces(forces_x, forces_y, particles, local_particles, N, M);
+			// send/recveive the local particles around
+			if(i<numProcs-1){
+				tmp_particles_rank = (rank+i+1)%numProcs;
+				if(rank%2==0){
+					MPI_Ssend(local_particles, M, particles_type, (rank-(i+1))%numProcs, 0, MPI_COMM_WORLD);
+					MPI_Recv(tmp_particles, M, particles_type, tmp_particles_rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+				} else {
+					MPI_Recv(tmp_particles, M, particles_type, tmp_particles_rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+					MPI_Ssend(local_particles, M, particles_type, (rank-(i+1))%numProcs, 0, MPI_COMM_WORLD);
+				}
+			}
 
-
-        MPI_Gather(local_particles, M, particles_type, particles, M, particles_type, 0, MPI_COMM_WORLD);
-    	MPI_Bcast(particles, N, particles_type, 0, MPI_COMM_WORLD);
-
-		// plot results
-		#ifdef VERBOSE
-		if (t % (int) ceil(T/10) == 0 || t == T-1) {
-            if (rank == 0) {
-                printf("time t: %d\n", t);
-			    print_particles(particles, N, room_size);
-            }
+			//TODO possible optimization send/receive forces
 		}
-		#endif
+		apply_forces(forces_x, forces_y, local_particles, rank, N, M);
 	}
-
-	// verification
-    double com_coords_T[2];
-    if (rank == 0) {
-	    get_com_coords(com_coords_T, local_particles, N);
-	    printf("The COM moved by (%f,%f) units\n", com_coords_T[0]-com_coords[0], com_coords_T[1]-com_coords[1]);
-    }
-	
 
 	free(forces_x);
 	free(forces_y);
 	free(local_particles);
+	free(tmp_particles);
     if(rank == 0) {
-        free(particles);
+#ifdef VERBOSE
+//    	TODO gather all particles for plotting
+//		print_particles(particles, N, room_size);
+#endif
         clock_t end = clock();
 	    printf("The process took %f seconds to finish. \n", ((double)(end - start)) / CLOCKS_PER_SEC);
     }
@@ -155,26 +145,49 @@ int get_com_coords(double* com_coords, Particle_p particles, int N){
  * calculates the forces in x and y direction between the N particles
  * only the upper triangular matrix (without diagonal) is calculated (i>j)
  */
-int get_forces(double *forces_x, double *forces_y, Particle_p particles, int N){
+int get_forces(double *forces_x, double *forces_y, Particle_p local_particles, int local_rank, Particle_p tmp_particles, int tmp_rank, int M){
 
-	for(int i=1; i<N; i++){
-		Particle pi = particles[i];
-		double mi = pi.mass;
-		double xi = pi.position.x;
-		double yi = pi.position.y;
+	if(local_rank == tmp_rank) { //first call -> only calculate between own particles
+		for(int i=1; i<M; i++){
+			Particle pi = local_particles[i];
+			double mi = pi.mass;
+			double xi = pi.position.x;
+			double yi = pi.position.y;
 
-		for(int j=0; j<i; j++){
-			Particle pj = particles[j];
-			double mj = pj.mass;
-			double dx = xi - pj.position.x;
-			double dy = yi - pj.position.y;
+			for(int j=0; j<i; j++){
+				Particle pj = local_particles[j];
+				double mj = pj.mass;
+				double dx = xi - pj.position.x;
+				double dy = yi - pj.position.y;
 
-			// calculate the force in the given directions
-			double tmp = - mi*mj/pow(dx*dx+dy*dy,1.5);
-			forces_x[IDX_FORCES(i, j)] = tmp*dx;
-			forces_y[IDX_FORCES(i, j)] = tmp*dy;
+				// calculate the force in the given directions
+				double tmp = - mi*mj/pow(dx*dx+dy*dy,1.5);
+				forces_x[IDX_FORCES_MPI(i, j, local_rank, local_rank, M)] = tmp*dx;
+				forces_y[IDX_FORCES_MPI(i, j, local_rank, local_rank, M)] = tmp*dy;
+			}
+		}
+	} else { // calculate all forces between the local and external particles
+		for(int i=0; i<M; i++){
+			Particle pi = (local_rank>tmp_rank) ? local_particles[i] : tmp_particles[i];
+			double mi = pi.mass;
+			double xi = pi.position.x;
+			double yi = pi.position.y;
+
+			for(int j=0; j<M; j++){
+				Particle pj = (local_rank>tmp_rank) ? tmp_particles[j] : local_particles[j];
+				double mj = pj.mass;
+				double dx = xi - pj.position.x;
+				double dy = yi - pj.position.y;
+
+				// calculate the force in the given directions
+				double tmp = - mi*mj/pow(dx*dx+dy*dy,1.5);
+				int idx = (local_rank>tmp_rank) ? IDX_FORCES_MPI(i, j, local_rank, tmp_rank, M) : IDX_FORCES_MPI(i, j, tmp_rank, local_rank, M);
+				forces_x[idx] = tmp*dx;
+				forces_y[idx] = tmp*dy;
+			}
 		}
 	}
+
 
 	return EXIT_SUCCESS;
 }
@@ -184,18 +197,15 @@ int get_forces(double *forces_x, double *forces_y, Particle_p particles, int N){
  * the total force on each particle is the superposition of all forces
  * calculate this sum and apply it to the position and velocity of the particles
  */
-int apply_forces(double *forces_x, double *forces_y, Particle_p particles, Particle_p local_particles, int N, int M){
+int apply_forces(double *forces_x, double *forces_y, Particle_p local_particles, int local_rank, int N, int M){
 	for(int i=0; i<M; i++){
 		// get total forces
 		double force_x = 0;
 		double force_y = 0;
 
 		for(int j=0; j<N; j++){
-			if(fabs(particles[j].position.x - local_particles[i].position.x) < 0.00001 &&  fabs(particles[j].position.y - local_particles[i].position.y) < 0.00001){ // there is no force from the particle itself
-				continue;
-			}
-			force_x += (particles[j].position.x < local_particles[i].position.x) ? forces_x[IDX_FORCES(i,j)] : -forces_x[IDX_FORCES(j,i)];
-			force_y += (particles[j].position.y < local_particles[i].position.y) ? forces_y[IDX_FORCES(i,j)] : -forces_y[IDX_FORCES(j,i)];
+			force_x += (j < i+M*local_rank) ? forces_x[IDX_FORCES(i+M*local_rank,j)] : -forces_x[IDX_FORCES(j,i+M*local_rank)];
+			force_y += (j < i+M*local_rank) ? forces_y[IDX_FORCES(i+M*local_rank,j)] : -forces_y[IDX_FORCES(j,i+M*local_rank)];
 		}
 		double m = local_particles[i].mass;
 		local_particles[i].velocity.x += force_x/m;

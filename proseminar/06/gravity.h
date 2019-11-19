@@ -3,6 +3,7 @@
 
 // using the upper triangular matrix the index of i has to be larger than j
 #define IDX_FORCES(i, j) (j)+(i)*(i-1)/2
+#define IDX_FORCES_MPI(i, j, rank_i, rank_j, M) (j)+(M)*(rank_j)+((i)+(M)*(rank_i))*((i)+(M)*(rank_i)-1)/2
 
 typedef struct{
 	double x;
