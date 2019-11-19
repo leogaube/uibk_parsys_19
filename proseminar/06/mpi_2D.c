@@ -91,7 +91,7 @@ int main(int argc, char **argv)
 			// send/recveive the local particles around
 			if(i<numProcs-1){
 				tmp_particles_rank = (rank+i+1+numProcs)%numProcs;
-				if(rank==0){
+				if(rank<=i){
 					MPI_Ssend(local_particles, M, particles_type, (rank-(i+1)+numProcs)%numProcs, 0, MPI_COMM_WORLD);
 					MPI_Recv(tmp_particles, M, particles_type, tmp_particles_rank, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 				} else {
