@@ -64,7 +64,7 @@ def outputs2csv():
 			group_name, problem_size = basename.rsplit("_", 1)
 		elif basename.count("_") in [3, 4]:
 			group_name, problem_size, slot_distribute, num_slots = basename.rsplit("_", 3)
-			group_name = "_".join([group_name, slot_distribute, num_slots])
+			group_name = "_".join([group_name, num_slots])
 		else:
 			print("unsupported_basename: %s!\n"%basename)
 			sys.exit(1)

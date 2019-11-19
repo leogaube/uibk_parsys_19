@@ -7,7 +7,7 @@
 #include "heat_stencil.h"
 
 // -- simulation code ---
-int main(int argc, char **argv) {
+int main(int argc, char** argv) {
   double start = MPI_Wtime();
 
   // 'parsing' optional input parameters: room size (&& rank layout)
@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
   int rank_layout = 0;
   if (argc == 2) {
     Nx = Ny = Nz = atoi(argv[1]);
-  } else if (argc == 3){
+  } else if (argc == 3) {
     Nx = Ny = Nz = atoi(argv[1]);
     Px = Py = Pz = atoi(argv[2]);
   } else if (argc == 4) {
@@ -33,7 +33,7 @@ int main(int argc, char **argv) {
     Py = atoi(argv[5]);
     Pz = atoi(argv[6]);
     rank_layout = 1;
-  } else{
+  } else {
     printf("wrong number of arguments!");
     return EXIT_FAILURE;
   }
@@ -49,25 +49,25 @@ int main(int argc, char **argv) {
   MPI_Init(&argc, &argv);
   MPI_Comm_size(MPI_COMM_WORLD, &numProcs);
 
-  if (Nx*Ny*Nz < numProcs){
+  if (Nx * Ny * Nz < numProcs) {
     printf("Room is too small for %d ranks", numProcs);
     MPI_Finalize();
     return EXIT_FAILURE;
   }
 
-  if (rank_layout){
-    if (numProcs != Px*Py*Pz){
+  if (rank_layout) {
+    if (numProcs != Px * Py * Pz) {
       printf("#ranks does not match with provided Px, Py and Pz!");
       MPI_Finalize();
       return EXIT_FAILURE;
     }
   } else {
-    // find the optimal rank layout 
+    // find the optimal rank layout
     // e.g. 8 slots --> Px=2, Py=2 Pz=2
     // e.g. 42 slots --> Px=3, Py=2 Pz=7
     // e.g. 17 slots --> Px=1, Py=1, Pz=17
     int c = floorf(cbrt(numProcs));
-    while (numProcs%c)
+    while (numProcs % c)
       c--;
     Px = c;
 
@@ -76,13 +76,13 @@ int main(int argc, char **argv) {
       s--;
     Py = s;
     Pz = numProcs / (Px * Py);
-    
+
     // also allow non-cubic 1D, 2D or 3D room sizes
-    if (Nz % Pz){
+    if (Nz % Pz) {
       Px *= Pz;
       Pz = 1;
     }
-    if (Ny % Py){
+    if (Ny % Py) {
       Px *= Py;
       Py = 1;
     }
@@ -90,13 +90,13 @@ int main(int argc, char **argv) {
 
   // same program works for poles and cubes --> identify by name of executable
   if (strstr(argv[0], "poles") != NULL) {
-    if (Px != 1 && Py != 1 && Pz != 1){
+    if (Px != 1 && Py != 1 && Pz != 1) {
       Px *= Py;
       Py = 1;
     }
   }
 
-  if (Nx % Px || Ny % Py || Nz % Pz){
+  if (Nx % Px || Ny % Py || Nz % Pz) {
     printf("Room size (%dx%dx%d) cannot be split up evenly among ranks (%dx%dx%d)\n", Nx, Ny, Nz, Px, Py, Pz);
     MPI_Finalize();
     return EXIT_FAILURE;
@@ -154,17 +154,17 @@ int main(int argc, char **argv) {
   // create subroom_datatypes for MPI_Gatherv
   //--> start of subroom determined by displacement_array, pretend size of subroom datatype == 1*sizeof(value_t)
   int room_sizes[3] = {Nx, Ny, Nz};
-  int subroom_sizes[3] = {Mz, My, Mx}; // for some reason Mz and Mx have to be swaped!!
+  int subroom_sizes[3] = {Mx, My, Mz};  // for some reason Mz and Mx have to be swaped or MPI_ORDER_FORTRAN?!!
   int start_array[3] = {0, 0, 0};
   MPI_Datatype cubic_subroom, resized_subroom;
-  MPI_Type_create_subarray(3, room_sizes, subroom_sizes, start_array, MPI_ORDER_C, MPI_FLOAT, &cubic_subroom);
+  MPI_Type_create_subarray(3, room_sizes, subroom_sizes, start_array, MPI_ORDER_FORTRAN, MPI_FLOAT, &cubic_subroom);
   // 'pretend' that subroom is only 1 float in size --> displacements ^= local2global conversion
   MPI_Type_create_resized(cubic_subroom, 0, 1 * sizeof(value_t), &resized_subroom);
   MPI_Type_commit(&resized_subroom);
 
   int* recv_count_array = malloc(sizeof(int) * numProcs);
   int* displacement_array = malloc(sizeof(int) * numProcs);
-  for (int r=0; r<numProcs; r++){
+  for (int r = 0; r < numProcs; r++) {
     recv_count_array[r] = 1;
     // get the global index of every rank at its local position 0
     displacement_array[r] = local2global(r, 0, Mx, My, Mz, Px, Py);
@@ -177,7 +177,7 @@ int main(int argc, char **argv) {
 
   // set up initial conditions in A
   for (int i = 0; i < Mx * My * Mz; i++) {
-    A[i] = 273; // debug with: + ((double)rank/(numProcs+1)) * 60;  // temperature is 0° C everywhere (273 K)
+    A[i] = 273;  // debug with: + ((double)rank/(numProcs+1)) * 60;  // temperature is 0° C everywhere (273 K)
   }
 
   // and there is a heat source in one corner
@@ -225,7 +225,6 @@ int main(int argc, char **argv) {
   MPI_Request topRrequest, topSrequest, bottomRrequest, bottomSrequest;
   MPI_Request frontRrequest, frontSrequest, backRrequest, backSrequest;
   MPI_Request leftRrequest, leftSrequest, rightRrequest, rightSrequest;
-  
 
   // exchange ghost cells for the very first iteration
   MPI_Isend(A, 1, x_slice, left_rank, 0, cubes, &leftSrequest);
@@ -251,7 +250,8 @@ int main(int argc, char **argv) {
       if (z == 0) {
         MPI_Wait(&topRrequest, MPI_STATUS_IGNORE);
         MPI_Wait(&topSrequest, MPI_STATUS_IGNORE);
-      } if (z == Mz - 1) {
+      }
+      if (z == Mz - 1) {
         MPI_Wait(&bottomRrequest, MPI_STATUS_IGNORE);
         MPI_Wait(&bottomSrequest, MPI_STATUS_IGNORE);
       }
@@ -259,7 +259,8 @@ int main(int argc, char **argv) {
         if (y == 0 && z == 0) {
           MPI_Wait(&frontRrequest, MPI_STATUS_IGNORE);
           MPI_Wait(&frontSrequest, MPI_STATUS_IGNORE);
-        } if (y == My - 1 && z == 0) {
+        }
+        if (y == My - 1 && z == 0) {
           MPI_Wait(&backRrequest, MPI_STATUS_IGNORE);
           MPI_Wait(&backSrequest, MPI_STATUS_IGNORE);
         }
@@ -267,7 +268,8 @@ int main(int argc, char **argv) {
           if (x == 0 && y == 0 && z == 0) {
             MPI_Wait(&leftRrequest, MPI_STATUS_IGNORE);
             MPI_Wait(&leftSrequest, MPI_STATUS_IGNORE);
-          } if (x == Mx - 1 && y == 0 && z == 0) {
+          }
+          if (x == Mx - 1 && y == 0 && z == 0) {
             MPI_Wait(&rightRrequest, MPI_STATUS_IGNORE);
             MPI_Wait(&rightSrequest, MPI_STATUS_IGNORE);
           }
@@ -297,10 +299,11 @@ int main(int argc, char **argv) {
           // send left/right layer to corresponding ranks immediately after the entire corresponding x_layer has been computed
           // also start receiving from neighbouring ranks - don't block, just continue calculations
           // don't send/receive in last timestep or you will get errors during gather!
-          if (x == 0 && y == My -1 && z == Mz - 1 && t != T - 1) {
+          if (x == 0 && y == My - 1 && z == Mz - 1 && t != T - 1) {
             MPI_Isend(A, 1, x_slice, left_rank, 0, cubes, &leftSrequest);
             MPI_Irecv(left_layer, My * Mz, MPI_FLOAT, left_rank, 0, cubes, &leftRrequest);
-          } if (x == Mx - 1 && y == My - 1 && z == Mz - 1 && t != T - 1) {
+          }
+          if (x == Mx - 1 && y == My - 1 && z == Mz - 1 && t != T - 1) {
             MPI_Isend(&(A[IDX_3D(Mx - 1, 0, 0, Mx, My)]), 1, x_slice, right_rank, 0, cubes, &rightSrequest);
             MPI_Irecv(right_layer, My * Mz, MPI_FLOAT, right_rank, 0, cubes, &rightRrequest);
           }
@@ -308,7 +311,8 @@ int main(int argc, char **argv) {
         if (y == 0 && z == Mz - 1 && t != T - 1) {
           MPI_Isend(A, 1, y_slice, front_rank, 0, cubes, &frontSrequest);
           MPI_Irecv(front_layer, Mx * Mz, MPI_FLOAT, front_rank, 0, cubes, &frontRrequest);
-        } if (y == My - 1 && z == Mz - 1 && t != T - 1) {
+        }
+        if (y == My - 1 && z == Mz - 1 && t != T - 1) {
           MPI_Isend(&(A[IDX_3D(0, My - 1, 0, Mx, My)]), 1, y_slice, back_rank, 0, cubes, &backSrequest);
           MPI_Irecv(back_layer, Mx * Mz, MPI_FLOAT, back_rank, 0, cubes, &backRrequest);
         }
@@ -316,7 +320,8 @@ int main(int argc, char **argv) {
       if (z == 0 && t != T - 1) {
         MPI_Isend(A, 1, z_slice, top_rank, 0, cubes, &topSrequest);
         MPI_Irecv(top_layer, Mx * My, MPI_FLOAT, top_rank, 0, cubes, &topRrequest);
-      } if (z == Mz - 1 && t != T - 1) {
+      }
+      if (z == Mz - 1 && t != T - 1) {
         MPI_Isend(&(A[IDX_3D(0, 0, Mz - 1, Mx, My)]), 1, z_slice, bottom_rank, 0, cubes, &bottomSrequest);
         MPI_Irecv(bottom_layer, Mx * My, MPI_FLOAT, bottom_rank, 0, cubes, &bottomRrequest);
       }

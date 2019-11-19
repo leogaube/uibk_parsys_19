@@ -61,7 +61,7 @@ def plot_data(dirs, filename, group_by="domain"):
 		specs=[[{"colspan": 2}, None], [{}, {}]],
 		subplot_titles=("runtime", "speedup", "efficiency"),
 		horizontal_spacing=0.1,
-		vertical_spacing=0.15)
+		vertical_spacing=0.135)
 
 	problem_size_column = "room_size"
 	seq_column = "seq_3D"
@@ -71,10 +71,10 @@ def plot_data(dirs, filename, group_by="domain"):
 		comparison_num_ranks = 1
 		speedup_type = "absolute"
 
-		seq_color = "rgb(0,0,205)"
+		seq_color = "rgb(255,0,149)"
 		seq_runtime_trace = go.Scatter(
                     x=df[problem_size_column], y=df[seq_column],
-					legendgroup=seq_column, name=seq_column, marker=dict(color=seq_color))
+               					legendgroup=seq_column, name=seq_column, marker=dict(color=seq_color), line=dict(width=4))
 		fig.add_trace(seq_runtime_trace, row=1, col=1)
 	else:
 		comparison_column, comparison_num_ranks = get_least_ranks(df)
@@ -87,19 +87,27 @@ def plot_data(dirs, filename, group_by="domain"):
 	next_color_index = 0
 
 	COLORS = cl.scales["9"]["seq"]
-	COLOR_NAMES = ["Greens", "Purples", "Reds", "Greys", "Oranges"]
+	COLOR_NAMES = ["Blues", "Reds", "Greens", "Oranges", "Greys", "Purples"]
 	colors = {}
 
 	mpi_columns = [column for column in df.columns if column not in [problem_size_column, seq_column]]
 	for i, column in enumerate(sorted(mpi_columns, key=find_int_in_string)):
 		num_ranks = find_int_in_string(column)
-		domain_group = column.split("_fillup_")[0]
-		legend_group = num_ranks if group_by == "domain" else domain_group
+		domain_group = column.rsplit("_", 1)[0]
+		if group_by == "domain":
+			legend_group = domain_group
+			show_by_default = (domain_group == "cubes")
+		elif group_by == "#ranks":
+			legend_group = num_ranks
+			show_by_default = (num_ranks == max_ranks) 
+		elif group_by is None:
+			legend_group = column
+			show_by_default = False
+
 		if domain_group not in colors:
 			colors[domain_group] = COLORS[COLOR_NAMES[next_color_index % len(COLOR_NAMES)]]
 			next_color_index += 1
 		color = colors[domain_group][int(2+log2(num_ranks))]
-		show_by_default = (num_ranks == max_ranks) if group_by == "domain" else (domain_group == "cubes")
 
 		runtimes = df[column]
 		speedups = (df[comparison_column]*comparison_num_ranks) / runtimes
@@ -130,7 +138,7 @@ def plot_data(dirs, filename, group_by="domain"):
 	fig.update_yaxes(title="%s speedup"%speedup_type, rangemode="tozero", row=2, col=1)
 	fig.update_yaxes(title="%s efficiency"%speedup_type, range=[0., 1.], row = 2, col = 2)
 
-	ply.plot(fig, filename=os.path.join(PLOTS_PATH, filename.split(".")[0]+"_"+group_by+".html"))
+	ply.plot(fig, filename=os.path.join(PLOTS_PATH, "%s_grouped_%s.html" %(filename.split(".")[0], group_by if group_by is not None else "single")))
 
 
 if __name__ == "__main__":
@@ -149,3 +157,4 @@ if __name__ == "__main__":
 			print("plotting %s"%filename)  
 			plot_data(path, filename, group_by="domain")
 			plot_data(path, filename, group_by="#ranks")
+			plot_data(path, filename, group_by=None)
