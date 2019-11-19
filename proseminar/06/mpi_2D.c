@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
     room_size = atoi(argv[2]);
 #endif
   }
-  int T = 10;
+  int T = 100;
 
   // MPI setup
   int rank, numProcs;

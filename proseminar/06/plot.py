@@ -24,7 +24,7 @@ def find_int_in_string(string):
 	ints = find_ints_in_string(string)
 	if ints is None:
 		return None
-	return ints[0]
+	return ints[-1]
 
 def get_least_ranks(df):
 	min_col = None
@@ -56,14 +56,12 @@ def get_most_ranks(df):
 def plot_data(dirs, filename, group_by="domain"):
 	df = pd.read_csv(os.path.join(DATA_PATH, filename))
 
-	fig = go.Figure()
-	
-	#make_subplots(
-	#	rows=2, cols=2, 
-	#	specs=[[{"colspan": 2}, None], [{}, {}]],
-	#	subplot_titles=("runtime", "speedup", "efficiency"),
-	#	horizontal_spacing=0.1,
-	#	vertical_spacing=0.135)
+	fig = make_subplots(
+		rows=2, cols=2, 
+		specs=[[{"colspan": 2}, None], [{}, {}]],
+		subplot_titles=("runtime", "speedup", "efficiency"),
+		horizontal_spacing=0.1,
+		vertical_spacing=0.135)
 
 	problem_size_column = "room_size"
 	seq_column = "seq_2D"
@@ -76,8 +74,8 @@ def plot_data(dirs, filename, group_by="domain"):
 		seq_color = "rgb(255,0,149)"
 		seq_runtime_trace = go.Scatter(
                     x=df[problem_size_column], y=df[seq_column],
-               					legendgroup=seq_column, name=seq_column, marker=dict(color=seq_color), line=dict(width=2))
-		fig.add_trace(seq_runtime_trace)
+               					legendgroup=seq_column, name=seq_column, marker=dict(color=seq_color), line=dict(width=4))
+		fig.add_trace(seq_runtime_trace, row=1, col=1)
 	else:
 		comparison_column, comparison_num_ranks = get_least_ranks(df)
 		speedup_type = "relative"
@@ -88,13 +86,11 @@ def plot_data(dirs, filename, group_by="domain"):
 	_, max_ranks = get_most_ranks(df)
 	next_color_index = 0
 
-	COLORS = cl.scales["9"]["seq"]
-	COLOR_NAMES = ["Blues", "Reds", "Greens", "Oranges", "Greys", "Purples"]
-	colors = {}
+	COLORS = cl.scales["4"]["seq"]
+	COLOR_NAMES = ["Greys", "Greens", "Blues", "Reds", "Purples"]
 
 	mpi_columns = [column for column in df.columns if column not in [problem_size_column, seq_column]]
 	for i, column in enumerate(sorted(mpi_columns, key=find_int_in_string)):
-		break
 		num_ranks = find_int_in_string(column)
 		domain_group = column.rsplit("_", 1)[0]
 		if group_by == "domain":
@@ -105,12 +101,9 @@ def plot_data(dirs, filename, group_by="domain"):
 			show_by_default = (num_ranks == max_ranks) 
 		elif group_by is None:
 			legend_group = column
-			show_by_default = False
+			show_by_default = True
 
-		if domain_group not in colors:
-			colors[domain_group] = COLORS[COLOR_NAMES[next_color_index % len(COLOR_NAMES)]]
-			next_color_index += 1
-		color = colors[domain_group][int(2+log2(num_ranks))]
+		color = COLORS[COLOR_NAMES[i]][-1]
 
 		runtimes = df[column]
 		speedups = (df[comparison_column]*comparison_num_ranks) / runtimes
@@ -136,11 +129,12 @@ def plot_data(dirs, filename, group_by="domain"):
 	fig.update_layout(title_text=filename.split(".")[0], xaxis_type="log")
 
 	fig.update_xaxes(title="#particles", type="log", tickvals=df[problem_size_column])
-	fig.update_yaxes(title="runtime in s", rangemode="tozero", type="log")
-	#fig.update_yaxes(title="%s speedup"%speedup_type, rangemode="tozero", row=2, col=1)
-	#fig.update_yaxes(title="%s efficiency"%speedup_type, range=[0., 1.], row = 2, col = 2)
 
-	ply.plot(fig, filename=os.path.join(PLOTS_PATH, filename.split(".")[0]+".html"))
+	fig.update_yaxes(title="runtime in s", rangemode="tozero", type="log", row=1, col=1)
+	fig.update_yaxes(title="%s speedup"%speedup_type, rangemode="tozero", row=2, col=1)
+	fig.update_yaxes(title="%s efficiency"%speedup_type, range=[0., 1.], row = 2, col = 2)
+
+	ply.plot(fig, filename=os.path.join(PLOTS_PATH, "%s_grouped_%s.html" %(filename.split(".")[0], group_by if group_by is not None else "single")))
 
 
 if __name__ == "__main__":
@@ -157,6 +151,4 @@ if __name__ == "__main__":
 				print("incompatible file: %s"%filename)
 				continue
 			print("plotting %s"%filename)  
-			#plot_data(path, filename, group_by="domain")
-			#plot_data(path, filename, group_by="#ranks")
 			plot_data(path, filename, group_by=None)

@@ -249,7 +249,7 @@ clean:
 
 .PHONEY: clean_executables
 clean_executables:
-	@rm $(DEP_OBJECTS) $(SEQ_EXECUTABLES) $(MPI_EXECUTABLES) 2>/dev/null || true
+	@rm poles$(EXECUTABLE_EXT) $(DEP_OBJECTS) $(SEQ_EXECUTABLES) $(MPI_EXECUTABLES) 2>/dev/null || true
 	@echo "your directory has been cleaned of executables and dependency objects!"
 	@echo
 

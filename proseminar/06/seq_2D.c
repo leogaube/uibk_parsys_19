@@ -34,7 +34,7 @@ int main(int argc, char **argv)
 		N = atoi(argv[1]);
 		room_size = atoi(argv[2]);
 	}
-	int T = 1000;
+	int T = 100;
 
 	// init particles with random values
 	Particle_p particles = malloc(N*sizeof(Particle));
