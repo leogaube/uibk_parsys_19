@@ -22,7 +22,7 @@ int get_com_coords(double *com_coords, Particle_p particles, int N);
 
 int main(int argc, char **argv) {
     clock_t start = clock();
-    int N = 2048;
+    int N = 4096;
     int room_size = 100;
     if (argc == 2) {
         N = atoi(argv[1]);

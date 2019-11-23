@@ -1,6 +1,6 @@
 /*
- * seq_2D.c
- * N-particle simulation with gravity in 2D (sequential)
+ * omp_2D.c
+ * N-particle simulation with gravity in 2D (with OpenMP)
  */
 #include <math.h>
 #include <omp.h>
@@ -24,8 +24,8 @@ int get_com_coords(double *com_coords, Particle_p particles, int N);
 int main(int argc, char **argv) {
     omp_set_num_threads(4);
 
-    clock_t start = clock();
-    int N = 2048;
+    double start = omp_get_wtime();
+    int N = 4096;
     int room_size = 100;
     if (argc == 2) {
         N = atoi(argv[1]);
@@ -53,13 +53,13 @@ int main(int argc, char **argv) {
         get_forces(forces_x, forces_y, particles, N);
         apply_forces(forces_x, forces_y, particles, N);
     }
-    clock_t end = clock();
+    double end = omp_get_wtime();
 
 #ifdef VERBOSE
     print_particles(particles, N, room_size);
 #endif
 
-    printf("The process took %f seconds to finish. \n", ((double)(end - start)) / CLOCKS_PER_SEC);
+    printf("The process took %f seconds to finish. \n", (end - start));
 
     // verification
     double com_coords_T[2];
@@ -98,6 +98,7 @@ int get_com_coords(double *com_coords, Particle_p particles, int N) {
 int get_forces(double *forces_x, double *forces_y, Particle_p particles, int N) {
 #pragma omp parallel for
     for (int i = 1; i < N; i++) {
+        //printf("%d\n", omp_get_num_threads());
         Particle pi = particles[i];
         double mi = pi.mass;
         double xi = pi.position.x;
