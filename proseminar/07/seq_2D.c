@@ -2,11 +2,11 @@
  * seq_2D.c
  * N-particle simulation with gravity in 2D (sequential)
  */
+#include <math.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <stdbool.h>
-#include <math.h>
 
 #include "gravity.h"
 
@@ -18,168 +18,162 @@ int apply_forces(double *forces_x, double *forces_y, Particle_p particles, int N
 int init_particles(Particle_p particles, int N);
 int print_particles(Particle_p particles, int N, int room_size);
 double let_particles_fly(double position);
-int get_com_coords(double* com_coords, Particle_p particles, int N);
+int get_com_coords(double *com_coords, Particle_p particles, int N);
 
+int main(int argc, char **argv) {
+    clock_t start = clock();
+    int N = 2048;
+    int room_size = 100;
+    if (argc == 2) {
+        N = atoi(argv[1]);
+        room_size = (N > 8) ? 80 : N * 10;
+    }
+    if (argc == 3) {
+        N = atoi(argv[1]);
+        room_size = atoi(argv[2]);
+    }
+    int T = 100;
 
-int main(int argc, char **argv)
-{
-	clock_t start = clock();
-	int N = 1000;
-	int room_size = 100;
-	if (argc == 2){
-	    N = atoi(argv[1]);
-		room_size = (N>8) ? 80 : N*10;
-	}
-	if (argc == 3) {
-		N = atoi(argv[1]);
-		room_size = atoi(argv[2]);
-	}
-	int T = 100;
+    // init particles with random values
+    Particle_p particles = malloc(N * sizeof(Particle));
+    init_particles(particles, N);
 
-	// init particles with random values
-	Particle_p particles = malloc(N*sizeof(Particle));
-	init_particles(particles, N);
+    // get the center of mass coordinates
+    double com_coords[2];
+    get_com_coords(com_coords, particles, N);
 
-	// get the center of mass coordinates
-	double com_coords[2];
-	get_com_coords(com_coords, particles, N);
+    // only upper triangular matrix (without diagonal) is needed
+    double *forces_x = malloc(((int)(N * (N - 1) / 2)) * sizeof(double));
+    double *forces_y = malloc(((int)(N * (N - 1) / 2)) * sizeof(double));
+    for (int t = 0; t < T; t++) {
+        get_forces(forces_x, forces_y, particles, N);
+        apply_forces(forces_x, forces_y, particles, N);
+    }
+    clock_t end = clock();
 
-	#ifdef VERBOSE
-	printf("Init:\n");
-	print_particles(particles, N, room_size);
-	#endif
+#ifdef VERBOSE
+    print_particles(particles, N, room_size);
+#endif
 
-	// only upper triangular matrix (without diagonal) is needed
-	double *forces_x = malloc(((int)(N*(N-1)/2))*sizeof(double));
-	double *forces_y = malloc(((int)(N*(N-1)/2))*sizeof(double));
-	for(int t=0; t<T; t++){
-		get_forces(forces_x, forces_y, particles, N);
-		apply_forces(forces_x, forces_y, particles, N);
-	}
-	
-	print_particles(particles, N, room_size);
+    printf("The process took %f seconds to finish. \n", ((double)(end - start)) / CLOCKS_PER_SEC);
 
-	// verification
-	double com_coords_T[2];
-	get_com_coords(com_coords_T, particles, N);
-	printf("The COM moved by (%f,%f) units\n", com_coords_T[0]-com_coords[0], com_coords_T[1]-com_coords[1]);
+    // verification
+    double com_coords_T[2];
+    get_com_coords(com_coords_T, particles, N);
+    printf("The COM moved by (%f,%f) units\n", com_coords_T[0] - com_coords[0], com_coords_T[1] - com_coords[1]);
 
-	free(forces_x);
-	free(forces_y);
-	free(particles);
-	clock_t end = clock();
-	printf("The process took %f seconds to finish. \n", ((double)(end - start)) / CLOCKS_PER_SEC);
+    free(forces_x);
+    free(forces_y);
+    free(particles);
 
-	return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
 
 /**
  * calculates the center of mass for verification purposes
  */
-int get_com_coords(double* com_coords, Particle_p particles, int N){
-	double M = 0;
+int get_com_coords(double *com_coords, Particle_p particles, int N) {
+    double M = 0;
 
-	for(int i=0; i<N; i++){
-		Particle pi = particles[i];
-		com_coords[0] += pi.mass*pi.position.x;
-		com_coords[1] += pi.mass*pi.position.y;
-		M += pi.mass;
-	}
-	com_coords[0] /= M;
-	com_coords[1] /= M;
+    for (int i = 0; i < N; i++) {
+        Particle pi = particles[i];
+        com_coords[0] += pi.mass * pi.position.x;
+        com_coords[1] += pi.mass * pi.position.y;
+        M += pi.mass;
+    }
+    com_coords[0] /= M;
+    com_coords[1] /= M;
 
-	return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
 
 /**
  * calculates the forces in x and y direction between the N particles
  * only the upper triangular matrix (without diagonal) is calculated (i>j)
  */
-int get_forces(double *forces_x, double *forces_y, Particle_p particles, int N){
+int get_forces(double *forces_x, double *forces_y, Particle_p particles, int N) {
+    for (int i = 1; i < N; i++) {
+        Particle pi = particles[i];
+        double mi = pi.mass;
+        double xi = pi.position.x;
+        double yi = pi.position.y;
 
-	for(int i=1; i<N; i++){
-		Particle pi = particles[i];
-		double mi = pi.mass;
-		double xi = pi.position.x;
-		double yi = pi.position.y;
+        for (int j = 0; j < i; j++) {
+            Particle pj = particles[j];
+            double mj = pj.mass;
+            double dx = xi - pj.position.x;
+            double dy = yi - pj.position.y;
 
-		for(int j=0; j<i; j++){
-			Particle pj = particles[j];
-			double mj = pj.mass;
-			double dx = xi - pj.position.x;
-			double dy = yi - pj.position.y;
+            // calculate the force in the given directions
+            double tmp = -mi * mj / pow(dx * dx + dy * dy, 1.5);
+            forces_x[IDX_FORCES(i, j)] = tmp * dx;
+            forces_y[IDX_FORCES(i, j)] = tmp * dy;
+        }
+    }
 
-			// calculate the force in the given directions
-			double tmp = - mi*mj/pow(dx*dx+dy*dy,1.5);
-			forces_x[IDX_FORCES(i, j)] = tmp*dx;
-			forces_y[IDX_FORCES(i, j)] = tmp*dy;
-		}
-	}
-
-	return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
-
 
 /**
  * the total force on each particle is the superposition of all forces
  * calculate this sum and apply it to the position and velocity of the particles
  */
-int apply_forces(double *forces_x, double *forces_y, Particle_p particles, int N){
-	for(int i=0; i<N; i++){
-		// get total forces
-		double force_x = 0;
-		double force_y = 0;
-		for(int j=0; j<N; j++){
-			if(i==j){ // there is no force from the particle itself
-				continue;
-			}
-			force_x += (j<i) ? forces_x[IDX_FORCES(i,j)] : -forces_x[IDX_FORCES(j,i)];
-			force_y += (j<i) ? forces_y[IDX_FORCES(i,j)] : -forces_y[IDX_FORCES(j,i)];
-		}
-		double m = particles[i].mass;
-		particles[i].velocity.x += force_x/m;
-		particles[i].velocity.y += force_y/m;
-		particles[i].position.x += particles[i].velocity.x;
-		particles[i].position.y += particles[i].velocity.y;
-		if (particles[i].position.x > MAX_POSITION || particles[i].position.x < -MAX_POSITION) {
-			particles[i].position.x = let_particles_fly(particles[i].position.x);
-		}
-		if (particles[i].position.y > MAX_POSITION || particles[i].position.y < -MAX_POSITION) {
-			particles[i].position.y = let_particles_fly(particles[i].position.y);
-		}
-	}
+int apply_forces(double *forces_x, double *forces_y, Particle_p particles, int N) {
+    for (int i = 0; i < N; i++) {
+        // get total forces
+        double force_x = 0;
+        double force_y = 0;
+        for (int j = 0; j < N; j++) {
+            if (i == j) {  // there is no force from the particle itself
+                continue;
+            }
+            force_x += (j < i) ? forces_x[IDX_FORCES(i, j)] : -forces_x[IDX_FORCES(j, i)];
+            force_y += (j < i) ? forces_y[IDX_FORCES(i, j)] : -forces_y[IDX_FORCES(j, i)];
+        }
+        double m = particles[i].mass;
+        particles[i].velocity.x += force_x / m;
+        particles[i].velocity.y += force_y / m;
+        particles[i].position.x += particles[i].velocity.x;
+        particles[i].position.y += particles[i].velocity.y;
+        if (particles[i].position.x > MAX_POSITION || particles[i].position.x < -MAX_POSITION) {
+            particles[i].position.x = let_particles_fly(particles[i].position.x);
+        }
+        if (particles[i].position.y > MAX_POSITION || particles[i].position.y < -MAX_POSITION) {
+            particles[i].position.y = let_particles_fly(particles[i].position.y);
+        }
+    }
 
-	return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
 
 /**
  * initializes the particles with random mass and random position
  */
 int init_particles(Particle_p particles, int N) {
-	srand(1234);
+    srand(1234);
 
-	for (int i = 0; i < N; i++) {
-		particles[i].mass = (rand() / (double) RAND_MAX * 0.9 + 0.1) * 1e-2/N;
-		particles[i].position.x = (rand() / (double) ((unsigned)RAND_MAX + 1) - MAX_POSITION);
-		particles[i].position.y = (rand() / (double) ((unsigned)RAND_MAX + 1) - MAX_POSITION);
-		particles[i].velocity.x = 0;
-		particles[i].velocity.y = 0;
-	}
+    for (int i = 0; i < N; i++) {
+        particles[i].mass = (rand() / (double)RAND_MAX * 0.9 + 0.1) * 1e-2 / N;
+        particles[i].position.x = (rand() / (double)((unsigned)RAND_MAX + 1) - MAX_POSITION);
+        particles[i].position.y = (rand() / (double)((unsigned)RAND_MAX + 1) - MAX_POSITION);
+        particles[i].velocity.x = 0;
+        particles[i].velocity.y = 0;
+    }
 
-	return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
 
 /**
  * function for checking of a particle is inside a specified index in relation to the room size
  */
 double get_mass_in_index(Particle_p particles, int N, int i, int j, int room_size) {
-	double m = 0.0;
-	for (int k = 0; k < N; k++) {
-		if ((int) ((particles[k].position.x + MAX_POSITION) * room_size) == j && (int) ((particles[k].position.y + MAX_POSITION) * room_size) == i) {
-			m += particles[k].mass;
-		}
-	}
-	return m;
+    double m = 0.0;
+    for (int k = 0; k < N; k++) {
+        if ((int)((particles[k].position.x + MAX_POSITION) * room_size) == j && (int)((particles[k].position.y + MAX_POSITION) * room_size) == i) {
+            m += particles[k].mass;
+        }
+    }
+    return m;
 }
 
 /**
@@ -187,41 +181,41 @@ double get_mass_in_index(Particle_p particles, int N, int i, int j, int room_siz
  * the movement of the particles is in relation to the room size.
  */
 int print_particles(Particle_p particles, int N, int room_size) {
-	double room_printed[room_size][room_size];
-	const char *colors = " .-:=+*^X#%@";
-	const int numColors = 12;
+    double room_printed[room_size][room_size];
+    const char *colors = " .-:=+*^X#%@";
+    const int numColors = 12;
 
-	for (int i = 0; i < room_size; i++) {
-		for (int j = 0; j < room_size; j++) {
-			room_printed[i][j] = get_mass_in_index(particles, N, i, j, room_size);
-		}
-	}
+    for (int i = 0; i < room_size; i++) {
+        for (int j = 0; j < room_size; j++) {
+            room_printed[i][j] = get_mass_in_index(particles, N, i, j, room_size);
+        }
+    }
 
-	for (int i = 0; i < room_size; i++) {
-		printf("X");
-		for (int j = 0; j < room_size; j++) {
-			// c gives how many mean particle masses are within a cell rounded up
-			int c = (int) ceil((room_printed[i][j] / 0.005 * N ));
-			c = (c >= numColors) ? numColors - 1 : ((c < 0) ? 0 : c);
-			printf("%c", colors[c]);
-		}
-		printf("X\n");
-	}
+    for (int i = 0; i < room_size; i++) {
+        printf("X");
+        for (int j = 0; j < room_size; j++) {
+            // c gives how many mean particle masses are within a cell rounded up
+            int c = (int)ceil((room_printed[i][j] / 0.005 * N));
+            c = (c >= numColors) ? numColors - 1 : ((c < 0) ? 0 : c);
+            printf("%c", colors[c]);
+        }
+        printf("X\n");
+    }
 
-	return EXIT_SUCCESS;
+    return EXIT_SUCCESS;
 }
 
 double let_particles_fly(double position) {
-	if (position < -MAX_POSITION) {
-		while (position < -MAX_POSITION) {
-			position += MAX_POSITION*2;
-		}
-		return position;
-	} else if (position > MAX_POSITION) {
-		while (position > MAX_POSITION) {
-			position -= MAX_POSITION*2;
-		}
-		return position;
-	}
-	return position;
+    if (position < -MAX_POSITION) {
+        while (position < -MAX_POSITION) {
+            position += MAX_POSITION * 2;
+        }
+        return position;
+    } else if (position > MAX_POSITION) {
+        while (position > MAX_POSITION) {
+            position -= MAX_POSITION * 2;
+        }
+        return position;
+    }
+    return position;
 }
