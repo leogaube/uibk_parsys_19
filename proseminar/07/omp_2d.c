@@ -22,10 +22,10 @@ double let_particles_fly(double position);
 int get_com_coords(double *com_coords, Particle_p particles, int N);
 
 int main(int argc, char **argv) {
-    omp_set_num_threads(4);
+    omp_set_num_threads(6);
 
     double start = omp_get_wtime();
-    int N = 4096;
+    int N = 3000;
     int room_size = 100;
     if (argc == 2) {
         N = atoi(argv[1]);
@@ -96,7 +96,7 @@ int get_com_coords(double *com_coords, Particle_p particles, int N) {
  * only the upper triangular matrix (without diagonal) is calculated (i>j)
  */
 int get_forces(double *forces_x, double *forces_y, Particle_p particles, int N) {
-#pragma omp parallel for
+#pragma omp parallel for schedule(static, 1)
     for (int i = 1; i < N; i++) {
         //printf("%d\n", omp_get_num_threads());
         Particle pi = particles[i];
