@@ -22,7 +22,7 @@ double let_particles_fly(double position);
 int get_com_coords(double *com_coords, Particle_p particles, int N);
 
 int main(int argc, char **argv) {
-    omp_set_num_threads(6);
+    omp_set_num_threads(8);
 
     double start = omp_get_wtime();
     int N = 3000;
@@ -96,8 +96,8 @@ int get_com_coords(double *com_coords, Particle_p particles, int N) {
  * only the upper triangular matrix (without diagonal) is calculated (i>j)
  */
 int get_forces(double *forces_x, double *forces_y, Particle_p particles, int N) {
-#pragma omp parallel for schedule(static, 1)
-    for (int i = 1; i < N; i++) {
+#pragma omp parallel for schedule(dynamic, 1)
+    for (int i = N; i > 0; i--) {
         //printf("%d\n", omp_get_num_threads());
         Particle pi = particles[i];
         double mi = pi.mass;
@@ -125,6 +125,7 @@ int get_forces(double *forces_x, double *forces_y, Particle_p particles, int N) 
  * calculate this sum and apply it to the position and velocity of the particles
  */
 int apply_forces(double *forces_x, double *forces_y, Particle_p particles, int N) {
+#pragma omp parallel for
     for (int i = 0; i < N; i++) {
         // get total forces
         double force_x = 0;
