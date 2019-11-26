@@ -22,19 +22,17 @@ double let_particles_fly(double position);
 int get_com_coords(double *com_coords, Particle_p particles, int N);
 
 int main(int argc, char **argv) {
-    omp_set_num_threads(8);
-
     double start = omp_get_wtime();
     int N = 3000;
-    int room_size = 100;
     if (argc == 2) {
         N = atoi(argv[1]);
-        room_size = (N > 8) ? 80 : N * 10;
     }
     if (argc == 3) {
         N = atoi(argv[1]);
-        room_size = atoi(argv[2]);
+        int max_num_threads = atoi(argv[2]);
+        omp_set_num_threads(max_num_threads);
     }
+    int room_size = 100;
     int T = 100;
 
     // init particles with random values
@@ -97,7 +95,7 @@ int get_com_coords(double *com_coords, Particle_p particles, int N) {
  */
 int get_forces(double *forces_x, double *forces_y, Particle_p particles, int N) {
 #pragma omp parallel for schedule(dynamic, 1)
-    for (int i = N; i > 0; i--) {
+    for (int i = N-1; i >= 1; i--) {
         //printf("%d\n", omp_get_num_threads());
         Particle pi = particles[i];
         double mi = pi.mass;
