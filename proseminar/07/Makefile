@@ -46,7 +46,7 @@ MPI_ERROR_FILENAME = $(ERRORS_DIR)/$(MPI_NAME).err
 CC = gcc
 CC_FLAGS = -O2 -std=c99 -Wall -g
 
-MPI = mpicc									#mpi++ for c++!
+MPI = gcc									#mpi++ for c++!
 MPI_FLAGS = -O2 -std=c99 -Wall -g
 LIBRARIES = -lm -fopenmp
 
@@ -94,7 +94,7 @@ ifeq ($(SGE_CELL), lcc2)
 
 	SEQ_EXEC_COMMAND += qsub $(SGE_SEQ_FLAGS) ./$${sequential} $${problem_size}
 
-	MPI_EXEC_COMMAND = echo -e "module load openmpi/$(MPI_VERSION) 2>/dev/null\n./$${parallel} $${problem_size} $${num_ranks}" > job.tmp;
+	MPI_EXEC_COMMAND = echo -e "./$${parallel} $${problem_size} $${num_ranks}" > job.tmp;
 	MPI_EXEC_COMMAND += qsub $(SGE_MPI_FLAGS) job.tmp;
 	MPI_EXEC_COMMAND += rm job.tmp
 
