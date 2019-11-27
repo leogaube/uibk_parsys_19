@@ -6,9 +6,21 @@ The goal of this assignment is to parallelize the sequential implementation of t
 
 ### Tasks
 
-- Study the OpenMP `parallel` and `for` pragmas and attempt to parallelize the n-body simulation using OpenMP. If you have multiple sequential implementations of n-body, you are free to choose one. Also, study how to submit OpenMP jobs on LCC2.
-- Measure the execution time of your OpenMP program for several problem sizes and for 1 to 8 threads.
-- Illustrate the data in appropriate speedup/efficiency figures and discuss them. What can you observe?
+- *Study the OpenMP `parallel` and `for` pragmas and attempt to parallelize the n-body simulation using OpenMP. If you have multiple sequential implementations of n-body, you are free to choose one. Also, study how to submit OpenMP jobs on LCC2.*
+
+We chose to parallize the outer for loop of the `get_forces()` function, which calculates a triangular matrix between interpartical forces. By fliping the loop around (N-1 to 1) and choosing a single-element dynamic schedule, we can almost eliminate any load imbalance.
+
+The `apply_forces()` functions was parallized with a "normal" static schedule.
+
+OpenMP jobs can be submitted in the same way as OpenMPI jobs, but with a ```-pe openmp num_threads``` flag as the parallel environment. It is not necessary to start the executable with `mpiexec`, a single program execution suffices.
+
+- *Measure the execution time of your OpenMP program for several problem sizes and for 1 to 8 threads.*
+
+Our outputs/execution times and figures can be found in `./outputs` and `./results` respectively.
+
+- *Illustrate the data in appropriate speedup/efficiency figures and discuss them. What can you observe?*
+
+Our plots suggest that weak scalability is good, as the efficiency increases with bigger problem sizes. However, strong scaling is worse than expected with more threads, but we still hit a 86% efficiency for 8 threads and a partical size of 4096. Cache efficiency seems to be ok, so we are unsure why we get lower performance on 8 threads for such a simple to paralize program...
 
 ## General Notes
 
