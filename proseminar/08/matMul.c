@@ -19,10 +19,10 @@ int main(int argc, char **argv) {
 #endif
     int L, M, N;
     L = M = N = 10;
-    if (argc == 2) {
+    if (argc >= 2) {
     	L = M = N = atoi(argv[1]);
     }
-    if (argc == 4) {
+    if (argc >= 4) {
         L = atoi(argv[1]);
         M = atoi(argv[2]);
         N = atoi(argv[3]);
