@@ -84,8 +84,6 @@ void transpose(int* mat, int ny, int nx, int* mat_t){
 			mat_t[IDX_MATRIX(y,x,ny)] = mat[IDX_MATRIX(x,y,nx)];
 		}
 	}
-
-	print_matrix(mat_t, nx, ny);
 }
 
 /**
