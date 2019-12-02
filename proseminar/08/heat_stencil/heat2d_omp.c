@@ -52,7 +52,7 @@ int main(int argc, char **argv) {
   // for each time step ..
   for (int t = 0; t < T; t++) {
     // .. we propagate the temperature
-    # pragma omp parallel for
+    #pragma omp parallel for
     for (int y = 0; y < Ny; y++)
     {
       for (int x = 0; x < Nx; x++)

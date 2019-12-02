@@ -9,7 +9,7 @@ int main (int argc, char** argv) {
 	// per default we create 100 million points
 	int N = 100000000;
 	double start = omp_get_wtime();
-    if (argc == 2) {
+    if (argc > 2) {
         N = atoi(argv[1]);
     }
 	double pi;
