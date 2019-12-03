@@ -86,8 +86,9 @@ def plot_data(dirs, filename, group_by="domain"):
 	_, max_ranks = get_most_ranks(df)
 	next_color_index = 0
 
-	COLORS = cl.scales["4"]["seq"]
+	COLORS = cl.scales["9"]["seq"]
 	COLOR_NAMES = ["Greys", "Greens", "Blues", "Reds", "Purples", "Oranges"]
+	colors = {}
 
 	mpi_columns = [column for column in df.columns if column not in [problem_size_column, seq_column]]
 	for i, column in enumerate(sorted(mpi_columns, key=find_int_in_string)):
@@ -95,7 +96,7 @@ def plot_data(dirs, filename, group_by="domain"):
 		domain_group = column.rsplit("_", 1)[0]
 		if group_by == "domain":
 			legend_group = domain_group
-			show_by_default = (domain_group == "cubes")
+			show_by_default = (domain_group == "mat_mult_v1")
 		elif group_by == "#ranks":
 			legend_group = num_ranks
 			show_by_default = (num_ranks == max_ranks) 
@@ -103,8 +104,11 @@ def plot_data(dirs, filename, group_by="domain"):
 			legend_group = column
 			show_by_default = True
 
-		color = COLORS[COLOR_NAMES[i]][-1]
-
+		if domain_group not in colors:
+			colors[domain_group] = COLORS[COLOR_NAMES[next_color_index % len(COLOR_NAMES)]]
+			next_color_index += 1
+		color = colors[domain_group][int(2+log2(num_ranks))]
+		
 		runtimes = df[column]
 		speedups = (df[comparison_column]*comparison_num_ranks) / runtimes
 		efficiencies = speedups / num_ranks
@@ -151,4 +155,4 @@ if __name__ == "__main__":
 				print("incompatible file: %s"%filename)
 				continue
 			print("plotting %s"%filename)  
-			plot_data(path, filename, group_by=None)
+			plot_data(path, filename, group_by="domain")
