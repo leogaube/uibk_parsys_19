@@ -39,10 +39,18 @@ int main(int argc, char **argv) {
 	 *  is used for the initialization, keeping in mind that x
 	 *  (representing a row) is the fast changing index.
 	 */
+#ifdef V3
+	#pragma omp parallel
+    {
+#endif
 	initMatrix(A, L, M);
 	initMatrix(B, M, N);
 
 	multiply(A, B, C, L, M, N);
+
+#ifdef V3
+    }
+#endif
 
 #ifdef OMP
     double end = omp_get_wtime();
@@ -73,6 +81,9 @@ void initMatrix(int* mat, int ny, int nx){
 #else
 	srand(1234);
 #endif
+#ifdef V3
+	#pragma omp for collapse(2)
+#endif
 #ifdef V2
 	#pragma omp parallel for collapse(2)
 #endif
@@ -93,6 +104,9 @@ void initMatrix(int* mat, int ny, int nx){
 
 
 void transpose(int* mat, int ny, int nx, int* mat_t){
+#ifdef V3
+	#pragma omp for collapse(2)
+#endif
 #ifdef V2
 	#pragma omp parallel for collapse(2)
 #endif
@@ -118,6 +132,9 @@ void multiply(int* A, int* B, int* C, int L, int M, int N){
 	transpose(B, M, N, B_t);
 
 	// perform the multiplication
+#ifdef V3
+	#pragma omp for collapse(2)
+#endif
 #ifdef V2
 	#pragma omp parallel for collapse(2)
 #endif
