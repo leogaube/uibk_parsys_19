@@ -59,11 +59,14 @@ def outputs2csv():
 
 		# categorise different output filenames into groups each comprising of average runtimes for different problem_sizes!
 		basename = filename.split(".")[0]
-		if basename.count("_") == 2:
+		print(basename, basename.count("_"), basename.rsplit("_"))
+		if basename.count("_") == 3:
 			#seq category
-			group_name, problem_size = basename.rsplit("_", 1)
-		elif basename.count("_") in [3, 4]:
-			group_name, problem_size, slot_distribute, num_slots = basename.rsplit("_", 3)
+			group_name1, group_name2, problem_size = basename.rsplit("_", 2)
+			group_name = group_name1 + "_" + group_name2
+		elif basename.count("_") in [4, 5]:
+			group_name1, group_name2, problem_size, slot_distribute, num_slots = basename.rsplit("_", 4)
+			group_name = group_name1 + "_" + group_name2
 			group_name = "_".join([group_name, num_slots])
 		else:
 			print("unsupported_basename: %s!\n"%basename)
@@ -77,7 +80,7 @@ def outputs2csv():
 		results[group_name][problem_size] = get_avg_runtime(OUTPUTS_PATH, filename)
 
 	#print(results)
-	dict2csv(results, "matMul.csv")
+	dict2csv(results, "mat_mult.csv")
 	
 
 if __name__ == "__main__":

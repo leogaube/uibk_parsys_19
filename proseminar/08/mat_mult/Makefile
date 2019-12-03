@@ -19,7 +19,7 @@ PRINT_FILES = print_files.py
 # --> use 'make run_mpi_single' for submitting a single job. 
 NUM_RUNS = 1
 
-NUM_RANKS_ARRAY = 8 4 2
+NUM_RANKS_ARRAY = 4 2 1
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
@@ -45,11 +45,11 @@ MPI_ERROR_FILENAME = $(ERRORS_DIR)/$(MPI_NAME).err
 ######## SETUP ##########
 ### COMPILERS + FLAGS ###
 CC = gcc
-CC_FLAGS = -O2 -std=c99 -Wall -g
+CC_FLAGS = -O2 -std=gnu99 -Wall -g
 
 MPI = gcc									#mpi++ for c++!
-MPI_FLAGS = -O2 -std=c99 -Wall -g -DOMP
-LIBRARIES = -lm -fopenmp
+MPI_FLAGS = -O2 -std=gnu99 -Wall -g -DOMP -fopenmp
+LIBRARIES = -lm
 
 PYTHON = python
 

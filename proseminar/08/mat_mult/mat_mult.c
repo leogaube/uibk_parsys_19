@@ -27,12 +27,12 @@ int main(int argc, char **argv) {
         M = atoi(argv[2]);
         N = atoi(argv[3]);
     }
+    printf("L=%d, M=%d, N=%d\n", L,M,N);
 
     int *A = malloc(L*M*sizeof(int));
     int *B = malloc(M*N*sizeof(int));
     int *C = malloc(L*N*sizeof(int)); //result
 
-	srand(1234);
 	/*
 	 *  The shared dimension has to be the fast one.
 	 *  The typical notation is (#rows,#columns). Therefore, (y,x)
@@ -68,17 +68,27 @@ int main(int argc, char **argv) {
 
 
 void initMatrix(int* mat, int ny, int nx){
-	#pragma omp parallel for collapse(2)
+#ifdef OMP
+	unsigned int seeds[8] = {1, 2, 3, 4, 5, 6, 7, 8}; //up to 8 threads are possible
+#else
+	srand(1234);
+#endif
+	#pragma omp parallel for
 	for(int y=0;y<ny;y++){
 		for(int x=0;x<nx;x++){
-			mat[IDX_MATRIX(x,y,nx)] = (int) ((((double) rand()/RAND_MAX)-0.5)*10);
+#ifdef OMP
+			double rnd = (double)rand_r(&seeds[omp_get_thread_num()]);
+#else
+			double rnd = (double)rand();
+#endif
+			mat[IDX_MATRIX(x,y,nx)] = (int) (((rnd/RAND_MAX)-0.5)*10);
 		}
 	}
 }
 
 
 void transpose(int* mat, int ny, int nx, int* mat_t){
-	#pragma omp parallel for collapse(2)
+	#pragma omp parallel for
 	for(int y=0; y<ny; y++){
 		for(int x=0; x<nx; x++){
 			mat_t[IDX_MATRIX(y,x,ny)] = mat[IDX_MATRIX(x,y,nx)];
@@ -97,19 +107,15 @@ void multiply(int* A, int* B, int* C, int L, int M, int N){
 	int* B_t = malloc(N*M*sizeof(int));
 	transpose(B, M, N, B_t);
 
-	// init C
-	#pragma omp parallel for
-	for(int i=0; i<L*N; i++){
-		C[i] = 0;
-	}
-
 	// perform the multiplication
 	#pragma omp parallel for
 	for(int l=0; l<L; l++){
 		for(int n=0; n<N; n++){
+			int sum=0;
 			for(int m=0; m<M; m++){
-				C[IDX_MATRIX(n,l,N)] += A[IDX_MATRIX(m,l,M)]*B_t[IDX_MATRIX(m,n,M)];
+				sum += A[IDX_MATRIX(m,l,M)]*B_t[IDX_MATRIX(m,n,M)];
 			}
+			C[IDX_MATRIX(n,l,N)] = sum;
 		}
 	}
 

@@ -64,7 +64,7 @@ def plot_data(dirs, filename, group_by="domain"):
 		vertical_spacing=0.135)
 
 	problem_size_column = "dimensions"
-	seq_column = "matMul_seq"
+	seq_column = "mat_mult_seq"
 	if seq_column in df.columns and not df[seq_column].isnull().values.any():
 		# only plot runtime of sequential column without speedup/efficiency
 		comparison_column = seq_column
