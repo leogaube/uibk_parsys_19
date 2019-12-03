@@ -107,7 +107,7 @@ def plot_data(dirs, filename, group_by="domain"):
 		if domain_group not in colors:
 			colors[domain_group] = COLORS[COLOR_NAMES[next_color_index % len(COLOR_NAMES)]]
 			next_color_index += 1
-		color = colors[domain_group][int(2+log2(num_ranks))]
+		color = colors[domain_group][int(3+log2(num_ranks))]
 		
 		runtimes = df[column]
 		speedups = (df[comparison_column]*comparison_num_ranks) / runtimes
