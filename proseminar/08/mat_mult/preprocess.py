@@ -59,7 +59,6 @@ def outputs2csv():
 
 		# categorise different output filenames into groups each comprising of average runtimes for different problem_sizes!
 		basename = filename.split(".")[0]
-		print(basename, basename.count("_"), basename.rsplit("_"))
 		if basename.count("_") == 3:
 			#seq category
 			group_name1, group_name2, problem_size = basename.rsplit("_", 2)

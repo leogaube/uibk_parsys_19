@@ -73,7 +73,12 @@ void initMatrix(int* mat, int ny, int nx){
 #else
 	srand(1234);
 #endif
+#ifdef V2
+	#pragma omp parallel for collapse(2)
+#endif
+#ifdef V1
 	#pragma omp parallel for
+#endif
 	for(int y=0;y<ny;y++){
 		for(int x=0;x<nx;x++){
 #ifdef OMP
@@ -88,7 +93,12 @@ void initMatrix(int* mat, int ny, int nx){
 
 
 void transpose(int* mat, int ny, int nx, int* mat_t){
+#ifdef V2
+	#pragma omp parallel for collapse(2)
+#endif
+#ifdef V1
 	#pragma omp parallel for
+#endif
 	for(int y=0; y<ny; y++){
 		for(int x=0; x<nx; x++){
 			mat_t[IDX_MATRIX(y,x,ny)] = mat[IDX_MATRIX(x,y,nx)];
@@ -108,7 +118,12 @@ void multiply(int* A, int* B, int* C, int L, int M, int N){
 	transpose(B, M, N, B_t);
 
 	// perform the multiplication
+#ifdef V2
+	#pragma omp parallel for collapse(2)
+#endif
+#ifdef V1
 	#pragma omp parallel for
+#endif
 	for(int l=0; l<L; l++){
 		for(int n=0; n<N; n++){
 			int sum=0;

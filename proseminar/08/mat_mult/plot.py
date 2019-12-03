@@ -87,7 +87,7 @@ def plot_data(dirs, filename, group_by="domain"):
 	next_color_index = 0
 
 	COLORS = cl.scales["4"]["seq"]
-	COLOR_NAMES = ["Greys", "Greens", "Blues", "Reds", "Purples"]
+	COLOR_NAMES = ["Greys", "Greens", "Blues", "Reds", "Purples", "Oranges"]
 
 	mpi_columns = [column for column in df.columns if column not in [problem_size_column, seq_column]]
 	for i, column in enumerate(sorted(mpi_columns, key=find_int_in_string)):

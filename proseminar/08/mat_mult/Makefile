@@ -1,6 +1,6 @@
 ### PROGRAMS ###
 SEQUENTIAL_ARRAY = mat_mult_seq
-PARALLEL_ARRAY = mat_mult_v1
+PARALLEL_ARRAY = mat_mult_v1 mat_mult_v2
 SHARED_SOURCE = mat_mult
 DEPENDENCY_ARRAY = 
 DEFINES = #-D VERBOSE
@@ -19,7 +19,7 @@ PRINT_FILES = print_files.py
 # --> use 'make run_mpi_single' for submitting a single job. 
 NUM_RUNS = 1
 
-NUM_RANKS_ARRAY = 4 2 1
+NUM_RANKS_ARRAY = 8 4 2 1
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
@@ -141,10 +141,15 @@ $(SEQ_EXECUTABLES): $(EXECUTABLE_PATTERN): $(if $(SHARED_SOURCE), $(SHARED_SOURC
 	@echo "compiling $@"
 	@$(CC) $(CC_FLAGS) $(DEFINES) $^ $(LIBRARIES) -o $@
 	@echo
-
-$(MPI_EXECUTABLES): $(EXECUTABLE_PATTERN): $(if $(SHARED_SOURCE), $(SHARED_SOURCE).$(LANGUAGE), %.$(LANGUAGE)) $(DEP_OBJECTS)
+	
+$(SHARED_SOURCE)_v1$(EXECUTABLE_EXT): $(if $(SHARED_SOURCE), $(SHARED_SOURCE).$(LANGUAGE), %.$(LANGUAGE)) $(DEP_OBJECTS)
 	@echo "compiling $@"
-	@$(MPI) $(MPI_FLAGS) $(DEFINES) $^ $(LIBRARIES) -o $@
+	@$(MPI) $(MPI_FLAGS) $(DEFINES) -DV1 $^ $(LIBRARIES) -o $@		
+	@echo
+
+$(SHARED_SOURCE)_v2$(EXECUTABLE_EXT): $(if $(SHARED_SOURCE), $(SHARED_SOURCE).$(LANGUAGE), %.$(LANGUAGE)) $(DEP_OBJECTS)
+	@echo "compiling $@"
+	@$(MPI) $(MPI_FLAGS) $(DEFINES) -DV2 $^ $(LIBRARIES) -o $@		
 	@echo
 
 .PHONEY: compile_all
