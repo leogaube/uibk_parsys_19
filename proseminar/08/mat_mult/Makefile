@@ -1,6 +1,6 @@
 ### PROGRAMS ###
 SEQUENTIAL_ARRAY = mat_mult_seq
-PARALLEL_ARRAY = mat_mult_v1 mat_mult_v2 mat_mult_v3
+PARALLEL_ARRAY = mat_mult_v1 mat_mult_v2 mat_mult_v3 mat_mult_v4
 SHARED_SOURCE = mat_mult
 DEPENDENCY_ARRAY = 
 DEFINES = #-D VERBOSE
@@ -155,6 +155,11 @@ $(SHARED_SOURCE)_v2$(EXECUTABLE_EXT): $(if $(SHARED_SOURCE), $(SHARED_SOURCE).$(
 $(SHARED_SOURCE)_v3$(EXECUTABLE_EXT): $(if $(SHARED_SOURCE), $(SHARED_SOURCE).$(LANGUAGE), %.$(LANGUAGE)) $(DEP_OBJECTS)
 	@echo "compiling $@"
 	@$(MPI) $(MPI_FLAGS) $(DEFINES) -DV3 $^ $(LIBRARIES) -o $@		
+	@echo	
+	
+$(SHARED_SOURCE)_v4$(EXECUTABLE_EXT): $(if $(SHARED_SOURCE), $(SHARED_SOURCE).$(LANGUAGE), %.$(LANGUAGE)) $(DEP_OBJECTS)
+	@echo "compiling $@"
+	@$(MPI) $(MPI_FLAGS) $(DEFINES) -DV4 $^ $(LIBRARIES) -o $@		
 	@echo
 
 .PHONEY: compile_all
