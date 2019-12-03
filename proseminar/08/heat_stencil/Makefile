@@ -17,9 +17,9 @@ PRINT_FILES = print_files.py
 # --> use 'make run' for submitting multiple jobs with different configurations
 # the default configuration consists of all first elements of the *_ARRAY variables
 # --> use 'make run_mpi_single' for submitting a single job. 
-NUM_RUNS = 1
+NUM_RUNS = {1..4}
 
-NUM_RANKS_ARRAY = 8 4 2
+NUM_RANKS_ARRAY = 8 4 2 1
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
@@ -45,11 +45,11 @@ MPI_ERROR_FILENAME = $(ERRORS_DIR)/$(MPI_NAME).err
 ######## SETUP ##########
 ### COMPILERS + FLAGS ###
 CC = gcc
-CC_FLAGS = -O2 -std=c99 -Wall -g
+CC_FLAGS = -O2 -std=gnu99 -Wall -g
 
 MPI = gcc									#mpi++ for c++!
-MPI_FLAGS = -O2 -std=c99 -Wall -g -DOMP
-LIBRARIES = -lm -fopenmp
+MPI_FLAGS = -O2 -std=gnu99 -Wall -g -DOMP -fopenmp
+LIBRARIES = -lm
 
 PYTHON = python
 
@@ -104,10 +104,10 @@ ifeq ($(SGE_CELL), lcc2)
 	#MPI_EXEC_COMMAND += rm job.tmp
 else
 	SEQ_EXEC_COMMAND = echo "running '$(SEQ_NAME)'";
-	SEQ_EXEC_COMMAND += ./$${sequential} $${problem_size} 1> $(SEQ_OUTPUT_FILENAME) 2> $(SEQ_ERROR_FILENAME)
+	SEQ_EXEC_COMMAND += ./$${sequential} $${problem_size} 1>> $(SEQ_OUTPUT_FILENAME) 2>> $(SEQ_ERROR_FILENAME)
 
 	MPI_EXEC_COMMAND = echo "running '$(MPI_NAME)'";
-	MPI_EXEC_COMMAND += ./$${parallel}$(EXECUTABLE_EXT) $${problem_size} $${num_ranks} 1> $(MPI_OUTPUT_FILENAME) 2> $(MPI_ERROR_FILENAME)
+	MPI_EXEC_COMMAND += ./$${parallel}$(EXECUTABLE_EXT) $${problem_size} 1>> $(MPI_OUTPUT_FILENAME) 2>> $(MPI_ERROR_FILENAME)
 
 	#MPI_EXEC_COMMAND = echo "running '$(MPI_NAME)'";
 	#MPI_EXEC_COMMAND += mpiexec -n $${num_ranks} --oversubscribe ./$${parallel}$(EXECUTABLE_EXT) $${problem_size} 1> $(MPI_OUTPUT_FILENAME) 2> $(MPI_ERROR_FILENAME)
@@ -162,9 +162,11 @@ run_seq_single: $(word 1, $(SEQ_EXECUTABLES))
 run_seq: $(SEQ_EXECUTABLES)
 
 run_seq run_seq_single: $(OUTPUTS_DIR) $(ERRORS_DIR)
-	@for sequential in $(SEQUENTIAL_ARRAY); do \
-		for problem_size in $(PROBLEM_SIZE_ARRAY); do \
-			$(SEQ_EXEC_COMMAND); \
+	@for run in $(NUM_RUNS); do \
+		for sequential in $(SEQUENTIAL_ARRAY); do \
+			for problem_size in $(PROBLEM_SIZE_ARRAY); do \
+				$(SEQ_EXEC_COMMAND); \
+			done \
 		done \
 	done
 	@echo
@@ -182,7 +184,7 @@ run_mpi: $(MPI_EXECUTABLES)
 
 run_mpi run_mpi_single: $(OUTPUTS_DIR) $(ERRORS_DIR)
 	@for parallel in $(PARALLEL_ARRAY); do \
-		for run in in $(seq 1 $(NUM_RUNS)); do \
+		for run in $(NUM_RUNS); do \
 			for num_ranks in $(NUM_RANKS_ARRAY); do \
 				export OMP_NUM_THREADS=$$num_ranks; \
 				for slot_distribute in $(SLOT_DISTRIBUTE_ARRAY); do \
