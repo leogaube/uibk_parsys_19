@@ -77,7 +77,7 @@ def outputs2csv():
 		results[group_name][problem_size] = get_avg_runtime(OUTPUTS_PATH, filename)
 
 	#print(results)
-	dict2csv(results, "matMul.csv")
+	dict2csv(results, "pi.csv")
 	
 
 if __name__ == "__main__":
