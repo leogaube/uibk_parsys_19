@@ -92,10 +92,6 @@ int main(int argc, char** argv) {
     if (argc == 2) {
         N = atoi(argv[1]);
     }
-    if (argc == 3) {
-        N = atoi(argv[1]);
-        omp_set_num_threads(atoi(argv[2]));
-    }
 
     int* solutions = malloc(sizeof(int));
     *solutions = 0;
