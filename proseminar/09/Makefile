@@ -18,11 +18,11 @@ PRINT_FILES = print_files.py
 # --> use 'make run_mpi_single' for submitting a single job. 
 NUM_RUNS = {1..5}
 
-NUM_RANKS_ARRAY = 1 2 4 6
+NUM_RANKS_ARRAY = 1 2 4 6 8
 #NUM_RANKS_ARRAY = 1 2 4 8 16
 SLOT_DISTRIBUTE_ARRAY = fillup
 #SLOT_DISTRIBUTE_ARRAY = fillup 1perhost 2perhost
-PROBLEM_SIZE_ARRAY = 8 9 10 11 12 13 14
+PROBLEM_SIZE_ARRAY = 10 12 14 16
 
 
 ### OUTPUT + ERRORS ###
@@ -82,23 +82,26 @@ ifeq ($(SGE_CELL), lcc2)
 	SGE_SEQ_FLAGS += -o $(SEQ_OUTPUT_FILENAME)
 	SGE_SEQ_FLAGS += -e $(SEQ_ERROR_FILENAME)
 	SGE_SEQ_FLAGS += -b yes
+	#SGE_SEQ_FLAGS += -sync yes
 
 	SGE_MPI_FLAGS = -q std.q
 	SGE_MPI_FLAGS += -cwd
 	SGE_MPI_FLAGS += -N $(MPI_NAME)
 	SGE_MPI_FLAGS += -o $(MPI_OUTPUT_FILENAME)
 	SGE_MPI_FLAGS += -e $(MPI_ERROR_FILENAME)
-	SGE_MPI_FLAGS += -pe openmp $$num_ranks
+	SGE_MPI_FLAGS += -pe openmp 8
+	#SGE_MPI_FLAGS += -sync yes
+
 	#openmpi-$$slot_distribute $$num_ranks
 	#cannot use '-b yes' because openmpi module needs to be loaded on lcc2 cluster TODO
 
 	SEQ_EXEC_COMMAND += qsub $(SGE_SEQ_FLAGS) ./$${sequential} $${problem_size}
 
-	MPI_EXEC_COMMAND = echo -e "./$${parallel} $${problem_size} $${num_ranks}" > job.tmp;
+	MPI_EXEC_COMMAND = echo -e "export OMP_NUM_THREADS=$$num_ranks\n./$${parallel} $${problem_size}" > job.tmp;
 	MPI_EXEC_COMMAND += qsub $(SGE_MPI_FLAGS) job.tmp;
 	MPI_EXEC_COMMAND += rm job.tmp
 
-	#MPI_EXEC_COMMAND = echo -e "module load openmpi/$(MPI_VERSION) 2>/dev/null\nmpiexec -n $${num_ranks} ./$${parallel} $${problem_size}" > job.tmp;
+	#MPI_EXEC_COMMAND = echo -e "module load openmpi/$(MPI_VERSION) 2>/dev/null\nexport OMP_NUM_THREADS=$$num_ranks\nmpiexec -n $${num_ranks} ./$${parallel} $${problem_size}" > job.tmp;
 	#MPI_EXEC_COMMAND += qsub $(SGE_MPI_FLAGS) job.tmp;
 	#MPI_EXEC_COMMAND += rm job.tmp
 else
@@ -143,7 +146,7 @@ $(SEQ_EXECUTABLES): $(EXECUTABLE_PATTERN): $(if $(SHARED_SOURCE), $(SHARED_SOURC
 	
 $(MPI_EXECUTABLES): $(EXECUTABLE_PATTERN): $(if $(SHARED_SOURCE), $(SHARED_SOURCE).$(LANGUAGE), %.$(LANGUAGE)) $(DEP_OBJECTS)
 	@echo "compiling $@"
-	@$(MPI) $(MPI_FLAGS) $(DEFINES) -DV1 $^ $(LIBRARIES) -o $@
+	@$(MPI) $(MPI_FLAGS) $(DEFINES) $^ $(LIBRARIES) -o $@
 	@echo
 
 
@@ -186,7 +189,6 @@ run_mpi run_mpi_single: $(OUTPUTS_DIR) $(ERRORS_DIR)
 	@for parallel in $(PARALLEL_ARRAY); do \
 		for run in $(NUM_RUNS); do \
 			for num_ranks in $(NUM_RANKS_ARRAY); do \
-				export OMP_NUM_THREADS=$$num_ranks; \
 				for slot_distribute in $(SLOT_DISTRIBUTE_ARRAY); do \
 					for problem_size in $(PROBLEM_SIZE_ARRAY); do \
 						$(MPI_EXEC_COMMAND); \
