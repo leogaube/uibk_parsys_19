@@ -5,8 +5,6 @@
 
 #include <time.h>
 
-_Atomic int global = 0;
-
 void print_board(int N, char board[N][N]){
     printf("\n");
     for (int row = 0; row < N; row++)
@@ -56,7 +54,6 @@ void n_queens(int N, char board[N][N], int row, int* solutions) {
 
         #pragma omp atomic
         *solutions += 1;
-        global++;
         return;
     }
 
@@ -102,7 +99,6 @@ int main(int argc, char** argv) {
 
     double end = omp_get_wtime();
     printf("The result is: %d\n", *solutions);
-    printf("The global result is: %d\n", global);
     printf("The process took %f seconds to finish. \n", end - start);
 
     free(solutions);
