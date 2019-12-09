@@ -7,6 +7,19 @@
 
 _Atomic int global = 0;
 
+void print_board(int N, char board[N][N]){
+    printf("\n");
+    for (int row = 0; row < N; row++)
+    {
+        for (int col = 0; col < N; col++)
+        {
+            printf("%c", board[row][col]);
+        }
+        printf("\n");
+    }
+    printf("\n");
+}
+
 // Function to check if two queens threaten each other or not
 int is_safe(int N, char board[N][N], int row, int col) {
     // return false if two queens share the same column
@@ -33,10 +46,15 @@ int is_safe(int N, char board[N][N], int row, int col) {
     return 1;
 }
 
-void set_queen(int N, char board[N][N], int row, int* solutions) {
+void n_queens(int N, char board[N][N], int row, int* solutions) {
     // if N queens are placed successfully, add one to solutions
     if (row == N) {
-#pragma omp atomic
+#ifdef VERBOSE
+        #pragma omp critical
+        print_board(N, board);
+#endif
+
+        #pragma omp atomic
         *solutions += 1;
         global++;
         return;
@@ -49,20 +67,20 @@ void set_queen(int N, char board[N][N], int row, int* solutions) {
         if (is_safe(N, board, row, i)) {
             // place queen on current square
             board[row][i] = 'Q';
-            set_queen(N, board, row + 1, solutions);
+            n_queens(N, board, row + 1, solutions);
             board[row][i] = '-';
         }
     }
 }
 
-void n_queen(int N, int* solutions) {
-    // place Queen at every square in starting row
-#pragma omp taskloop shared(solutions)
+void setup_n_queens(int N, int* solutions) {
+    // create N sets for boards each with a single queen placed in the first row and run the n-queens algorithm as tasks
     for (int i = 0; i < N; i++) {
         char board[N][N];
         memset(board, '-', sizeof board);
         board[0][i] = 'Q';
-        set_queen(N, board, 1, solutions);
+        #pragma omp task
+        n_queens(N, board, 1, solutions);
     }
 }
 
@@ -82,9 +100,9 @@ int main(int argc, char** argv) {
     int* solutions = malloc(sizeof(int));
     *solutions = 0;
 
-#pragma omp parallel
-#pragma omp single
-    n_queen(N, solutions);
+    #pragma omp parallel
+    #pragma omp single
+    setup_n_queens(N, solutions);
 
     double end = omp_get_wtime();
     printf("The result is: %d\n", *solutions);
