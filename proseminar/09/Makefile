@@ -90,6 +90,7 @@ ifeq ($(SGE_CELL), lcc2)
 	SGE_MPI_FLAGS += -o $(MPI_OUTPUT_FILENAME)
 	SGE_MPI_FLAGS += -e $(MPI_ERROR_FILENAME)
 	SGE_MPI_FLAGS += -pe openmp 8
+	SGE_MPI_FLAGS += -l excl=1
 	#SGE_MPI_FLAGS += -sync yes
 
 	#openmpi-$$slot_distribute $$num_ranks
