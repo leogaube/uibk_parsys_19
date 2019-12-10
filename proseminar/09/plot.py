@@ -7,6 +7,7 @@ import pandas as pd
 
 import plotly.offline as ply
 import plotly.graph_objs as go
+import plotly.express as px
 from plotly.subplots import make_subplots
 import colorlover as cl
 
@@ -107,7 +108,7 @@ def plot_data(dirs, filename, group_by="domain"):
 		if domain_group not in colors:
 			colors[domain_group] = COLORS[COLOR_NAMES[next_color_index % len(COLOR_NAMES)]]
 			next_color_index += 1
-		color = colors[domain_group][-2]
+		color = colors[domain_group][-4]
 		
 		runtimes = df[column]
 		speedups = (df[comparison_column]*comparison_num_ranks) / runtimes
@@ -132,13 +133,66 @@ def plot_data(dirs, filename, group_by="domain"):
 
 	fig.update_layout(title_text=filename.split(".")[0])
 
-	fig.update_xaxes(title="#rows (= #columns)", tickvals=df[problem_size_column])
+	fig.update_xaxes(title="board size", tickvals=df[problem_size_column])
 
 	fig.update_yaxes(title="runtime in s", rangemode="tozero", type="log", row=1, col=1)
 	fig.update_yaxes(title="%s speedup"%speedup_type, rangemode="tozero", row=2, col=1)
-	fig.update_yaxes(title="%s efficiency"%speedup_type, range=[0., 1.], row = 2, col = 2)
+	fig.update_yaxes(title="%s efficiency"%speedup_type, range=[0., 1.05], row = 2, col = 2)
 
-	ply.plot(fig, filename=os.path.join(PLOTS_PATH, "%s_grouped_%s.html" %(filename.split(".")[0], group_by if group_by is not None else "single")))
+	ply.plot(fig, filename=os.path.join(PLOTS_PATH, "%s.html"%filename.split(".")[0]))
+
+
+def plot_data_by_ranks(dirs, filename):
+	df = pd.read_csv(os.path.join(DATA_PATH, filename))
+
+	fig = make_subplots(
+		rows=2, cols=2,
+		specs=[[{"colspan": 2}, None], [{}, {}]],
+		subplot_titles=("runtime", "speedup", "efficiency"),
+		horizontal_spacing=0.1,
+		vertical_spacing=0.135)
+
+	# only plot runtime of sequential column without speedup/efficiency
+	comparison_num_ranks = 1
+	speedup_type = "absolute"
+
+	COLORS = cl.scales["9"]["seq"]
+	COLOR_NAMES = ["Greys", "Greens", "Blues", "Reds", "Purples", "Oranges"]
+
+	show_by_default = True
+	for i, col in enumerate(df.columns[1:]):
+		color = COLORS[COLOR_NAMES[i]][5]
+		#runtime
+		runtime_trace = go.Bar(x=df[df.columns[0]], y=df[col], legendgroup=col, name=col, marker=dict(color=color))
+
+		#speedup + efficiency
+		runtimes = df[col]
+		speedups = [(df[col][0]*comparison_num_ranks) / runtimes[r] for r in range(1, len(runtimes))]
+		efficiencies = [speedups[r] / find_int_in_string(df[df.columns[0]][r+1]) for r in range(len(speedups))]
+
+		speedup_trace = go.Scatter(
+			x=df[df.columns[0]][1:], y=speedups,
+			legendgroup=col, marker=dict(color=color), showlegend=False, visible=True if show_by_default else "legendonly")
+
+		efficiency_trace = go.Scatter(
+			x=df[df.columns[0]][1:], y=efficiencies,
+			legendgroup=col, marker=dict(color=color), showlegend=False, visible=True if show_by_default else "legendonly")
+
+		fig.add_trace(runtime_trace, row=1, col=1)
+		fig.add_trace(speedup_trace, row=2, col=1)
+		fig.add_trace(efficiency_trace, row=2, col=2)
+
+
+	fig.update_layout(title_text=filename.split(".")[0])
+
+	fig.update_xaxes(title="#ranks")
+
+	fig.update_yaxes(title="runtime in s", rangemode="tozero", type="log", row=1, col=1)
+	fig.update_yaxes(title="%s speedup" % speedup_type, rangemode="tozero", row=2, col=1)
+	fig.update_yaxes(title="%s efficiency" % speedup_type, range=[0., 1.05], row=2, col=2)
+
+	ply.plot(fig, filename=os.path.join(PLOTS_PATH, "%s.html" % filename.split(".")[0]))
+
 
 
 if __name__ == "__main__":
@@ -154,5 +208,8 @@ if __name__ == "__main__":
 			if filename.split(".")[-1] != "csv":
 				print("incompatible file: %s"%filename)
 				continue
-			print("plotting %s"%filename)  
-			plot_data(path, filename, group_by=None)
+			print("plotting %s"%filename) 
+			if "#ranks" in filename:
+				plot_data_by_ranks(path, filename)
+			else:
+				plot_data(path, filename, group_by=None)

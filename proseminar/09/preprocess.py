@@ -4,6 +4,8 @@ import sys
 import re
 import csv
 
+from collections import defaultdict
+
 def dict2csv(dim_dict, filename):
 	with open(os.path.join(DATA_PATH, filename), 'w', newline='') as csvfile:
 		fieldnames = ["size"]
@@ -50,6 +52,19 @@ def get_avg_runtime(path, filename):
 
 	return sum(runtimes)/len(runtimes)
 
+
+def transpose(results):
+	d = defaultdict(dict)
+	for key1, inner in results.items():
+		key1 
+		for key2, value in inner.items():
+			ranks = find_ints_in_string(key1)
+			col_key = "1 SEQ" if ranks == [] else str(ranks[0])+" ranks"
+			row_key = str(key2)+"_queens"
+			d[row_key][col_key] = value
+	return d
+
+
 def outputs2csv():
 	results = {}
 	for filename in os.listdir(OUTPUTS_PATH):
@@ -79,7 +94,9 @@ def outputs2csv():
 		results[group_name][problem_size] = get_avg_runtime(OUTPUTS_PATH, filename)
 
 	#print(results)
-	dict2csv(results, "mat_mult.csv")
+	dict2csv(results, "n_queens_problem_size.csv")
+	results_by_ranks = transpose(results)
+	dict2csv(results_by_ranks, "n_queens_#ranks.csv")
 	
 
 if __name__ == "__main__":
