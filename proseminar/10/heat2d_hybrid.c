@@ -1,10 +1,11 @@
-#include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 #include <time.h>
 
 #include "heat_stencil.h"
+#include <mpi.h>
+#include <omp.h>
 
 // -- simulation code ---
 
@@ -85,14 +86,14 @@ int main(int argc, char **argv) {
   // for each time step ..
   for (int t = 0; t < T; t++) {
     // send the uppermost and lowest layer to upper and lower slices
-    MPI_ISend(A, Nx, MPI_FLOAT, top_rank, 0, stripes_1D, &LSrequest);
-    MPI_ISend(&(A[IDX_2D(0,My-1,Nx)]), Nx, MPI_FLOAT, bottom_rank, 0, stripes_1D, &RSrequest);
+    MPI_Isend(A, Nx, MPI_FLOAT, top_rank, 0, stripes_1D, &LSrequest);
+    MPI_Isend(&(A[IDX_2D(0,My-1,Nx)]), Nx, MPI_FLOAT, bottom_rank, 0, stripes_1D, &RSrequest);
 
-    MPI_IRecv(upper_layer, Nx, MPI_FLOAT, top_rank, 0, stripes_1D, MPI_STATUS_IGNORE, &LRrequest);
-    MPI_IRecv(lower_layer, Nx, MPI_FLOAT, bottom_rank, 0, stripes_1D, MPI_STATUS_IGNORE, &RRrequest);
+    MPI_Irecv(upper_layer, Nx, MPI_FLOAT, top_rank, 0, stripes_1D, &LRrequest);
+    MPI_Irecv(lower_layer, Nx, MPI_FLOAT, bottom_rank, 0, stripes_1D, &RRrequest);
 
     MPI_Wait(&LSrequest, MPI_STATUS_IGNORE);
-    MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);}
+    MPI_Wait(&LRrequest, MPI_STATUS_IGNORE);
     MPI_Wait(&RSrequest, MPI_STATUS_IGNORE);
     MPI_Wait(&RRrequest, MPI_STATUS_IGNORE);
 
