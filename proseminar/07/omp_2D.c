@@ -22,17 +22,19 @@ double let_particles_fly(double position);
 int get_com_coords(double *com_coords, Particle_p particles, int N);
 
 int main(int argc, char **argv) {
+    omp_set_num_threads(6);
+
     double start = omp_get_wtime();
     int N = 3000;
+    int room_size = 100;
     if (argc == 2) {
         N = atoi(argv[1]);
+        room_size = (N > 8) ? 80 : N * 10;
     }
     if (argc == 3) {
         N = atoi(argv[1]);
-        int max_num_threads = atoi(argv[2]);
-        omp_set_num_threads(max_num_threads);
+        room_size = atoi(argv[2]);
     }
-    int room_size = 100;
     int T = 100;
 
     // init particles with random values
@@ -89,30 +91,57 @@ int get_com_coords(double *com_coords, Particle_p particles, int N) {
     return EXIT_SUCCESS;
 }
 
+int get_i_from_N(int N){
+	return (int) floor(-1/2+sqrt(1/4+2*N))+1;
+}
+
+int get_j_from_N(int N, int i){
+	return N-i*(i-1)/2;
+}
+
 /**
  * calculates the forces in x and y direction between the N particles
  * only the upper triangular matrix (without diagonal) is calculated (i>j)
  */
 int get_forces(double *forces_x, double *forces_y, Particle_p particles, int N) {
-#pragma omp parallel for schedule(dynamic, 1)
-    for (int i = N-1; i >= 1; i--) {
+	Particle pi;
+	int i_tmp = 0;
+#pragma omp parallel for
+	for (int k = 0; k < N*(N-1)/2; k++) {
+    	int i = get_i_from_N(k);
         //printf("%d\n", omp_get_num_threads());
-        Particle pi = particles[i];
-        double mi = pi.mass;
-        double xi = pi.position.x;
-        double yi = pi.position.y;
-
-        for (int j = 0; j < i; j++) {
-            Particle pj = particles[j];
-            double mj = pj.mass;
-            double dx = xi - pj.position.x;
-            double dy = yi - pj.position.y;
-
-            // calculate the force in the given directions
-            double tmp = -mi * mj / pow(dx * dx + dy * dy, 1.5);
-            forces_x[IDX_FORCES(i, j)] = tmp * dx;
-            forces_y[IDX_FORCES(i, j)] = tmp * dy;
+		double mi;
+		double xi;
+		double yi;
+        if(i!=i_tmp){
+        	pi = particles[i];
+			mi = pi.mass;
+			xi = pi.position.x;
+			yi = pi.position.y;
+			i_tmp=i;
         }
+
+        int j = get_j_from_N(k, i);
+		Particle pj = particles[j];
+		double mj = pj.mass;
+		double dx = xi - pj.position.x;
+		double dy = yi - pj.position.y;
+
+		// calculate the force in the given directions
+		double tmp = -mi * mj / pow(dx * dx + dy * dy, 1.5);
+		forces_x[IDX_FORCES(i, j)] = tmp * dx;
+		forces_y[IDX_FORCES(i, j)] = tmp * dy;
+
+//        if(IDX_FORCES(i,j)>=N*(N-1)/2){
+//        	printf("idx too large(%i>=%i) i=%i, j=%i, k=%i\n",IDX_FORCES(i,j),N*(N-1)/2,i,j,k);
+//        }
+//        if(j>=i){
+//        	printf("i too small i=%i, j=%i, k=%i\n",i,j,k);
+//        }
+//        if(IDX_FORCES(i,j)!=k){
+//        	printf("i,j does not give k but k+%i\n",IDX_FORCES(i,j)+k);
+//        }
+
     }
 
     return EXIT_SUCCESS;
