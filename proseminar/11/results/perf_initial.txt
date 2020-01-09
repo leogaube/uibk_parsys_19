@@ -1,0 +1,20 @@
+# started on Thu Jan  9 16:25:31 2020
+
+
+ Performance counter stats for './real':
+
+         17,425.30 msec task-clock:u              #    1.000 CPUs utilized          
+                 0      context-switches:u        #    0.000 K/sec                  
+                 0      cpu-migrations:u          #    0.000 K/sec                  
+             1,164      page-faults:u             #    0.067 K/sec                  
+    42,516,440,802      cycles:u                  #    2.440 GHz                      (50.00%)
+    49,712,459,714      instructions:u            #    1.17  insn per cycle           (75.00%)
+     1,758,097,691      branches:u                #  100.893 M/sec                    (75.00%)
+        12,399,120      branch-misses:u           #    0.71% of all branches          (75.00%)
+
+      17.427440723 seconds time elapsed
+
+      17.251034000 seconds user
+       0.174990000 seconds sys
+
+
