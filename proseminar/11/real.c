@@ -1,4 +1,4 @@
-
+#include <omp.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -52,6 +52,7 @@ double starts[NM];
 
 int main()
 {
+  double start = omp_get_wtime();
   //-------------------------------------------------------------------------c
   // k is the current level. It is passed down through subroutine args
   // and is NOT global. it is the current iteration
@@ -320,6 +321,9 @@ int main()
     }
   }
 
+  double end = omp_get_wtime();
+  printf("The process took %f seconds to finish. \n", end - start);
+  
   return 0;
 }
 
@@ -517,6 +521,7 @@ static void resid(void *ou, void *ov, void *or, int n1, int n2, int n3,
   double u1[M], u2[M];
 
   if (timeron) timer_start(T_resid);
+#pragma omp parallel for collapse(3)
   for (i3 = 1; i3 < n3-1; i3++) {
     for (i2 = 1; i2 < n2-1; i2++) {
       for (i1 = 0; i1 < n1; i1++) {
