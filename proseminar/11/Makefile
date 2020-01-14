@@ -1,28 +1,21 @@
 CC=gcc
-CC_FLAGS=-O3 -g3 -lm -pg
-OMP_FLAGS=$(CC_FLAGS) -fopenmp
+CC_FLAGS=-O3 -std=c99 -g3 -pg -fopenmp
+DEFINES=-D _OMP
 
 .PHONEY: all
-all: real real_omp
+all: real
 
 SRC=$(wildcard *.c)
 
 real: $(SRC)
-	@$(CC) $(CC_FLAGS) $(SRC) -o real
- 
-real_omp: $(SRC)
-	@$(CC) $(OMP_FLAGS) $(SRC) -o real_omp
+	@$(CC) $(CC_FLAGS) $(DEFINES) $(SRC) -lm -o real
 
 .PHONEY: clean
 clean:
-	@rm real || true
-	@rm real_omp || true
+	@rm real
 
 .PHONEY: run
 run: all
-	@echo "OMP:"
-	@./real_omp
-	@echo
 	@echo "Sequential:"
 	@./real
 	@echo
