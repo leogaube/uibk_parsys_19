@@ -1,4 +1,8 @@
-#include <omp.h>
+#ifdef OMP
+	#include <omp.h>
+#else
+	#include <time.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -52,7 +56,11 @@ double starts[NM];
 
 int main()
 {
+#ifdef OMP
   double start = omp_get_wtime();
+#else
+    clock_t start = clock();
+#endif
   //-------------------------------------------------------------------------c
   // k is the current level. It is passed down through subroutine args
   // and is NOT global. it is the current iteration
@@ -196,7 +204,12 @@ int main()
   printf(" Iterations:                  %5d\n", nit);
   printf("\n");
 
+#pragma omp parallel
+{ // this is the first encounter of the resid fct.
+  // in first optmization step only optimize resid
   resid(u, v, r, n1, n2, n3, a, k);
+}
+
   norm2u3(r, n1, n2, n3, &rnm2, &rnmu, nx[lt], ny[lt], nz[lt]);
   old2 = rnm2;
   oldu = rnmu;
@@ -205,7 +218,10 @@ int main()
   // One iteration for startup
   //---------------------------------------------------------------------
   mg3P(u, v, r, a, c, n1, n2, n3);
+#pragma omp parallel
+{
   resid(u, v, r, n1, n2, n3, a, k);
+}
   setup(&n1, &n2, &n3);
   zero3(u, n1, n2, n3);
   zran3(v, n1, n2, n3, nx[lt], ny[lt], k);
@@ -222,7 +238,10 @@ int main()
   timer_start(T_bench);
 
   if (timeron) timer_start(T_resid2);
+#pragma omp paralell
+{
   resid(u, v, r, n1, n2, n3, a, k);
+}
   if (timeron) timer_stop(T_resid2);
   norm2u3(r, n1, n2, n3, &rnm2, &rnmu, nx[lt], ny[lt], nz[lt]);
   old2 = rnm2;
@@ -236,9 +255,13 @@ int main()
     mg3P(u, v, r, a, c, n1, n2, n3);
     if (timeron) timer_stop(T_mg3P);
     if (timeron) timer_start(T_resid2);
+    #pragma omp parallel
+    {
     resid(u, v, r, n1, n2, n3, a, k);
+    }
     if (timeron) timer_stop(T_resid2);
   }
+ // no resid calls follow from here on (in main, mg3p is also not called below)
 
   norm2u3(r, n1, n2, n3, &rnm2, &rnmu, nx[lt], ny[lt], nz[lt]);
 
@@ -321,8 +344,13 @@ int main()
     }
   }
 
-  double end = omp_get_wtime();
-  printf("The process took %f seconds to finish. \n", end - start);
+#ifdef OMP
+    double end = omp_get_wtime();
+    printf("The process took %f seconds to finish. \n", (end - start));
+#else
+    clock_t end = clock();
+    printf("The process took %f seconds to finish. \n", ((double)(end - start)) / CLOCKS_PER_SEC);
+#endif
   
   return 0;
 }
@@ -421,8 +449,10 @@ static void mg3P(double u[], double v[], double r[],
     //---------------------------------------------------------------------
     // compute residual for level k
     //---------------------------------------------------------------------
+    #pragma omp parallel
+    {
     resid(&u[ir[k]], &r[ir[k]], &r[ir[k]], m1[k], m2[k], m3[k], a, k);
-
+    }
     //---------------------------------------------------------------------
     // apply smoother
     //---------------------------------------------------------------------
@@ -432,7 +462,10 @@ static void mg3P(double u[], double v[], double r[],
   j = lt - 1;
   k = lt;
   interp(&u[ir[j]], m1[j], m2[j], m3[j], u, n1, n2, n3, k);
+  #pragma omp parallel
+  {
   resid(u, v, r, n1, n2, n3, a, k);
+  }
   psinv(r, u, n1, n2, n3, c, k);
 }
 
@@ -520,34 +553,31 @@ static void resid(void *ou, void *ov, void *or, int n1, int n2, int n3,
   int i3, i2, i1;
   double u1[M], u2[M];
 
-  #pragma omp paralell
-  {
-	  if (timeron) timer_start(T_resid);
-	  for (i3 = 1; i3 < n3-1; i3++) {
-		for (i2 = 1; i2 < n2-1; i2++) {
-          #pragma omp for
-		  for (i1 = 0; i1 < n1; i1++) {
-			u1[i1] = u[i3][i2-1][i1] + u[i3][i2+1][i1]
-				   + u[i3-1][i2][i1] + u[i3+1][i2][i1];
-			u2[i1] = u[i3-1][i2-1][i1] + u[i3-1][i2+1][i1]
-				   + u[i3+1][i2-1][i1] + u[i3+1][i2+1][i1];
-		  }
-		  #pragma omp for
-		  for (i1 = 1; i1 < n1-1; i1++) {
-			r[i3][i2][i1] = v[i3][i2][i1]
-						  - a[0] * u[i3][i2][i1]
-			//-------------------------------------------------------------------
-			//  Assume a[1] = 0      (Enable 2 lines below if a[1] not= 0)
-			//-------------------------------------------------------------------
-			//            - a[1] * ( u[i3][i2][i1-1] + u[i3][i2][i1+1]
-			//                     + u1[i1] )
-			//-------------------------------------------------------------------
-						  - a[2] * ( u2[i1] + u1[i1-1] + u1[i1+1] )
-						  - a[3] * ( u2[i1-1] + u2[i1+1] );
-		  }
-		}
+  if (timeron) timer_start(T_resid);
+  for (i3 = 1; i3 < n3-1; i3++) {
+	for (i2 = 1; i2 < n2-1; i2++) {
+	  for (i1 = 0; i1 < n1; i1++) {
+		u1[i1] = u[i3][i2-1][i1] + u[i3][i2+1][i1]
+			   + u[i3-1][i2][i1] + u[i3+1][i2][i1];
+		u2[i1] = u[i3-1][i2-1][i1] + u[i3-1][i2+1][i1]
+			   + u[i3+1][i2-1][i1] + u[i3+1][i2+1][i1];
 	  }
+	  for (i1 = 1; i1 < n1-1; i1++) {
+		r[i3][i2][i1] = v[i3][i2][i1]
+					  - a[0] * u[i3][i2][i1]
+		//-------------------------------------------------------------------
+		//  Assume a[1] = 0      (Enable 2 lines below if a[1] not= 0)
+		//-------------------------------------------------------------------
+		//            - a[1] * ( u[i3][i2][i1-1] + u[i3][i2][i1+1]
+		//                     + u1[i1] )
+		//-------------------------------------------------------------------
+					  - a[2] * ( u2[i1] + u1[i1-1] + u1[i1+1] )
+					  - a[3] * ( u2[i1-1] + u2[i1+1] );
+	  }
+	}
   }
+
+
   if (timeron) timer_stop(T_resid);
 
   //---------------------------------------------------------------------
