@@ -11,11 +11,10 @@ proc main(args: [] string){
 	var timer = new Timer();
 	timer.start();
 
-	var randStream = new owned RandomStream(real, 0);
 	forall i in 0..(N-1) {
-		var x: real = randStream.getNext();
-		var y: real = randStream.getNext();
-		var z: real = x * x + y * y;
+		var xy: [1..2] real;
+		fillRandom(xy,i);
+		var z: real = xy(1) * xy(1) + xy(2) * xy(2);
 		if z <= 1 {
 			count += 1;
 		}
