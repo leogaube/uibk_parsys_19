@@ -1,6 +1,9 @@
 
 use Time;
 proc main(args: [] string) {
+  var timer = new Timer();
+  timer.start();
+  
   if (args.size != 2) {
     writeln("Invalid number of arguments, please specify how many elements the arrays should have.");
     return;
@@ -12,7 +15,6 @@ proc main(args: [] string) {
   var A: [1..n][1..n] int;
   var B: [1..n][1..n] int;
   var C: [1..n][1..n] int;
-  var timer = new Timer();
 
   // initialization
   for i in 1..n do {
@@ -21,8 +23,6 @@ proc main(args: [] string) {
     }
     B(i)(i) = 1;
   }
-
-  timer.start();
 
   // Calcuation
   forall i in 1..n do {
