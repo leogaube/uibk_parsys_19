@@ -28,10 +28,13 @@ proc main(args: [] string){
 	var timer = new Timer();
 	timer.start();
 
-	forall thread_id in 1..(num_threads) with (+ reduce global_count) do{
-		global_count += monte_carlo_method(N/num_threads, thread_id);
+	forall loc in Locales do {
+		on loc do {
+			forall thread_id in 1..(num_threads) with (+ reduce global_count) do{
+				global_count += monte_carlo_method(N/num_threads, here.id*num_threads + thread_id);
+			}
+		}
 	}
-
 	var pi: real = global_count / N:real * 4;
 
 	timer.stop();
