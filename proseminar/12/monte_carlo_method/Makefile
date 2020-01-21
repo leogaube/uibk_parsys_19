@@ -3,7 +3,7 @@ COMPILER=chpl
 SOURCE=pi.chpl
 
 pi: pi.chpl
-	$(CC) $(SRC) -o pi
+	$(COMPILER) $(SOURCE) -o pi
 
 .PHONEY: run
 run: pi
