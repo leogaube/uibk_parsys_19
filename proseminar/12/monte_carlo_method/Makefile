@@ -2,7 +2,7 @@ COMPILER=chpl
 
 SOURCE=pi.chpl
 
-pi: monte_carlo.chpl
+pi: pi.chpl
 	$(CC) $(SRC) -o pi
 
 .PHONEY: run
