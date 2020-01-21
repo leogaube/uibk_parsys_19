@@ -28,9 +28,9 @@ proc main(args: [] string){
 	var timer = new Timer();
 	timer.start();
 
-	forall loc in Locales do {
+	forall loc in Locales with (+ reduce global_count) do {
 		on loc do {
-			forall thread_id in 1..(num_threads) with (+ reduce global_count) do{
+			forall thread_id in 1..(num_threads) with (+ reduce global_count) do {
 				global_count += monte_carlo_method(N/num_threads, here.id*num_threads + thread_id);
 			}
 		}
