@@ -13,7 +13,7 @@ proc monte_carlo_method(N: int, seed: int) : int {
 		}
 	}
 
-	return count
+	return count;
 }
 
 proc main(args: [] string){
@@ -29,7 +29,7 @@ proc main(args: [] string){
 	timer.start();
 
 	forall thread_id in 1..(num_threads) with (+ reduce global_count) do{
-		count += monte_carlo_method(N/num_threads, thread_id)
+		count += monte_carlo_method(N/num_threads, thread_id);
 	}
 
 	var pi: real = count / N:real * 4;
