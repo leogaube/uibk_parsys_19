@@ -8,8 +8,8 @@ pi: pi.chpl
 .PHONEY: run
 run: pi
 	qsub 1_thread.script
-	qsub 2_thread.script
-	qsub 4_thread.script
-	qsub 8_thread.script
+	qsub 2_threads.script
+	qsub 4_threads.script
+	qsub 8_threads.script
 
 
