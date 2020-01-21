@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#$ -q std.q
+#$ -cwd
+#$ -N pi_4_thread
+#$ -o pi_4_thread.dat
+#$ -j yes
+#$ -pe openmp 4
+#$ -l excl=1
+
+export CHPL_RT_NUM_THREADS_PER_LOCALE=4
+./pi 1000000000

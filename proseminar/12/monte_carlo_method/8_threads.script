@@ -2,11 +2,11 @@
 
 #$ -q std.q
 #$ -cwd
-#$ -N pi_shared_mem
-#$ -o output_pi_shared_mem.dat
+#$ -N pi_8_thread
+#$ -o pi_8_thread.dat
 #$ -j yes
 #$ -pe openmp 8
 #$ -l excl=1
 
 export CHPL_RT_NUM_THREADS_PER_LOCALE=8
-./pi 3000000
+./pi 1000000000
