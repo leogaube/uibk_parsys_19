@@ -15,6 +15,12 @@ The Chapel programming model has been briefly discussed in the lecture. It is a 
 - Implement a parallel version of matrix multiplication in Chapel and benchmark it for 1, 2, 4, and 8 threads on LCC2.
 - Enter your results in [this table](https://docs.google.com/spreadsheets/d/1Xklv7YoOBet34Q82SfKXc7K_bv_6E43UlxSStN7RDuc/edit?usp=sharing).
 
+#### Monte Carlo Pi
+
+Each thread requires a unique seed. Otherwise they would sample the same random numbers. At first we used a forall-loop iterating over the number of samples and using each sample as the seed for `fillRandom`. However, this results in really bad performance due to using so many seeds! We then replaced `fillRandom` with a `RandomStream` with a thread-specific seed by iterating over `here.maxTaskPar` (the documentation claims it is only an estimate, but it works fine for our purposes).
+
+![](https://raw.githubusercontent.com/leogaube/uibk_parsys_19/master/proseminar/12/results.png)
+
 ## Exercise 2
 
 ### Tasks
@@ -22,6 +28,9 @@ The Chapel programming model has been briefly discussed in the lecture. It is a 
 - If you haven't already done so, extend your Chapel installation to support distributed memory parallelism using [this guide](https://chapel-lang.org/docs/usingchapel/multilocale.html#readme-multilocale). Examples of environment variables to be used on LCC2 when compiling Chapel are `CHPL_LAUNCHER=gasnetrun_mpi` and `CHPL_COMM_SUBSTRATE=mpi`. You can then re-compile your Chapel programs and launch them directly by running `./chapel_program -nl <number_of_locales>` using a job submission script.
 - If you haven't already done so, extend your Chapel programs to support distributed memory parallelism.
 - Benchmark your distributed memory version for 1, 2, and 4 nodes on LCC2 using 8 threads add your results in the result table linked in Exercise 1.
+
+Unfortunately we were unable to get results for this exercise, because we had trouble to figure out how to submit Multilocale jobs properly.
+However we did our best adapt the code to also work on multiple nodes.
 
 ## General Notes
 
