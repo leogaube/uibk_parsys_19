@@ -1,0 +1,12 @@
+#!/bin/bash
+
+#$ -q std.q
+#$ -cwd
+#$ -N mat_mult_8_thread
+#$ -o mat_mult_8_thread.dat
+#$ -j yes
+#$ -pe openmp 8
+#$ -l excl=1
+
+export CHPL_RT_NUM_THREADS_PER_LOCALE=8
+./mat_mult 2552
