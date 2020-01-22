@@ -1,7 +1,7 @@
 COMPILER=chpl
 
 mat_mult: mat_mult.chpl
-	$(COMPILER) $< -o $%
+	$(COMPILER) mat_mult.chpl -o mat_mult
 
 .PHONEY: run
 run: mat_mult
